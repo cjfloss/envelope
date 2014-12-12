@@ -9,14 +9,14 @@ set (DATADIR "${CMAKE_INSTALL_PREFIX}/share")
 
 
 set (CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/config.vala)
-set (PKGDATADIR "${DATADIR}/envelope")
+set (PKG_DATADIR "${DATADIR}/envelope")
 set (EXEC_NAME "envelope")
 set (RELEASE_NAME "An easy to use personal budget application.")
 set (VERSION "0.0.0")
 set (VERSION_INFO "development")
 set (GETTEXT_PACKAGE "envelope")
 
-#configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.vala.cmake ${CONFIG_FILE})
+configure_file (${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
 
 find_package(PkgConfig)
 
@@ -55,7 +55,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
   src/window/MainWindow.vala
   src/window/AddAccountDialog.vala
   src/view/WelcomeScreen.vala
-  src/envelope.vala
+  src/Envelope.vala
   src/main.vala
 
   PACKAGES
@@ -68,6 +68,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
 
   CUSTOM_VAPIS
     src/vapi/monetary.vapi
+    src/vapi/config.vapi
 )
 
 add_executable(${EXEC_NAME} ${VALA_C})
