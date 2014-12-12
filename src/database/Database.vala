@@ -41,10 +41,6 @@ namespace Envelope {
             return dbm;
         }
 
-        public Gee.ArrayList<Account>? load_accounts () {
-            return null;
-        }
-
         public Account? load_account (int account_id) {
 
             try {
