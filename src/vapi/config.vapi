@@ -1,5 +1,6 @@
 [CCode (cprefix = "", lower_case_cprefix = "", cheader_filename = "config.h")]
 namespace Build {
+  public const string PROGRAM_NAME;
   public const string DATADIR;
   public const string PKG_DATADIR;
   public const string GETTEXT_PACKAGE;
