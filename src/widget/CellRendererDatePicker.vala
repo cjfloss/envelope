@@ -20,11 +20,20 @@ namespace Envelope {
 
     public class CellRendererDatePicker : Gtk.CellRendererText {
 
-        public Gtk.Calendar calendar { get; private set; }
-        public Granite.Widgets.PopOver popover { get; private set; }
+        private static string date_format = Granite.DateTime.get_default_date_format (false, true, true);
 
-        public CellRendererDatePicker () {
+        public Gtk.Calendar calendar { get; private set; }
+        public Gtk.Popover popover { get; private set; }
+        public bool date_selected { get; private set; }
+
+        private Gtk.Widget relative_to { get; set; }
+        private string? current_path;
+
+        public CellRendererDatePicker (Gtk.Widget relative_to) {
             Object ();
+
+            this.relative_to = relative_to;
+
             build_ui ();
             connect_signals ();
         }
@@ -36,75 +45,57 @@ namespace Envelope {
                                             Gdk.Rectangle cell_area,
                                             Gtk.CellRendererState flags) {
 
-            /*weak Gtk.CellEditable return_value = base.start_editing (event, hack, path, background_area, cell_area,
-                Gtk.CellRendererState.SELECTED |
-                Gtk.CellRendererState.INSENSITIVE |
-                Gtk.CellRendererState.EXPANDABLE |
-                Gtk.CellRendererState.EXPANDED);
-                */
+            weak Gtk.CellEditable ret = base.start_editing (event, widget, path, background_area, cell_area, flags);
 
-            double x;
-            double y;
-            int cell_x;
-            int cell_y;
+            current_path = path;
 
-            event.get_coords (out x, out y);
-            retrieve_cell_position (event, widget, out cell_x, out cell_y);
+            Cairo.RectangleInt pos;
+            determine_position (cell_area, out pos);
 
-            int pos_x = cell_area.x + cell_x + 10;
-            int pos_y = cell_area.y + cell_y + ((int) (cell_area.height * 2.5));
+            popover.pointing_to = pos;
+            popover.relative_to = widget;
+            popover.show ();
 
-            debug ("cell area x,y: %d,%d".printf (cell_area.x, cell_area.y));
-
-            popover.move_to_coords (pos_x, pos_y);
-            //popover.map_event ((Gdk.EventAny) event);
-
-            return null;
+            return ret;
         }
 
-        private void retrieve_cell_position (Gdk.Event event, Gtk.Widget widget, out int x, out int y) {
-            int w_x, w_y;
-            Gtk.Allocation allocation;
+        private void determine_position (Gdk.Rectangle area, out Cairo.RectangleInt position) {
+            position = Cairo.RectangleInt ();
 
-            widget.get_window ().get_origin (out w_x, out w_y);
-            widget.get_allocation (out allocation);
-
-            w_x += allocation.x;
-            w_y += allocation.y;
-
-            x = w_x;
-            y = w_y;
+            position.width = area.width;
+            position.height = area.height;
+            position.y = area.y + area.height + 2;
+            position.x = area.x;
         }
 
         private void build_ui () {
             calendar = new Gtk.Calendar ();
-            popover = new Granite.Widgets.PopOver ();
 
-            popover.set_parent_pop (Envelope.App.get_default ().main_window);
-            popover.get_content_area ().add (calendar);
+            popover = new Gtk.Popover (relative_to);
+            popover.modal = false;
+            popover.border_width = 10;
+            popover.set_position (Gtk.PositionType.BOTTOM);
+            popover.add (calendar);
 
             calendar.show_all ();
-
-            mode = Gtk.CellRendererMode.ACTIVATABLE;
         }
 
         private void connect_signals () {
+            calendar.day_selected_double_click.connect (select_date);
+        }
 
-            var that = this;
+        private void select_date () {
 
-            calendar.day_selected.connect (() => {
-                popover.hide ();
+            popover.hide ();
 
-                uint day;
-                uint month;
-                uint year;
+            date_selected = true;
 
-                calendar.get_date (out day, out month, out year);
+            var dt = new DateTime.local (calendar.year, calendar.month + 1, calendar.day, 0, 0, 0);
 
-                var dt = new DateTime.local ((int) year, (int) month, (int) day, 0, 0, 0);
+            edited (current_path, dt.format (date_format));
 
-                that.text = dt.format (Granite.DateTime.get_default_date_format (false, true, true));
-            });
+            date_selected = false;
+            current_path = null;
         }
     }
 }
