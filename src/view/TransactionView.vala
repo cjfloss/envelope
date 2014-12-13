@@ -18,13 +18,23 @@
 
 namespace Envelope {
 
+    private static TransactionView transaction_view_instance = null;
+
     public class TransactionView : Gtk.Box {
+
+        public static new unowned TransactionView get_default () {
+            if (transaction_view_instance == null) {
+                transaction_view_instance = new TransactionView ();
+            }
+
+            return transaction_view_instance;
+        }
 
         private static const string CELL_COLOR_INCOMING = "green";
         private static const string CELL_COLOR_OUTGOING = "red";
+        private static string CELL_DATE_FORMAT = Granite.DateTime.get_default_date_format (false, true, true);
 
         private Gtk.TreeView treeview;
-        private Gtk.Label account_label;
         private Gtk.ScrolledWindow grid_scroll;
 
         // filter widgets
@@ -44,6 +54,7 @@ namespace Envelope {
             Object (orientation: Gtk.Orientation.VERTICAL);
 
             build_ui ();
+            transaction_view_instance = this;
         }
 
         public TransactionView.with_account (Account account) {
@@ -95,12 +106,13 @@ namespace Envelope {
             transactions_store.append (out iter, parent_iter);
 
             transactions_store.@set (iter,
-                0, transaction.date.format("%x"),
+                0, transaction.date.format(CELL_DATE_FORMAT),
                 1, transaction.label,
                 2, out_amount,
                 3, in_amount,
                 4, transaction.description,
                 5, transaction.@id);
+
 
             update_view ();
         }
@@ -166,6 +178,10 @@ namespace Envelope {
 
                 var transactions = account.transactions;
 
+                if (transactions == null || transactions.size == 0) {
+                    transactions = DatabaseManager.get_default ().load_account_transactions (account.@id);
+                }
+
                 if (transactions != null && transactions.size > 0) {
                     add_transactions (transactions);
                 }
@@ -174,11 +190,9 @@ namespace Envelope {
                 }
             }
 
-            update_view ();
-        }
+            add_empty_row ();
 
-        private void account_changed () {
-            load_account (account);
+            update_view ();
         }
 
         private void build_ui () {
@@ -222,6 +236,16 @@ namespace Envelope {
 
             // manual dates
             btn_manual = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Pick dates:"));
+            btn_manual.toggled.connect ( () => {
+                if (btn_manual.get_active ()) {
+                    from_date.sensitive = true;
+                    to_date.sensitive = true;
+                }
+                else {
+                    from_date.sensitive = false;
+                    to_date.sensitive = false;
+                }
+            });
             filter_box.add (btn_manual);
 
             from_date = new Granite.Widgets.DatePicker ();
@@ -274,6 +298,8 @@ namespace Envelope {
                 typeof (string),
                 typeof (string),
                 typeof (int));
+
+            add_empty_row ();
 
             treeview.set_model (transactions_store);
 
@@ -351,6 +377,19 @@ namespace Envelope {
             */
 
             grid_scroll.show_all ();
+        }
+
+        private void add_empty_row () {
+            // add empty insert row
+            Gtk.TreeIter insert_iter;
+            transactions_store.append (out insert_iter, null);
+            transactions_store.@set (insert_iter,
+                0, "",
+                1, "",
+                2, "",
+                3, "",
+                4, "",
+                5, -1);
         }
 
         private void from_date_selected () {
