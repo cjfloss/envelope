@@ -75,18 +75,18 @@ namespace Envelope {
         private void build_ui () {
 
             title = "Add an account";
-            border_width = 12;
+            border_width = 20;
 
             // Add buttons
             add_button (_("Cancel"), Gtk.ResponseType.CLOSE);
             add_button (_("Ok"), Gtk.ResponseType.APPLY);
 
             Gtk.Box content = get_content_area () as Gtk.Box;
+            content.spacing = 20;
 
             var grid = new Gtk.Grid ();
             grid.row_spacing = 10;
-            grid.column_spacing = 12;
-
+            grid.column_spacing = 20;
             content.add (grid);
 
             grid.show_all ();
@@ -97,6 +97,7 @@ namespace Envelope {
 
             number_entry = new Gtk.Entry ();
             number_entry.placeholder_text = "ID or number";
+            number_entry.expand = true;
             grid.attach(number_entry, 1, 1, 1, 1);
 
             var type_label = new Gtk.Label ("Type:");
@@ -112,6 +113,7 @@ namespace Envelope {
             type_list_store.set (type_list_store_iter, 0, _("Savings"), 1, Account.Type.SAVINGS);
 
             type_choice = new Gtk.ComboBox.with_model (type_list_store);
+            type_choice.expand = true;
             grid.attach (type_choice, 1, 2, 1, 1);
 
             var type_renderer = new Gtk.CellRendererText ();
@@ -134,6 +136,7 @@ namespace Envelope {
             grid.attach (balance_label, 0, 3, 1, 1);
 
             balance_entry = new Gtk.Entry ();
+            balance_entry.expand = true;
             balance_entry.placeholder_text = Envelope.Util.format_currency (0d);
             grid.attach (balance_entry, 1, 3, 1, 1);
 
@@ -142,6 +145,7 @@ namespace Envelope {
             grid.attach (desc_label, 0, 4, 1, 1);
 
             desc_entry = new Gtk.Entry ();
+            desc_entry.expand = true;
             desc_entry.placeholder_text = _("Optional");
             grid.attach (desc_entry, 1, 4, 1, 1);
         }
