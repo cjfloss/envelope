@@ -16,6 +16,8 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
+private Envelope.App application_instance = null;
+
 public class Envelope.App : Granite.Application {
 
     public const string PROGRAM_NAME = "Envelope";
@@ -48,16 +50,26 @@ public class Envelope.App : Granite.Application {
         about_authors = {"Nicolas Laplante <nicolas.laplante@gmail.com>"};
         about_comments = "";
         about_license_type = Gtk.License.GPL_3_0;
+
+        application_instance = this;
     }
 
-    public static MainWindow? main_window = null;
+    public static new unowned Envelope.App get_default () {
+        if (application_instance == null) {
+            application_instance = new Envelope.App ();
+        }
+
+        return application_instance;
+    }
+
+    public MainWindow main_window { get; private set; }
 
     protected override void activate () {
 
-        //if (DEBUG)
-            Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.DEBUG;
-        //else
-        //  Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
+        //if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG)
+        //    Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
+        // force DEBUG for now
+        Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.DEBUG;
 
         if (main_window == null) {
             main_window = new MainWindow ();
