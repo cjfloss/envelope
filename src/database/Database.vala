@@ -21,9 +21,11 @@ using Granite.Services;
 namespace Envelope {
     class DatabaseManager : Object {
 
-        private static DatabaseManager? dbm = null;
+        public signal void account_created (Account account);
+        public signal void account_deleted (Account account);
+        public signal void accout_updated (Account account);
 
-        private static const string APP_NAME = "envelope"; // TODO get from build system
+        private static DatabaseManager? dbm = null;
 
         // database handler
         private SQLHeavy.Database database;
@@ -32,6 +34,9 @@ namespace Envelope {
         private SQLHeavy.Query q_load_account;
         private SQLHeavy.Query q_load_all_accounts;
         private SQLHeavy.Query q_insert_account;
+        private SQLHeavy.Query q_load_account_transactions;
+        private SQLHeavy.Query q_delete_account_transactions;
+        private SQLHeavy.Query q_insert_account_transaction;
 
         public static DatabaseManager get_default () {
             if (dbm == null) {
@@ -74,11 +79,7 @@ namespace Envelope {
 
                 while (results.next ()) {
                     Account account;
-
                     query_result_to_account (results, out account);
-
-                    account.transactions = get_mocked_transactions ();
-
                     list.add (account);
                 }
             }
@@ -106,14 +107,34 @@ namespace Envelope {
             debug ("account created with id %d".printf ((int) id));
 
             account.@id = (int) id;
+
+            // notify account created
+            account_created (account);
         }
 
-        public Gee.ArrayList<Budget>? load_budgets () {
-            return null;
-        }
+        public Gee.ArrayList<Transaction> load_account_transactions (int account_id) {
 
-        public Budget? load_budget (int budget_id) {
-            return null;
+            debug ("loading transactions for account %d".printf (account_id));
+
+            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
+
+            try {
+                q_load_account_transactions.clear ();
+                q_load_account_transactions.set_int ("account_id", account_id);
+
+                SQLHeavy.QueryResult results = q_load_account_transactions.execute ();
+
+                while (results.next ()) {
+                    Transaction transaction;
+                    query_result_to_transaction (results, out transaction);
+                    list.add (transaction);
+                }
+            }
+            catch (SQLHeavy.Error err) {
+                error ("could not load transactions for account %d (%s)".printf (account_id, err.message));
+            }
+
+            return list;
         }
 
         private DatabaseManager () {
@@ -139,10 +160,31 @@ namespace Envelope {
             account.account_type = Account.Type.from_int (account_type);
         }
 
+        private void query_result_to_transaction (SQLHeavy.QueryResult results, out Transaction transaction) throws SQLHeavy.Error {
+            assert (!results.finished);
+
+            var id = results.get_int ("id");
+            var label = results.get_string ("label");
+            var description = results.get_string ("description");
+            var direction = results.get_int ("direction");
+            var amount = results.get_double ("amount");
+            var account_id = results.get_int ("account_id");
+            var parent_id = results.get_int ("parent_transaction_id");
+            //var date = results.get_datetime ("date");
+
+            transaction = new Transaction ();
+
+            transaction.@id = id;
+            transaction.label = label;
+            transaction.description = description;
+            transaction.direction = Transaction.Direction.from_int (direction);
+            //transaction.date = date;
+        }
+
         private void init_database () {
 
             var app_path = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
-                Environment.get_user_data_dir (), APP_NAME));
+                Environment.get_user_data_dir (), Build.PROGRAM_NAME));
 
             try {
                 app_path.make_directory_with_parents (null);
@@ -170,7 +212,6 @@ namespace Envelope {
             }
 
             try {
-                load_table (Envelope.Tables.BUDGETS);
                 load_table (Envelope.Tables.TRANSACTIONS);
                 load_table (Envelope.Tables.ACCOUNTS);
 
@@ -202,11 +243,24 @@ namespace Envelope {
             VALUES
             (:number, :description, :balance, :type);
             """);
+
+            q_load_account_transactions = database.prepare("""
+            SELECT * FROM `transactions` WHERE `account_id` = :account_id ORDER BY `date` DESC
+            """);
+
+            q_delete_account_transactions = database.prepare("""
+            DELETE FROM `transactions` WHERE `account_id` = :account_id
+            """);
+
+            q_insert_account_transaction = database.prepare("""
+            INSERT INTO `transactions`
+            (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`)
+            VALUES
+            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date)
+            """);
         }
 
         private void load_table (string table) {
-
-            debug ("load table: %s".printf (table));
 
             try {
                 database.execute (table);
