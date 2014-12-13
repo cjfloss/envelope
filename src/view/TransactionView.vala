@@ -329,9 +329,26 @@ namespace Envelope {
 
             // columns
             var date_column = new Gtk.TreeViewColumn ();
-            var crdp = new CellRendererDatePicker ();
+            var crdp = new CellRendererDatePicker (treeview);
             crdp.editable = true;
             crdp.editable_set = true;
+
+            // TODO check if we can do better than this...
+            // this makes the cell renderer event dependant on the
+            // store... normally the column interacts with the store, not
+            // the renderer
+            crdp.edited.connect ((path, text) => {
+
+                if (crdp.date_selected) {
+                    Gtk.TreeIter iter;
+
+                    if (transactions_store.get_iter_from_string (out iter, path)) {
+                        debug ("edited: setting text in store");
+                        transactions_store.@set (iter, 0, text, -1);
+                    }
+                }
+            });
+
             date_column.set_title (_("Date"));
             date_column.max_width = -1;
             date_column.pack_start (crdp, true);
