@@ -80,6 +80,9 @@ namespace Envelope {
                 while (results.next ()) {
                     Account account;
                     query_result_to_account (results, out account);
+
+                    account.transactions = get_mocked_transactions ();
+                    
                     list.add (account);
                 }
             }
