@@ -55,6 +55,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
   src/window/MainWindow.vala
   src/window/AddAccountDialog.vala
   src/view/WelcomeScreen.vala
+  src/widget/CellRendererDatePicker.vala
   src/Envelope.vala
   src/main.vala
 
