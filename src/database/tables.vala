@@ -18,12 +18,6 @@
 
 namespace Envelope.Tables {
 
-public const string BUDGETS = """
-CREATE TABLE IF NOT EXISTS budgets (
-    `id` INT PRIMARY KEY,
-    `label` TEXT UNIQUE NOT NULL)
-""";
-
 public const string ACCOUNTS = """
 CREATE TABLE IF NOT EXISTS accounts (
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
