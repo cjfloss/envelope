@@ -329,11 +329,14 @@ namespace Envelope {
 
             // columns
             var date_column = new Gtk.TreeViewColumn ();
+            var crdp = new CellRendererDatePicker ();
+            crdp.editable = true;
+            crdp.editable_set = true;
             date_column.set_title (_("Date"));
             date_column.max_width = -1;
-            date_column.pack_start (renderer, true);
+            date_column.pack_start (crdp, true);
             date_column.resizable = true;
-            date_column.set_attributes (renderer, "text", 0);
+            date_column.set_attributes (crdp, "text", 0);
             treeview.append_column (date_column);
 
             var merchant_column = new Gtk.TreeViewColumn ();
