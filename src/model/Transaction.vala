@@ -21,7 +21,18 @@ namespace Envelope {
 
         public enum Direction {
             INCOMING,
-            OUTGOING
+            OUTGOING;
+
+            public static Direction from_int (int direction) {
+                switch (direction) {
+                    case 0:
+                        return Direction.INCOMING;
+                    case 1:
+                        return Direction.OUTGOING;
+                    default:
+                        assert_not_reached ();
+                }
+            }
         }
 
         private int _id;
