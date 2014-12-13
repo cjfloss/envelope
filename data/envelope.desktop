@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Envelope
+Comment=Manage your budget
+Keywords=budget;money
+GenericName=Personal finance manager
+Exec=envelope
+Icon=accessories-calculator
+Terminal=false
+StartupNotify=true
+Type=Application
+Categories=Utility
+X-GNOME-Gettext-Domain=envelope
+X-GNOME-UsesNotifications=true;
