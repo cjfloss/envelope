@@ -18,7 +18,17 @@
 
 namespace Envelope {
 
+    private static Sidebar sidebar_instance = null;
+
     public class Sidebar : Gtk.ScrolledWindow {
+
+        public static new unowned Sidebar get_default () {
+            if (sidebar_instance == null) {
+                sidebar_instance = new Sidebar ();
+            }
+
+            return sidebar_instance;
+        }
 
         private static const int COLUMN_COUNT = 4;
 
@@ -52,11 +62,14 @@ namespace Envelope {
             store = new Gtk.TreeStore(COLUMN_COUNT,
                 typeof (string),
                 typeof (Account),
-                typeof (Icon),
+                typeof (string),
                 typeof (Action)
             );
 
             build_ui ();
+            connect_signals ();
+
+            sidebar_instance = this;
         }
 
         public Sidebar.with_accounts (Gee.ArrayList<Account> accounts) {
@@ -95,17 +108,24 @@ namespace Envelope {
             col.expand = true;
             col.spacing = 3;
 
+            var crs = new Gtk.CellRendererText ();
+            col.pack_start (crs, false);
+
+            var cri = new Gtk.CellRendererPixbuf ();
+            col.pack_start (cri, false);
+            col.set_attributes (cri, "icon-name", Column.ICON);
+            col.set_cell_data_func (cri, treeview_icon_renderer_function);
+
             var crt = new Gtk.CellRendererText ();
             col.pack_start (crt, true);
             crt.editable = false;
             crt.editable_set = true;
-            crt.xpad = 10;
 
             col.set_attributes (crt, "text", Column.LABEL);
             col.set_cell_data_func (crt, treeview_text_renderer_function);
 
             cre = new Granite.Widgets.CellRendererExpander ();
-            cre.is_category_expander = true;
+            //cre.is_category_expander = true;
             cre.xalign = (float) 1.0;
             col.pack_end (cre, false);
             col.set_cell_data_func (cre, treeview_expander_renderer_function);
@@ -122,14 +142,18 @@ namespace Envelope {
             add (treeview);
 
             treeview.append_column (col);
+            treeview.show_all ();
 
             treeview.get_selection ().changed.connect (treeview_row_activated);
 
-            treeview.show_all ();
+            width_request = 150;
+        }
 
-            width_request = 250;
+        private void connect_signals () {
+            var dbm = DatabaseManager.get_default ();
 
-            show_all ();
+            // add account to list when a new account is added in the database
+            dbm.account_created.connect (add_new_account);
         }
 
         public void update_view () {
@@ -150,8 +174,6 @@ namespace Envelope {
 
             // Add "Add account..."
             add_item (account_iter, _("Add account\u2026"), null, Action.ADD_ACCOUNT);
-
-            treeview.expand_all ();
         }
 
         private Gtk.TreeIter add_item (Gtk.TreeIter? parent, string label, Account? account, Action action = Action.NONE) {
@@ -162,7 +184,7 @@ namespace Envelope {
 
             store.@set (iter, Column.LABEL, label,
                 Column.ACCOUNT, account,
-                Column.ICON, null,
+                Column.ICON, account != null ? "accessories-calculator" : null,
                 Column.ACTION, action, -1);
 
             return iter;
@@ -186,6 +208,21 @@ namespace Envelope {
             else {
                 crt.height = -1;
                 crt.weight_set = false;
+            }
+        }
+
+        private void treeview_icon_renderer_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+
+            Gtk.CellRendererPixbuf crp = renderer as Gtk.CellRendererPixbuf;
+            string? icon_name = null;
+
+            model.@get (iter, Column.ICON, out icon_name, -1);
+
+            if (icon_name != null) {
+                crp.visible = true;
+            }
+            else {
+                crp.visible = false;
             }
         }
 
@@ -215,21 +252,28 @@ namespace Envelope {
             model.@get (iter, Column.ACTION, out action, -1);
 
             if (account == null && action == Action.NONE) {
-                //
-                crt.visible = true;
 
-                // calculate balance for all accounts
-                var balance = 0d;
-
-                foreach (Account a in accounts) {
-                    balance += a.balance;
+                if (accounts == null || accounts.size == 0) {
+                    crt.visible = false;
                 }
+                else {
+                    crt.visible = true;
+                    // calculate balance for all accounts
+                    var balance = 0d;
 
-                crt.text = Envelope.Util.format_currency (balance);
-                crt.foreground = balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+                    foreach (Account a in accounts) {
+                        balance += a.balance;
+                    }
+
+                    crt.weight = 900;
+                    crt.weight_set = true;
+                    crt.text = Envelope.Util.format_currency (balance);
+                    crt.foreground = balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+                }
             }
             else if (account != null) {
                 crt.visible = true;
+                crt.weight_set = false;
                 crt.text = Envelope.Util.format_currency (account.balance);
                 crt.foreground = account.balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
             }
@@ -281,9 +325,47 @@ namespace Envelope {
             add_account (account);
         }
 
-        private void add_account (Account account) {
+        public void add_account (Account account) {
             accounts.add (account);
             update_view ();
+        }
+
+        public void add_new_account (Account account) {
+            add_account (account);
+            select_account (account);
+        }
+
+        public void select_account (Account account) {
+            Gtk.TreeIter? iter;
+            get_account_iter (account, out iter);
+
+            if (iter != null) {
+                treeview.get_selection ().select_iter (iter);
+            }
+        }
+
+        private void get_account_iter (Account account, out Gtk.TreeIter iter) {
+
+            debug ("looking for tree iterator matching account %d".printf (account.@id));
+
+            Gtk.TreeIter? found_iter = null;
+            int id = account.@id;
+
+            store.@foreach ((model, path, fe_iter) => {
+
+                Account val;
+
+                model.@get (fe_iter, Column.ACCOUNT, out val, -1);
+
+                if (val != null && val.@id == id) {
+                    found_iter = fe_iter;
+                    return true;
+                }
+
+                return false;
+            });
+
+            iter = found_iter;
         }
 
         private void toggle_selected_row_expansion () {
