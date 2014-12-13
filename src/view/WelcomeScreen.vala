@@ -20,6 +20,8 @@ namespace Envelope {
 
         private void build_ui () {
             append ("add", "Add an account", "Create an account to record your transactions");
+            append ("document-import", _("Import transactions"),
+                _("Import from a QIF file obtained from another application"));
         }
 
         private void connect_signals () {
@@ -36,6 +38,10 @@ namespace Envelope {
                     });
 
                     dialog.show_all ();
+                    break;
+
+                case 1:
+                    // TODO import task
                     break;
             }
         }
