@@ -120,6 +120,8 @@ namespace Envelope {
             col.pack_start (crt, true);
             crt.editable = false;
             crt.editable_set = true;
+            crt.ellipsize = Pango.EllipsizeMode.END;
+            crt.ellipsize_set = true;
 
             col.set_attributes (crt, "text", Column.LABEL);
             col.set_cell_data_func (crt, treeview_text_renderer_function);
@@ -136,6 +138,8 @@ namespace Envelope {
             crt_balance_total.xalign = (float) 1.0;
             crt_balance_total.size_points = 8;
             crt_balance_total.size_set = true;
+            crt_balance_total.ellipsize = Pango.EllipsizeMode.NONE;
+            crt_balance_total.ellipsize_set = true;
             col.pack_end (crt_balance_total, false);
             col.set_cell_data_func (crt_balance_total, treeview_text_renderer_balance_total_function);
 
@@ -146,7 +150,7 @@ namespace Envelope {
 
             treeview.get_selection ().changed.connect (treeview_row_activated);
 
-            width_request = 150;
+            //width_request = 150;
         }
 
         private void connect_signals () {
