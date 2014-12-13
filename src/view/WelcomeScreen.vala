@@ -1,5 +1,16 @@
 namespace Envelope {
+
+    private static Welcome welcome_instance = null;
+
     public class Welcome : Granite.Widgets.Welcome {
+
+        public static new unowned Welcome get_default () {
+            if (welcome_instance == null) {
+                welcome_instance = new Welcome ();
+            }
+
+            return welcome_instance;
+        }
 
         public Welcome () {
             base (_("Get your budget going"), _("Envelope could not find any account"));
@@ -19,16 +30,14 @@ namespace Envelope {
             switch (index) {
                 case 0:
                     var dialog = new AddAccountDialog ();
-                    dialog.account_created.connect (s_account_created);
+
+                    dialog.account_created.connect ((account) => {
+                        dialog.destroy ();
+                    });
+
                     dialog.show_all ();
                     break;
             }
         }
-
-        private void s_account_created (Account account) {
-            Envelope.App.main_window.sidebar.s_account_created (account);
-            Envelope.App.main_window.sidebar.list_account_selected (account);
-        }
-
     }
 }
