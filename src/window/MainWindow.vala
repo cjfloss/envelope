@@ -18,26 +18,18 @@
 
 namespace Envelope {
 
-    public class MainWindow : Gtk.Window {
+    public class MainWindow : Gtk.ApplicationWindow {
 
         // window elements
-        private Gtk.HeaderBar header_bar;
-        private Granite.Widgets.ThinPaned paned;
-        public static Sidebar sidebar;
-        private Gtk.MenuButton app_menu;
-        private Gtk.Menu settings_menu;
-        private Gtk.MenuItem preferences_menu_item;
-        private Gtk.Box box;
-        private Welcome welcome;
-
-        // for testing purposes
-        private TransactionView transaction_view;
+        private Gtk.HeaderBar               header_bar;
+        private Granite.Widgets.ThinPaned   paned;
+        public static Sidebar               sidebar;
+        private Gtk.MenuButton              app_menu;
+        private Gtk.Menu                    settings_menu;
+        private Gtk.MenuItem                preferences_menu_item;
+        private Gtk.Box                     box;
 
         private DatabaseManager dbm = DatabaseManager.get_default ();
-
-        public MainWindow () {
-
-        }
 
         public void build_ui () {
 
@@ -74,13 +66,15 @@ namespace Envelope {
             sidebar = new Sidebar ();
             paned.pack1 (sidebar, true, false);
 
-            Gee.ArrayList<Account> accounts = DatabaseManager.get_default ().load_all_accounts ();
+            Gee.ArrayList<Account> accounts = dbm.load_all_accounts ();
             sidebar.accounts = accounts;
 
             sidebar.update_view ();
             sidebar.show_all ();
 
             sidebar.list_account_selected.connect ((account) => {
+
+                var transaction_view = TransactionView.get_default ();
                 transaction_view.load_account (account);
 
                 if (paned.get_child2 () != transaction_view) {
@@ -88,70 +82,33 @@ namespace Envelope {
                 }
 
                 paned.pack2 (transaction_view, true, false);
-
             });
 
-            welcome = new Welcome ();
-            transaction_view = new TransactionView ();
+            // If we have accounts, show the transaction view
+            // otherwise show welcome screen
+            Gtk.Widget content_view;
+            determine_content_view (accounts, out content_view);
+            paned.pack2 (content_view, true, false);
 
-            paned.pack2 (welcome, true, false);
-
-            box.add (paned);
-
+            paned.position = 250;
+            paned.position_set = true;
             paned.show_all ();
 
+            box.add (paned);
             box.show_all ();
 
-            //this.set_default_size (800, 600);
             this.width_request = 1200;
-            this.height_request = 680;
+            this.height_request = 780;
             this.window_position = Gtk.WindowPosition.CENTER;
-            this.title = "envelope";
         }
 
-        private Gee.ArrayList<Transaction> get_mocked_transactions () {
-            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
-
-            for (int i = 0; i < 10; i++) {
-                var trans = new Transaction ();
-
-                trans.label = "transaction %d".printf (i);
-                trans.amount = 100 + i;
-
-                trans.date = new DateTime.now_local ().add_days (i);
-
-                trans.direction = i % 2 == 0 ? Transaction.Direction.INCOMING : Transaction.Direction.OUTGOING;
-
-                trans.description = "description for %d".printf (i);
-
-                trans.@id = i;
-
-                list.add (trans);
-
-                if (i == 4) {
-                    var child = new Transaction ();
-                    child.label = "child transaction";
-                    child.amount = 259.34;
-                    child.direction = Transaction.Direction.INCOMING;
-                    child.date = new DateTime.now_local ();
-                    child.description = "this is a child";
-
-                    child.parent = trans;
-
-                    child.@id = i * 2000;
-
-                    list.add (child);
-                }
-
-
+        private void determine_content_view (Gee.ArrayList<Account> accounts, out Gtk.Widget widget) {
+            if (accounts.size > 0) {
+                widget = TransactionView.get_default ();
             }
-
-            // Transaction is comparable; sort
-            list.sort();
-
-            return list;
+            else {
+                widget = Welcome.get_default ();
+            }
         }
     }
-
-
 }
