@@ -7,7 +7,7 @@ list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 set (DATADIR "${CMAKE_INSTALL_PREFIX}/share")
 
-
+set (PROGRAM_NAME "envelope")
 set (CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/config.vala)
 set (PKG_DATADIR "${DATADIR}/envelope")
 set (EXEC_NAME "envelope")
