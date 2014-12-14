@@ -8,5 +8,6 @@
 #cmakedefine RELEASE_NAME "@RELEASE_NAME@"
 #cmakedefine VERSION "@VERSION@"
 #cmakedefine VERSION_INFO "@VERSION_INFO@"
+#cmakedefine DEBUG @DEBUG@
 
 #endif // CONFIG_H
