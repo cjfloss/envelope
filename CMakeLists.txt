@@ -44,20 +44,34 @@ ensure_vala_version("0.16" MINIMUM)
 include(ValaPrecompile)
 
 vala_precompile(VALA_C ${EXEC_NAME}
-  src/util/format.vala
+
+  src/util/string.vala
+
   src/model/Account.vala
   src/model/Budget.vala
   src/model/Transaction.vala
-  src/database/tables.vala
+  src/model/Category.vala
+  src/model/Merchant.vala
+
   src/database/Database.vala
+
+  src/service/Error.vala
+  src/service/AccountManager.vala
+  src/service/Importer.vala
+  src/service/QIFImporter.vala
+
   src/view/TransactionView.vala
   src/view/Sidebar.vala
-  src/window/MainWindow.vala
-  src/window/AddAccountDialog.vala
   src/view/WelcomeScreen.vala
+
+  src/window/MainWindow.vala
+
+  src/dialog/AddAccountDialog.vala
+
   src/widget/CellRendererDatePicker.vala
+  src/widget/CellRendererTextCompletion.vala
+
   src/Envelope.vala
-  src/main.vala
 
   PACKAGES
     gtk+-3.0
