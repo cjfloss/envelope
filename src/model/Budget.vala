@@ -20,11 +20,10 @@ namespace Envelope {
 
     public class Budget : Object {
 
-        private string _name;
+        public Gee.ArrayList<Category> categories { get; set; }
 
-        public string name {
-            get { return _name; }
-            set { _name = value; }
+        public Budget () {
+            Object ();
         }
     }
 }
