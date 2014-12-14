@@ -24,7 +24,8 @@ namespace Envelope.Service {
 
     public class QIFImporter : Object, Importer {
 
-        construct {
+        private QIFImporter () {
+            Object ();
             qif_importer_instance = this;
         }
 
