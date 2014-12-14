@@ -25,11 +25,12 @@ namespace Envelope.Window {
     public class MainWindow : Gtk.ApplicationWindow {
 
         // window elements
-        private Gtk.HeaderBar               header_bar;
+        public Gtk.HeaderBar                header_bar { get; private set; }
+        public Sidebar                      sidebar { get; private set; }
+        public Gtk.MenuButton               app_menu { get; private set; }
+        public Menu                         settings_menu { get; private set; }
+
         private Granite.Widgets.ThinPaned   paned;
-        public static Sidebar               sidebar;
-        private Gtk.MenuButton              app_menu;
-        private Menu                        settings_menu;
         private Gtk.MenuItem                preferences_menu_item;
         private Gtk.Box                     box;
         private Gtk.Popover                 menu_popover;
@@ -145,7 +146,7 @@ namespace Envelope.Window {
                     try {
                         AccountManager.get_default ().rename_account (ref acct, new_name);
                     }
-                    catch (err) {
+                    catch (Error err) {
                         if (err is ServiceError.DATABASE_ERROR) {
 
                         }
