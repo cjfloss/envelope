@@ -17,6 +17,7 @@
 */
 
 namespace Envelope {
+
     public class Account : Object, Gee.Comparable<Account> {
 
         public enum Type {
