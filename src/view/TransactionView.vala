@@ -16,11 +16,92 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
-namespace Envelope {
+using Envelope.DB;
+using Envelope.Widget;
+
+namespace Envelope.View {
+
+    private static TransactionWelcomeScreen transaction_welcome_screen_instance = null;
+
+    public class TransactionWelcomeScreen : Granite.Widgets.Welcome {
+
+        public static new unowned TransactionWelcomeScreen get_default () {
+            if (transaction_welcome_screen_instance == null) {
+                transaction_welcome_screen_instance = new TransactionWelcomeScreen ();
+            }
+
+            return transaction_welcome_screen_instance;
+        }
+
+        private enum Action {
+            ADD_TRANSACTION,
+            IMPORT_TRANSACTIONS
+        }
+
+        public Account account { get; set; }
+
+        public signal void add_transaction_selected (Account account);
+
+        public TransactionWelcomeScreen () {
+            base (_("Spend! Get paid!"), _("There are currently no transactions in this account"));
+            build_ui ();
+            connect_signals ();
+        }
+
+        private void build_ui () {
+            append ("add", _("Record a transaction"),
+                _("Record a fresh new transaction for this account. Or, plan a future one!"));
+
+            append ("document-import", _("Import transactions"),
+                _("Import from a QIF file obtained from another application"));
+        }
+
+        private void connect_signals () {
+            activated.connect (item_activated);
+        }
+
+        private void item_activated (int index ) {
+            switch (index) {
+
+                case Action.ADD_TRANSACTION:
+                    add_transaction_selected (account);
+                    break;
+
+                case Action.IMPORT_TRANSACTIONS:
+                    break;
+
+                default:
+                    assert_not_reached ();
+            }
+        }
+    }
 
     private static TransactionView transaction_view_instance = null;
 
     public class TransactionView : Gtk.Box {
+
+        private enum InfoBarResponse {
+            OK
+        }
+
+        private enum DateFilter {
+            THIS_MONTH,
+            LAST_MONTH,
+            MANUAL
+        }
+
+        private enum Column {
+            DATE,
+            MERCHANT,
+            OUTFLOW,
+            INFLOW,
+            MEMO,
+            ID,
+            TRANSACTION,
+            CATEGORY
+        }
+
+        private static const int COLUMN_COUNT = 8;
 
         public static new unowned TransactionView get_default () {
             if (transaction_view_instance == null) {
@@ -35,7 +116,9 @@ namespace Envelope {
         private static string CELL_DATE_FORMAT = Granite.DateTime.get_default_date_format (false, true, true);
 
         private Gtk.TreeView treeview;
+        private Gtk.Box filter_box;
         private Gtk.ScrolledWindow grid_scroll;
+        private Gtk.Box scroll_box;
 
         // filter widgets
         private Gtk.RadioButton btn_this_month;
@@ -44,10 +127,16 @@ namespace Envelope {
         private Gtk.RadioButton btn_manual;
         private Granite.Widgets.DatePicker from_date;
         private Granite.Widgets.DatePicker to_date;
+        private Gtk.Button btn_add_transaction;
 
         private Gtk.TreeStore transactions_store;
+        private Gtk.ListStore merchant_store;
+
+        private DateFilter date_filter = DateFilter.THIS_MONTH;
 
         public Account account { get; set; }
+
+        private bool populating_from_list = false;
 
         public TransactionView () {
 
@@ -60,24 +149,26 @@ namespace Envelope {
         public TransactionView.with_account (Account account) {
             this ();
             this.account = account;
+            load_account (account);
         }
 
         private void add_transactions (Gee.ArrayList<Transaction> transactions) {
 
             debug ("adding %d transactions".printf (transactions.size));
 
+            populating_from_list = true;
+
+            // HUGE TODO: Use Gee.Traversable.filter
             var transaction_iter = transactions.iterator ();
 
             while (transaction_iter.next ()) {
-                Transaction trans = transaction_iter.get();
-                add_transaction (trans);
+                add_transaction (transaction_iter.get());
             }
+
+            populating_from_list = false;
         }
 
-        private void add_transaction (Transaction transaction) {
-
-            debug ("adding transaction %d in tree view".printf (transaction.id));
-
+        public void add_transaction (Transaction transaction) {
             var in_amount = "";
             var out_amount = "";
             var formatted_amount = Envelope.Util.format_currency (transaction.amount);
@@ -97,22 +188,20 @@ namespace Envelope {
 
             if (transaction.parent != null) {
                 Transaction parent_transaction = transaction.parent;
-
-                debug ("transaction %d has parent %d".printf (transaction.@id, parent_transaction.@id));
-
                 get_transaction_iter (parent_transaction, out parent_iter);
             }
 
             transactions_store.append (out iter, parent_iter);
 
             transactions_store.@set (iter,
-                0, transaction.date.format(CELL_DATE_FORMAT),
-                1, transaction.label,
-                2, out_amount,
-                3, in_amount,
-                4, transaction.description,
-                5, transaction.@id);
-
+                Column.DATE, transaction.date.format (CELL_DATE_FORMAT),
+                Column.MERCHANT, transaction.label,
+                Column.OUTFLOW, out_amount,
+                Column.INFLOW, in_amount,
+                Column.MEMO, transaction.description,
+                Column.ID, transaction.@id,
+                Column.TRANSACTION, transaction,
+                Column.CATEGORY, "", -1);
 
             update_view ();
         }
@@ -142,45 +231,31 @@ namespace Envelope {
         }
 
         public void remove_transaction (Transaction transaction) {
+            // TODO
             update_view ();
         }
 
         public void clear () {
+            debug ("clear");
             transactions_store.clear ();
         }
 
         private void update_view () {
-            treeview.columns_autosize ();
+            treeview.show_all ();
+            //treeview.columns_autosize ();
         }
 
-        private void label_changed (string path, Gtk.TreeIter iter_new) {
-            Gtk.TreeIter iter_val;
-            Value val;
-
-            transactions_store.get_value (iter_new, 1, out val);
-            transactions_store.get_iter (out iter_val, new Gtk.TreePath.from_string (path));
-            transactions_store.set_value (iter_val, 1, val);
-
-            // TODO update transaction object
-
-            // TODO update database
-
-            // TODO recalculate budget stats
-        }
-
-        public void load_account (Account account) {
+        public void load_account (Account acct) {
 
             debug ("account changed");
 
             clear();
 
-            if (account != null) {
+            Gee.ArrayList<Transaction>? transactions = null;
 
-                var transactions = account.transactions;
+            if (acct != null) {
 
-                if (transactions == null || transactions.size == 0) {
-                    transactions = DatabaseManager.get_default ().load_account_transactions (account.@id);
-                }
+                transactions = acct.transactions;
 
                 if (transactions != null && transactions.size > 0) {
                     add_transactions (transactions);
@@ -190,7 +265,18 @@ namespace Envelope {
                 }
             }
 
-            add_empty_row ();
+            if (transactions.size > 1) {
+                filter_box.show_all ();
+            }
+            else {
+                filter_box.hide ();
+            }
+
+            grid_scroll.show_all ();
+            scroll_box.show_all ();
+            treeview.show_all ();
+
+            account = acct;
 
             update_view ();
         }
@@ -203,8 +289,6 @@ namespace Envelope {
 
             build_filter_ui ();
             build_transaction_grid_ui ();
-
-            show_all ();
         }
 
         private void build_filter_ui () {
@@ -212,7 +296,7 @@ namespace Envelope {
             debug ("building filter ui");
 
             // filters
-            var filter_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
+            filter_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
             filter_box.border_width = 10;
 
             add (filter_box);
@@ -224,10 +308,25 @@ namespace Envelope {
             // this month
             btn_this_month = new Gtk.RadioButton (null);
             btn_this_month.label = _("This month");
+            btn_this_month.toggled.connect ( () => {
+                if (btn_this_month.get_active ()) {
+                    date_filter = DateFilter.THIS_MONTH;
+
+                    debug ("account is %d".printf (account.@id));
+
+                    load_account (account);
+                }
+            });
             filter_box.add (btn_this_month);
 
             // last month
             btn_last_month = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Last month"));
+            btn_last_month.toggled.connect ( () => {
+                if (btn_last_month.get_active ()) {
+                    date_filter = DateFilter.LAST_MONTH;
+                    load_account (account);
+                }
+            });
             filter_box.add (btn_last_month);
 
             // future
@@ -238,6 +337,7 @@ namespace Envelope {
             btn_manual = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Pick dates:"));
             btn_manual.toggled.connect ( () => {
                 if (btn_manual.get_active ()) {
+                    date_filter = DateFilter.MANUAL;
                     from_date.sensitive = true;
                     to_date.sensitive = true;
                 }
@@ -270,7 +370,7 @@ namespace Envelope {
 
         private void build_transaction_grid_ui () {
 
-            debug ("building tree ui");
+            debug ("building transaction grid ui");
 
             grid_scroll = new Gtk.ScrolledWindow (null, null);
 
@@ -279,9 +379,27 @@ namespace Envelope {
 
             add (grid_scroll);
 
+            scroll_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            grid_scroll.add (scroll_box);
+            scroll_box.show_all ();
+
             treeview = new Gtk.TreeView ();
 
-            grid_scroll.add (treeview);
+            scroll_box.pack_start (treeview, false, false);
+
+            btn_add_transaction = new Gtk.Button.with_label (_("Add transaction"));
+            btn_add_transaction.show_all ();
+            btn_add_transaction.expand = false;
+            btn_add_transaction.clicked.connect (() => {
+                add_empty_row ();
+            });
+
+            var button_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
+            button_box.set_layout (Gtk.ButtonBoxStyle.START);
+            button_box.add (btn_add_transaction);
+            button_box.set_spacing (10);
+            button_box.border_width = 10;
+            scroll_box.add (button_box);
 
             treeview.activate_on_single_click = true;
             treeview.reorderable = true;
@@ -291,93 +409,138 @@ namespace Envelope {
             treeview.set_search_column (1);
             treeview.show_all ();
 
-            transactions_store = new Gtk.TreeStore(6,
+            transactions_store = new Gtk.TreeStore(COLUMN_COUNT,
                 typeof (string),
                 typeof (string),
                 typeof (string),
                 typeof (string),
                 typeof (string),
-                typeof (int));
+                typeof (int),
+                typeof (Transaction),
+                typeof (string)); // todo change to category type
 
-            add_empty_row ();
+            merchant_store = new Gtk.ListStore (2,
+                typeof (string), // merchant
+                typeof (int));   // occurences
+
+            // load merchants
+            var merchants = DatabaseManager.get_default ().get_merchants ();
+
+            foreach (Merchant m in merchants) {
+                Gtk.TreeIter iter;
+                merchant_store.append (out iter);
+                merchant_store.@set (iter, 0, m.label, -1);
+                merchant_store.@set (iter, 1, m.occurences, -1);
+            }
+
+            // notify when a transaction changed
+            transactions_store.row_changed.connect ((path, iter) => {
+
+                transaction_edited (path, iter);
+
+                // add new empty row if iter is last
+                //if (!transactions_store.iter_next (ref iter)) {
+                    // iter has no next, append
+                if (!populating_from_list) {
+                    //add_empty_row ();
+                }
+                //}
+            });
 
             treeview.set_model (transactions_store);
 
-            // normal cell renderer
-            Gtk.CellRendererText renderer = new Gtk.CellRendererText();
-            renderer.editable = true;
+            // memo cell renderer
+            Gtk.CellRendererText renderer_memo = new Gtk.CellRendererText();
+            renderer_memo.editable = true;
+            renderer_memo.edited.connect ((path, text) => {
+                Gtk.TreeIter iter;
+
+                if (transactions_store.get_iter_from_string (out iter, path)) {
+                    debug ("edited: setting memo in store");
+                    transactions_store.@set (iter, Column.MEMO, text, -1);
+                }
+            });
 
             // label cell renderer
-            Gtk.CellRendererCombo renderer_label = new Gtk.CellRendererCombo();
+            var renderer_label = new CellRendererTextCompletion ();
+            renderer_label.store = merchant_store;
+            renderer_label.text_column = 0;
             renderer_label.editable = true;
-            renderer_label.model = transactions_store;
-            renderer_label.text_column = 1;
+            renderer_label.edited.connect ((path, text) =>  {
+                Gtk.TreeIter iter;
 
-            renderer_label.changed.connect((path, iter_new) => {
-                label_changed (path, iter_new);
+                if (transactions_store.get_iter_from_string (out iter, path)) {
+                    debug ("edited: setting merchant in store");
+                    transactions_store.@set (iter, Column.MERCHANT, text, -1);
+                }
             });
 
             // cell renderer for outgoing transactions
             Gtk.CellRendererText renderer_out = new Gtk.CellRendererText();
             renderer_out.editable = true;
             renderer_out.foreground = CELL_COLOR_OUTGOING;
+            renderer_out.xalign = 1.0f;
+            renderer_out.edited.connect ((path, text) =>  {
+                Gtk.TreeIter iter;
+
+                if (transactions_store.get_iter_from_string (out iter, path)) {
+                    debug ("edited: setting outgoing amount in store");
+                    transactions_store.@set (iter, Column.OUTFLOW, Envelope.Util.format_currency (double.parse (text)), -1);
+                }
+            });
 
             // cell renderer for incoming transactions
             Gtk.CellRendererText renderer_in = new Gtk.CellRendererText();
             renderer_in.editable = true;
             renderer_in.foreground = CELL_COLOR_INCOMING;
+            renderer_in.xalign = 1.0f;
+            renderer_in.edited.connect ((path, text) =>  {
+                Gtk.TreeIter iter;
 
-            // columns
-            var date_column = new Gtk.TreeViewColumn ();
+                if (transactions_store.get_iter_from_string (out iter, path)) {
+                    debug ("edited: setting incoming amount in store");
+                    transactions_store.@set (iter, Column.INFLOW, Envelope.Util.format_currency (double.parse (text)), -1);
+                }
+            });
+
             var crdp = new CellRendererDatePicker (treeview);
             crdp.editable = true;
             crdp.editable_set = true;
-
-            // TODO check if we can do better than this...
-            // this makes the cell renderer event dependant on the
-            // store... normally the column interacts with the store, not
-            // the renderer
             crdp.edited.connect ((path, text) => {
 
                 if (crdp.date_selected) {
                     Gtk.TreeIter iter;
 
                     if (transactions_store.get_iter_from_string (out iter, path)) {
-                        debug ("edited: setting text in store");
-                        transactions_store.@set (iter, 0, text, -1);
+                        debug ("edited: setting date in store");
+                        transactions_store.@set (iter, Column.DATE, text, -1);
                     }
                 }
             });
 
+            // columns
+            var date_column = new Gtk.TreeViewColumn ();
             date_column.set_title (_("Date"));
             date_column.max_width = -1;
             date_column.pack_start (crdp, true);
             date_column.resizable = true;
-            date_column.set_attributes (crdp, "text", 0);
+            date_column.set_attributes (crdp, "text", Column.DATE);
             treeview.append_column (date_column);
 
             var merchant_column = new Gtk.TreeViewColumn ();
             merchant_column.set_title (_("Merchant"));
             merchant_column.max_width = -1;
-            merchant_column.pack_start (renderer, true);
+            merchant_column.pack_start (renderer_label, true);
             merchant_column.resizable = true;
-            merchant_column.set_attributes (renderer, "text", 1);
+            merchant_column.set_attributes (renderer_label, "text", Column.MERCHANT);
             treeview.append_column (merchant_column);
-
-            var memo_column = new Gtk.TreeViewColumn ();
-            memo_column.set_title (_("Memo"));
-            memo_column.max_width = -1;
-            memo_column.pack_start (renderer, true);
-            memo_column.resizable = true;
-            memo_column.set_attributes (renderer, "text", 4);
-            treeview.append_column (memo_column);
 
             var out_column = new Gtk.TreeViewColumn ();
             out_column.set_title (_("Outflow"));
             out_column.max_width = -1;
             out_column.pack_start (renderer_out, true);
             out_column.resizable = true;
-            out_column.set_attributes (renderer_out, "text", 2);
+            out_column.set_attributes (renderer_out, "text", Column.OUTFLOW);
             treeview.append_column (out_column);
 
             var in_column = new Gtk.TreeViewColumn ();
@@ -385,31 +548,34 @@ namespace Envelope {
             in_column.max_width = -1;
             in_column.pack_start (renderer_in, true);
             in_column.resizable = true;
-            in_column.set_attributes (renderer_in, "text", 3);
+            in_column.set_attributes (renderer_in, "text", Column.INFLOW);
             treeview.append_column (in_column);
 
-            /*
-            treeview.insert_column_with_attributes (-1, _("Date"), renderer, "text", 0, "resizable", true, null);
-            treeview.insert_column_with_attributes (-1, _("Merchant"), renderer_label, "text", 1, "resizable", true, null);
-            treeview.insert_column_with_attributes (-1, _("Memo"), renderer, "text", 4, "resizable", true, null);
-            treeview.insert_column_with_attributes (-1, _("Outflow"), renderer_out, "text", 2, "resizable", true, null);
-            treeview.insert_column_with_attributes (-1, _("Inflow"), renderer_in, "text", 3, "resizable", true, null);
-            */
+            var memo_column = new Gtk.TreeViewColumn ();
+            memo_column.set_title (_("Memo"));
+            memo_column.max_width = -1;
+            memo_column.pack_start (renderer_memo, true);
+            memo_column.resizable = true;
+            memo_column.set_attributes (renderer_memo, "text", Column.MEMO);
+            treeview.append_column (memo_column);
 
             grid_scroll.show_all ();
+            treeview.show_all ();
         }
 
-        private void add_empty_row () {
+        private void add_empty_row (Gtk.TreeIter? parent = null) {
             // add empty insert row
             Gtk.TreeIter insert_iter;
-            transactions_store.append (out insert_iter, null);
+            transactions_store.append (out insert_iter, parent);
             transactions_store.@set (insert_iter,
-                0, "",
-                1, "",
-                2, "",
-                3, "",
-                4, "",
-                5, -1);
+                Column.DATE, "",
+                Column.MERCHANT, "",
+                Column.MEMO, "",
+                Column.OUTFLOW, "",
+                Column.INFLOW, "",
+                Column.ID, null,
+                Column.TRANSACTION, null,
+                Column.CATEGORY, "", -1);
         }
 
         private void from_date_selected () {
@@ -420,5 +586,48 @@ namespace Envelope {
             debug ("to date selected %s".printf (to_date.date.to_string ()));
         }
 
+        private void transaction_edited (Gtk.TreePath path, Gtk.TreeIter iter) {
+            if (!populating_from_list) {
+
+                Transaction transaction;
+                string date;
+                string label;
+                string description;
+                string in_amount;
+                string out_amount;
+
+                transactions_store.@get (iter,
+                    Column.DATE, out date,
+                    Column.MERCHANT, out label,
+                    Column.OUTFLOW, out out_amount,
+                    Column.INFLOW, out in_amount,
+                    Column.MEMO, out description,
+                    Column.TRANSACTION, out transaction, -1);
+
+                if (transaction != null) {
+
+                    transaction.label = label;
+                    transaction.description = description;
+
+                    double? amount = null;
+
+                    if (in_amount != "") {
+                        amount = double.parse (in_amount);
+                        transaction.direction = Transaction.Direction.INCOMING;
+                    }
+                    else if (out_amount != "") {
+                        amount = double.parse (out_amount);
+                        transaction.direction = Transaction.Direction.OUTGOING;
+                    }
+                    else {
+                        debug ("warning! no amount set!!!");
+                    }
+
+                    transaction.amount = amount;
+
+                    // TODO date
+                }
+            }
+        }
     }
 }
