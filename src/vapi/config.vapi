@@ -7,4 +7,5 @@ namespace Build {
   public const string RELEASE_NAME;
   public const string VERSION;
   public const string VERSION_INFO;
+  public const int     DEBUG;
 }
