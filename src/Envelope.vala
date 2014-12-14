@@ -16,6 +16,8 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
+using Envelope.Window;
+
 private Envelope.App application_instance = null;
 
 public class Envelope.App : Granite.Application {
@@ -74,7 +76,6 @@ public class Envelope.App : Granite.Application {
         if (main_window == null) {
             main_window = new MainWindow ();
             main_window.set_application (this);
-            main_window.build_ui ();
         }
 
         main_window.show ();
@@ -87,4 +88,9 @@ public class Envelope.App : Granite.Application {
     public string get_name () {
         return PROGRAM_NAME;
     }
+}
+
+public static int main (string[] args) {
+    var app = new Envelope.App ();
+    return app.run (args);
 }
