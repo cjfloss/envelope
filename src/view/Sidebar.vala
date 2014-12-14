@@ -16,7 +16,11 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
-namespace Envelope {
+using Envelope.DB;
+using Envelope.Dialog;
+using Envelope.Widget;
+
+namespace Envelope.View {
 
     private static Sidebar sidebar_instance = null;
 
@@ -30,7 +34,7 @@ namespace Envelope {
             return sidebar_instance;
         }
 
-        private static const int COLUMN_COUNT = 4;
+        private static const int COLUMN_COUNT = 5;
 
         private enum Action {
             NONE,
@@ -41,7 +45,8 @@ namespace Envelope {
             LABEL,
             ACCOUNT,
             ICON,
-            ACTION
+            ACTION,
+            DESCRIPTION
         }
 
         private static const string COLOR_SUBZERO = "red";
@@ -57,13 +62,15 @@ namespace Envelope {
         public Gee.ArrayList<Account> accounts { get; set; }
 
         public signal void list_account_selected (Account account);
+        public signal void list_account_name_updated (Account account, string new_name);
 
         public Sidebar () {
             store = new Gtk.TreeStore(COLUMN_COUNT,
                 typeof (string),
                 typeof (Account),
                 typeof (string),
-                typeof (Action)
+                typeof (Action),
+                typeof (string)
             );
 
             build_ui ();
@@ -93,6 +100,7 @@ namespace Envelope {
             treeview.activate_on_single_click = true;
             treeview.vexpand = true;
             treeview.vexpand_set = true;
+            treeview.tooltip_column = Column.DESCRIPTION;
 
             // style
             var style_context = treeview.get_style_context ();
@@ -118,10 +126,11 @@ namespace Envelope {
 
             var crt = new Gtk.CellRendererText ();
             col.pack_start (crt, true);
-            crt.editable = false;
+            crt.editable = true;
             crt.editable_set = true;
             crt.ellipsize = Pango.EllipsizeMode.END;
             crt.ellipsize_set = true;
+            crt.edited.connect (account_renamed);
 
             col.set_attributes (crt, "text", Column.LABEL);
             col.set_cell_data_func (crt, treeview_text_renderer_function);
@@ -189,7 +198,8 @@ namespace Envelope {
             store.@set (iter, Column.LABEL, label,
                 Column.ACCOUNT, account,
                 Column.ICON, account != null ? "accessories-calculator" : null,
-                Column.ACTION, action, -1);
+                Column.ACTION, action,
+                Column.DESCRIPTION, account != null ? account.description : null, -1);
 
             return iter;
         }
@@ -208,6 +218,7 @@ namespace Envelope {
                 crt.weight = 900;
                 crt.weight_set = true;
                 crt.height = 20;
+                crt.style_set = false;
             }
             else {
                 crt.height = -1;
@@ -392,6 +403,25 @@ namespace Envelope {
         private void account_selected (Account account) {
             debug ("sidebar account selected : %s".printf (account.number));
             list_account_selected (account);
+        }
+
+        private void account_renamed (string path, string text) {
+            Gtk.TreeIter iter;
+
+            if (store.get_iter_from_string (out iter, path)) {
+                string old_name = "";
+                Account account;
+
+                store.@get (iter, Column.LABEL, out old_name,
+                    Column.ACCOUNT, out account, -1);
+
+                debug ("account '%s' renamed to '%s'".printf (old_name, text));
+
+                store.@set (iter, Column.LABEL, text, -1);
+
+                // fire signal list_account_name_updated
+                list_account_name_updated (account, text);
+            }
         }
 
         private Gtk.TreePath? get_selected_path () {
