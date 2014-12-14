@@ -16,7 +16,7 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
-namespace Envelope {
+namespace Envelope.Widget {
 
     public class CellRendererDatePicker : Gtk.CellRendererText {
 
