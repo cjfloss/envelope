@@ -26,6 +26,7 @@ namespace Envelope.Window {
 
         // window elements
         public Gtk.HeaderBar                header_bar { get; private set; }
+        public Gtk.Button                   import_button { get; private set; }
         public Gtk.SearchEntry              search_entry { get; private set; }
         public Sidebar                      sidebar { get; private set; }
         public Gtk.MenuButton               app_menu { get; private set; }
@@ -75,6 +76,11 @@ namespace Envelope.Window {
             set_titlebar (header_bar);
 
             header_bar.pack_end (app_menu);
+
+            // import button
+            import_button = new Gtk.Button.from_icon_name ("document-import", Gtk.IconSize.LARGE_TOOLBAR);
+            import_button.tooltip_text = _("Import transactions");
+            header_bar.pack_start (import_button);
 
             search_entry = new Gtk.SearchEntry ();
             search_entry.placeholder_text = _("Search transactions\u2026");
@@ -176,10 +182,15 @@ namespace Envelope.Window {
             main_view_changed.connect ( (window, widget) => {
                 // check if we need to show the transaction search entry
                 if (widget is TransactionView) {
+                    import_button.show ();
                     search_entry.show ();
                     search_entry.text = "";
                 }
+                else if (widget is TransactionWelcomeScreen) {
+                    import_button.show ();
+                }
                 else {
+                    import_button.hide();
                     search_entry.hide ();
                     search_entry.text = "";
                 }
@@ -188,6 +199,10 @@ namespace Envelope.Window {
             search_entry.search_changed.connect ( (entry) => {
                 debug ("search changed to %s".printf (entry.text));
                 TransactionView.get_default ().set_search_filter (entry.text);
+            });
+
+            import_button.clicked.connect ( () => {
+                TransactionView.get_default ().show_import_dialog ();
             });
         }
 
