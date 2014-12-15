@@ -21,10 +21,14 @@ using Gee;
 
 namespace Envelope.Service {
 
+    public errordomain ImporterError {
+        UNSUPPORTED
+    }
+
     /**
      *
      */
-    public interface Importer {
+    public interface Importer : Object {
         /**
          *
          */
