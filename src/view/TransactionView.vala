@@ -232,10 +232,6 @@ namespace Envelope.View {
                 }
             }
 
-            //grid_scroll.show_all ();
-            //scroll_box.show_all ();
-            //treeview.show_all ();
-
             account = acct;
 
             update_view ();
