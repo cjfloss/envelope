@@ -67,6 +67,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_load_all_accounts;
         private SQLHeavy.Query q_insert_account;
         private SQLHeavy.Query q_rename_account;
+        private SQLHeavy.Query q_update_account_balance;
 
         private SQLHeavy.Query q_load_account_transactions;
         private SQLHeavy.Query q_delete_account_transactions;
@@ -85,6 +86,10 @@ namespace Envelope.DB {
             }
 
             return dbm;
+        }
+
+        public SQLHeavy.Transaction start_transaction () throws SQLHeavy.Error {
+            return database.begin_transaction ();
         }
 
         public Gee.ArrayList<Merchant> get_merchants () {
@@ -196,6 +201,11 @@ namespace Envelope.DB {
             q_rename_account.clear ();
         }
 
+        public void update_account_balance (Account account, ref SQLHeavy.Transaction transaction)  throws SQLHeavy.Error {
+            transaction.prepare ("UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id")
+                .execute ("balance", typeof (double), account.balance, "account_id", typeof (int), account.@id);
+        }
+
         public Gee.ArrayList<Transaction> load_account_transactions (int account_id) {
 
             debug ("loading transactions for account %d".printf (account_id));
@@ -221,6 +231,44 @@ namespace Envelope.DB {
             }
 
             return list;
+        }
+
+        public void insert_transaction (Transaction transaction, SQLHeavy.Query? statement = null) throws SQLHeavy.Error {
+
+            debug ("inserting new transaction in account %d".printf (transaction.account.@id));
+
+            var q = statement != null ? statement : q_insert_account_transaction;
+
+            var id = q.execute_insert (
+                "label", typeof (string), transaction.label,
+                "description", typeof (string), transaction.description,
+                "amount", typeof (double), transaction.amount,
+                "direction", typeof (int), (int) transaction.direction,
+                "account_id", typeof (int), transaction.account.@id,
+                "parent_transaction_id", typeof (int), null,
+                "date", typeof (int), (int) transaction.date.to_unix ()
+            );
+
+            debug ("transaction created with id %d".printf ((int) id));
+
+            transaction.@id = (int) id;
+        }
+
+        /**
+         * Insert multiple transactions
+         */
+        public void insert_transactions (Gee.ArrayList<Transaction> transactions, ref SQLHeavy.Transaction transaction) throws SQLHeavy.Error {
+
+            var stmt = transaction.prepare ("""
+            INSERT INTO `transactions`
+            (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`)
+            VALUES
+            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date)
+            """);
+
+            foreach (Transaction t in transactions) {
+                insert_transaction (t, stmt);
+            }
         }
 
         public Gee.ArrayList<Category> load_categories () {
@@ -395,6 +443,10 @@ namespace Envelope.DB {
             UPDATE `accounts` SET `number` = :number WHERE `id` = :account_id
             """);
 
+            q_update_account_balance = database.prepare ("""
+            UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id
+            """);
+
             q_load_account_transactions = database.prepare("""
             SELECT * FROM `transactions` WHERE `account_id` = :account_id ORDER BY `date` DESC
             """);
@@ -445,7 +497,7 @@ namespace Envelope.DB {
         }
 
         private void debug_sql (string sql) {
-            debug (sql);
+            debug (sql.strip());
         }
     }
 }
