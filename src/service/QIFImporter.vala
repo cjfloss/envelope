@@ -66,7 +66,7 @@ namespace Envelope.Service {
             return qif_importer_instance;
         }
 
-        public char date_delimiter { get; set; default = '/'; }
+        public string date_delimiter { get; set; default = "/"; }
         public string date_format { get; set; default = "M/D/Y"; }
 
         /**
@@ -74,7 +74,7 @@ namespace Envelope.Service {
          */
         public ArrayList<Transaction> import (string path) throws Error {
 
-            debug ("importing transactions from %s".printf (path));
+            info ("importing transactions from %s".printf (path));
 
             var file = File.new_for_path (path);
 
@@ -96,20 +96,23 @@ namespace Envelope.Service {
             do {
                 line = stream.read_line ();
 
-                if (line != null) {
+                if (line != null && line != "") {
                     if (!parse_line (line, ref transaction)) {
                         // transaction is complete; create a real Transaction object from the
                         // struct and add it to the list
-                        Transaction trans = new Transaction ();
+                        Transaction trans;
 
-                        // TODO
+                        qif_transaction_to_transaction (transaction, out trans);
 
                         list.add (trans);
 
+                        // try new transaction
                         transaction = QIFTransaction ();
                     }
                 }
             } while (line != null);
+
+            info ("imported %d transactions from %s".printf (list.size, path));
 
             return list;
         }
@@ -146,7 +149,7 @@ namespace Envelope.Service {
                     break;
 
                  default:
-                    debug ("type %c ignored".printf (type));
+                    debug ("type %s ignored".printf (type.to_string ()));
                     break;
             }
 
@@ -156,15 +159,34 @@ namespace Envelope.Service {
         private void qif_transaction_to_transaction (QIFTransaction transaction, out Transaction trans) {
             trans = new Transaction ();
 
-            trans.label = transaction.payee;
-            trans.description = transaction.memo;
-            trans.amount = transaction.amount;
+            trans.label = transaction.payee.strip ();
+            trans.description = transaction.memo != null ? transaction.memo.strip () : null;
+            trans.amount = Math.fabs (transaction.amount);
 
             trans.direction = transaction.amount < 0 ?
-                Transaction.Direction.INCOMING :  Transaction.Direction.OUTGOING;
+                Transaction.Direction.OUTGOING :  Transaction.Direction.INCOMING;
 
             // parse date
-            //Date date =
+            DateTime dt;
+            if (!parse_qif_date_string (transaction.date, out dt)) {
+                error ("could not parse date string %s".printf (transaction.date));
+            }
+
+            trans.date = dt;
+        }
+
+        // this is so wrong
+        private bool parse_qif_date_string (string input, out DateTime date) {
+            string[] tokens = input.split (date_delimiter);
+
+            string year = tokens[2].strip ();
+            if (year.length == 2) {
+                year = "20" + year;
+            }
+
+            date = new DateTime.local (int.parse (year), int.parse (tokens[0]), int.parse (tokens[1]), 0, 0, 0d);
+
+            return true;
         }
     }
 }
