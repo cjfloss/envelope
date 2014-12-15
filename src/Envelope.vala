@@ -72,6 +72,7 @@ public class Envelope.App : Granite.Application {
         //    Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
         // force DEBUG for now
         Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.DEBUG;
+        Granite.Services.Paths.initialize (Build.PROGRAM_NAME, Build.PKG_DATADIR);
 
         if (main_window == null) {
             main_window = new MainWindow ();
