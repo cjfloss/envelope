@@ -26,6 +26,7 @@ namespace Envelope.Window {
 
         // window elements
         public Gtk.HeaderBar                header_bar { get; private set; }
+        public Gtk.SearchEntry              search_entry { get; private set; }
         public Sidebar                      sidebar { get; private set; }
         public Gtk.MenuButton               app_menu { get; private set; }
         public Menu                         settings_menu { get; private set; }
@@ -36,6 +37,9 @@ namespace Envelope.Window {
         private Gtk.Popover                 menu_popover;
 
         private DatabaseManager dbm = DatabaseManager.get_default ();
+
+        // fired when the content view changes
+        public signal void main_view_changed (Gtk.Widget main_view);
 
         public MainWindow () {
             Object ();
@@ -72,8 +76,15 @@ namespace Envelope.Window {
 
             header_bar.pack_end (app_menu);
 
-            var search_entry = new Gtk.SearchEntry ();
+            search_entry = new Gtk.SearchEntry ();
             search_entry.placeholder_text = _("Search transactions\u2026");
+
+            var search_entry_completion = new Gtk.EntryCompletion ();
+            search_entry_completion.set_model (TransactionView.get_default ().merchant_store);
+            search_entry_completion.set_text_column (0);
+
+            search_entry.completion = search_entry_completion;
+
             header_bar.pack_end (search_entry);
 
             header_bar.show_all ();
@@ -93,6 +104,7 @@ namespace Envelope.Window {
                 determine_content_view (account, out widget);
 
                 Type t = widget.get_type ();
+
                 debug ("view to show: %s".printf (t.name ()));
 
                 if (paned.get_child2 () != widget) {
@@ -103,6 +115,8 @@ namespace Envelope.Window {
 
                 paned.add2 (widget);
                 paned.show_all ();
+
+                main_view_changed (widget);
             });
 
             // If we have accounts, show the transaction view
@@ -119,7 +133,7 @@ namespace Envelope.Window {
             box.show_all ();
 
             this.width_request = 1200;
-            this.height_request = 780;
+            this.height_request = 800;
             this.window_position = Gtk.WindowPosition.CENTER;
         }
 
@@ -157,6 +171,23 @@ namespace Envelope.Window {
                         // TODO reset the label in the sidebar to the original account number
                     }
                 }
+            });
+
+            main_view_changed.connect ( (window, widget) => {
+                // check if we need to show the transaction search entry
+                if (widget is TransactionView) {
+                    search_entry.show ();
+                    search_entry.text = "";
+                }
+                else {
+                    search_entry.hide ();
+                    search_entry.text = "";
+                }
+            });
+
+            search_entry.search_changed.connect ( (entry) => {
+                debug ("search changed to %s".printf (entry.text));
+                TransactionView.get_default ().set_search_filter (entry.text);
             });
         }
 
