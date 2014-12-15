@@ -34,11 +34,12 @@ namespace Envelope.View {
             return sidebar_instance;
         }
 
-        private static const int COLUMN_COUNT = 5;
+        private static const int COLUMN_COUNT = 6;
 
         private enum Action {
             NONE,
-            ADD_ACCOUNT
+            ADD_ACCOUNT,
+            ADD_CATEGORY
         }
 
         private enum Column {
@@ -46,7 +47,8 @@ namespace Envelope.View {
             ACCOUNT,
             ICON,
             ACTION,
-            DESCRIPTION
+            DESCRIPTION,
+            CATEGORY
         }
 
         private static const string COLOR_SUBZERO = "red";
@@ -55,6 +57,7 @@ namespace Envelope.View {
         private Gtk.TreeView treeview;
         private Gtk.TreeStore store;
         private Gtk.TreeIter account_iter;
+        private Gtk.TreeIter category_iter;
 
         private Granite.Widgets.CellRendererExpander cre;
         private Gtk.CellRendererText crt_balance_total;
@@ -70,7 +73,8 @@ namespace Envelope.View {
                 typeof (Account),
                 typeof (string),
                 typeof (Action),
-                typeof (string)
+                typeof (string),
+                typeof (Category)
             );
 
             build_ui ();
@@ -176,20 +180,43 @@ namespace Envelope.View {
             store.clear ();
 
             // Add "Accounts" category header
-            account_iter = add_item (null, _("Accounts"), null);
+            account_iter = add_item (null, _("Accounts"), null, null);
 
             if (accounts != null) {
 
                 foreach (Account account in accounts) {
-                    add_item (account_iter, account.number, account);
+                    add_item (account_iter, account.number, account, null);
                 }
             }
 
             // Add "Add account..."
-            add_item (account_iter, _("Add account\u2026"), null, Action.ADD_ACCOUNT);
+            add_item (account_iter, _("Add account\u2026"), null, null, Action.ADD_ACCOUNT);
+
+            // Add "Categories" category header
+            category_iter = add_item (null, _("Spending categories"), null, null);
+
+            // Add mocked categories
+
+            var cat = new Category ();
+
+            add_item (category_iter, _("Groceries"), null, cat);
+            add_item (category_iter, _("Fuel"), null, cat);
+            add_item (category_iter, _("Public transit"), null, cat);
+            add_item (category_iter, _("Restaurants"), null, cat);
+            add_item (category_iter, _("Entertainment"), null, cat);
+            add_item (category_iter, _("Savings"), null, cat);
+            add_item (category_iter, _("Personal care"), null, cat);
+            add_item (category_iter, _("Alcohol & Bars"), null, cat);
+            add_item (category_iter, _("Emergency fund"), null, cat);
+            add_item (category_iter, _("Cigarettes"), null, cat);
+
+            // Add "Add category..."
+            add_item (category_iter, _("Add category\u2026"), null, null, Action.ADD_CATEGORY);
+
+            treeview.expand_all ();
         }
 
-        private Gtk.TreeIter add_item (Gtk.TreeIter? parent, string label, Account? account, Action action = Action.NONE) {
+        private Gtk.TreeIter add_item (Gtk.TreeIter? parent, string label, Account? account, Category? category, Action action = Action.NONE) {
 
             Gtk.TreeIter iter;
 
@@ -199,7 +226,8 @@ namespace Envelope.View {
                 Column.ACCOUNT, account,
                 Column.ICON, account != null ? "accessories-calculator" : null,
                 Column.ACTION, action,
-                Column.DESCRIPTION, account != null ? account.description : null, -1);
+                Column.DESCRIPTION, account != null ? account.description : null,
+                Column.CATEGORY, category, -1);
 
             return iter;
         }
@@ -208,21 +236,31 @@ namespace Envelope.View {
 
             Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
             Account? account = null;
+            Category? category = null;
             Action action;
 
             model.@get (iter, Column.ACCOUNT, out account, -1);
             model.@get (iter, Column.ACTION, out action, -1);
+            model.@get (iter, Column.CATEGORY, out category, -1);
 
-            if (account == null && action == Action.NONE) {
+            if (account == null && category == null) {
                 // category name
-                crt.weight = 900;
-                crt.weight_set = true;
-                crt.height = 20;
-                crt.style_set = false;
+
+                if (action == Action.NONE) {
+                    crt.weight = 900;
+                    crt.weight_set = true;
+                    crt.height = 20;
+                    crt.style_set = false;
+                }
+
+                crt.editable = false;
+                crt.editable_set = true;
             }
             else {
                 crt.height = -1;
                 crt.weight_set = false;
+                crt.editable_set = true;
+                crt.editable = true;
             }
         }
 
@@ -245,10 +283,12 @@ namespace Envelope.View {
 
             Granite.Widgets.CellRendererExpander cre = renderer as Granite.Widgets.CellRendererExpander;
             Account? account = null;
+            Category? category = null;
 
             model.@get (iter, Column.ACCOUNT, out account, -1);
+            model.@get (iter, Column.CATEGORY, out category, -1);
 
-            if (account == null) {
+            if (account == null && category == null) {
                 // category name
                 cre.visible = true;
             }
@@ -261,12 +301,14 @@ namespace Envelope.View {
 
             Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
             Account? account = null;
+            Category? category = null;
             Action action;
 
             model.@get (iter, Column.ACCOUNT, out account, -1);
             model.@get (iter, Column.ACTION, out action, -1);
+            model.@get (iter, Column.CATEGORY, out category, -1);
 
-            if (account == null && action == Action.NONE) {
+            if (account == null && category == null &&  action == Action.NONE) {
 
                 if (accounts == null || accounts.size == 0) {
                     crt.visible = false;
@@ -300,6 +342,8 @@ namespace Envelope.View {
 
         private void treeview_row_activated () {
 
+            debug ("row activated!");
+
             Gtk.TreeIter iter;
             Gtk.TreeModel model;
 
@@ -312,6 +356,7 @@ namespace Envelope.View {
                 model.@get (iter, Column.ACTION, out action, -1);
 
                 if (account != null) {
+                    debug ("account_selected");
                     account_selected (account);
                 }
                 else {
@@ -338,6 +383,7 @@ namespace Envelope.View {
 
         public void s_account_created (Account account) {
             add_account (account);
+            select_account (account);
         }
 
         public void add_account (Account account) {
@@ -356,6 +402,7 @@ namespace Envelope.View {
 
             if (iter != null) {
                 treeview.get_selection ().select_iter (iter);
+                account_selected (account);
             }
         }
 
