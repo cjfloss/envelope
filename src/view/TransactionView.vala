@@ -18,6 +18,7 @@
 
 using Envelope.DB;
 using Envelope.Widget;
+using Envelope.Service;
 
 namespace Envelope.View {
 
@@ -68,6 +69,9 @@ namespace Envelope.View {
                     break;
 
                 case Action.IMPORT_TRANSACTIONS:
+                    var view = TransactionView.get_default();
+                    view.account = account;
+                    view.show_import_dialog ();
                     break;
 
                 default:
@@ -80,8 +84,16 @@ namespace Envelope.View {
 
     public class TransactionView : Gtk.Box {
 
+        public static new unowned TransactionView get_default () {
+            if (transaction_view_instance == null) {
+                transaction_view_instance = new TransactionView ();
+            }
+
+            return transaction_view_instance;
+        }
+
         private enum InfoBarResponse {
-            OK
+            CLEAR
         }
 
         private enum DateFilter {
@@ -102,17 +114,8 @@ namespace Envelope.View {
         }
 
         private static const int COLUMN_COUNT = 8;
-
-        public static new unowned TransactionView get_default () {
-            if (transaction_view_instance == null) {
-                transaction_view_instance = new TransactionView ();
-            }
-
-            return transaction_view_instance;
-        }
-
-        private static const string CELL_COLOR_INCOMING = "green";
-        private static const string CELL_COLOR_OUTGOING = "red";
+        private static const string CELL_COLOR_INCOMING = "#4e9a06";
+        private static const string CELL_COLOR_OUTGOING = "#A62626";
         private static string CELL_DATE_FORMAT = Granite.DateTime.get_default_date_format (false, true, true);
 
         private Gtk.TreeView treeview;
@@ -128,21 +131,26 @@ namespace Envelope.View {
         private Granite.Widgets.DatePicker from_date;
         private Granite.Widgets.DatePicker to_date;
         private Gtk.Button btn_add_transaction;
+        private Gtk.InfoBar infobar;
 
         private Gtk.TreeStore transactions_store;
-        private Gtk.ListStore merchant_store;
+
+        private bool populating_from_list = false;
+
+        private DateTime now = new DateTime.now_local ();
 
         private DateFilter date_filter = DateFilter.THIS_MONTH;
 
+        public Gtk.ListStore merchant_store { get; set; }
         public Account account { get; set; }
-
-        private bool populating_from_list = false;
+        public string search_term { get; set; }
 
         public TransactionView () {
 
             Object (orientation: Gtk.Orientation.VERTICAL);
 
             build_ui ();
+            connect_signals ();
             transaction_view_instance = this;
         }
 
@@ -152,20 +160,9 @@ namespace Envelope.View {
             load_account (account);
         }
 
-        private void add_transactions (Gee.ArrayList<Transaction> transactions) {
-
-            debug ("adding %d transactions".printf (transactions.size));
-
-            populating_from_list = true;
-
-            // HUGE TODO: Use Gee.Traversable.filter
-            var transaction_iter = transactions.iterator ();
-
-            while (transaction_iter.next ()) {
-                add_transaction (transaction_iter.get());
-            }
-
-            populating_from_list = false;
+        public void set_search_filter (string term) {
+            search_term = term;
+            apply_filters ();
         }
 
         public void add_transaction (Transaction transaction) {
@@ -175,12 +172,12 @@ namespace Envelope.View {
 
             switch (transaction.direction) {
                 case Transaction.Direction.INCOMING:
-                    in_amount = formatted_amount;
-                    break;
+                in_amount = formatted_amount;
+                break;
 
                 case Transaction.Direction.OUTGOING:
-                    out_amount = formatted_amount;
-                    break;
+                out_amount = formatted_amount;
+                break;
             }
 
             Gtk.TreeIter iter;
@@ -203,7 +200,193 @@ namespace Envelope.View {
                 Column.TRANSACTION, transaction,
                 Column.CATEGORY, "", -1);
 
+                update_view ();
+        }
+
+        public void remove_transaction (Transaction transaction) {
+            // TODO
             update_view ();
+        }
+
+        public void clear () {
+            debug ("clear");
+            transactions_store.clear ();
+        }
+
+        public void load_account (Account acct) {
+
+            debug ("account changed");
+
+            clear();
+
+            now = new DateTime.now_local ();
+
+            Gee.ArrayList<Transaction>? transactions = null;
+
+            if (acct != null) {
+
+                transactions = acct.transactions;
+
+                if (transactions != null && transactions.size > 0) {
+                    add_transactions (transactions);
+                }
+            }
+
+            //grid_scroll.show_all ();
+            //scroll_box.show_all ();
+            //treeview.show_all ();
+
+            account = acct;
+
+            update_view ();
+        }
+
+        public void show_import_dialog () {
+            // show open file dialog
+            var chooser = new Gtk.FileChooserDialog (_("Import a QIF file"), Envelope.App.get_default ().main_window,
+            Gtk.FileChooserAction.OPEN,
+            "_Cancel",
+            Gtk.ResponseType.CANCEL,
+            "_Open",
+            Gtk.ResponseType.ACCEPT);
+
+            debug ("setting file chooser to this path: %s".printf (Granite.Services.Paths.home_folder.get_path ()));
+
+            chooser.select_multiple = false;
+            chooser.create_folders = false;
+            chooser.set_current_folder_file (Granite.Services.Paths.home_folder);
+
+            var filter = new Gtk.FileFilter ();
+            chooser.set_filter (filter);
+            filter.add_pattern ("*.qif");
+
+            var response = chooser.run ();
+
+            switch (response) {
+                case Gtk.ResponseType.ACCEPT:
+                case Gtk.ResponseType.OK:
+
+                    chooser.close ();
+
+                    try {
+
+                        var local_account = account;
+
+                        AccountManager.get_default ().import_transactions_from_file (ref local_account, chooser.get_file ());
+
+                        //load_account (account);
+                        Sidebar.get_default ().select_account (account);
+
+                    } catch (ServiceError err) {
+                        error (err.message);
+                    } catch (ImporterError err) {
+                        assert (!(err is ImporterError.UNSUPPORTED));
+                        error (err.message);
+                    }
+
+                    break;
+
+                case Gtk.ResponseType.CANCEL:
+                case Gtk.ResponseType.CLOSE:
+                    chooser.close ();
+                    break;
+
+                default:
+                    assert_not_reached ();
+            }
+        }
+
+        private void get_filter_dates (out DateTime this_month, out DateTime last_month, out DateTime future, out DateTime from, out DateTime to) {
+            //var now = new DateTime.now_local ();
+
+            this_month = new DateTime.local (now.get_year (), now.get_month (), 1, 0, 0, 0);
+            last_month = new DateTime.local (now.get_year (), now.get_month (), 1, 0, 0, 0).add_months (-1);
+            future = new DateTime.now_local ().add_days (1);
+
+            from = from_date.date;  // might be null
+            to = to_date.date;      // might be null
+        }
+
+        /**
+         * Adds a list of transactions to the grid store
+         */
+        private void add_transactions (Gee.ArrayList<Transaction> transactions) {
+
+            debug ("filtering and adding %d transactions".printf (transactions.size));
+
+            populating_from_list = true;
+
+            bool do_filter_search = search_term != null && search_term != "";
+            var search = do_filter_search ? search_term.up () : "";
+
+            DateTime this_month;
+            DateTime last_month;
+            DateTime future;
+            DateTime? from;
+            DateTime? to;
+
+            get_filter_dates (out this_month, out last_month, out future, out from, out to);
+
+            var iter = transactions.iterator ().filter ( (transaction) =>  {
+                // filter on search term
+                if (do_filter_search) {
+
+                    var label = transaction.label.up ();
+                    var desc = (transaction.description != null ? transaction.description : "").up ();
+
+                    if (label.index_of (search) == -1 && desc.index_of (search) == -1) {
+                        return false;
+                    }
+                }
+
+                // honor date radio buttons
+                var tdate = transaction.date;
+
+                if (btn_this_month.get_active ()) {
+                    if (tdate.get_year () == this_month.get_year () && tdate.get_month () == this_month.get_month ()) {
+                        return true;
+                    }
+
+                    return false;
+                }
+                else if (btn_last_month.get_active ()) {
+                    if (tdate.get_year () == last_month.get_year () && tdate.get_month () == last_month.get_month ()) {
+                        return true;
+                    }
+
+                    return false;
+                }
+                else if (btn_future.get_active ()) {
+                    return tdate.compare (future) >= 0;
+                }
+                else if (btn_manual.get_active ()) {
+                    if (from != null && to != null) {
+                        return from.compare (tdate) <= 0 && to.compare (tdate) >= 0;
+                    }
+
+                    return false;
+                }
+
+                return true;
+            });
+
+            var count = 0;
+
+            while (iter.next ()) {
+                add_transaction (iter.get());
+                count++;
+            }
+
+            if (count > 0) {
+                infobar.hide ();
+                scroll_box.show_all ();
+            }
+            else {
+                infobar.show_all ();
+                scroll_box.hide ();
+            }
+
+            populating_from_list = false;
         }
 
         private void get_transaction_iter (Transaction transaction, out Gtk.TreeIter? iter) {
@@ -230,55 +413,13 @@ namespace Envelope.View {
             iter = found_iter;
         }
 
-        public void remove_transaction (Transaction transaction) {
-            // TODO
-            update_view ();
-        }
-
-        public void clear () {
-            debug ("clear");
-            transactions_store.clear ();
-        }
-
         private void update_view () {
             treeview.show_all ();
             //treeview.columns_autosize ();
         }
 
-        public void load_account (Account acct) {
-
-            debug ("account changed");
-
-            clear();
-
-            Gee.ArrayList<Transaction>? transactions = null;
-
-            if (acct != null) {
-
-                transactions = acct.transactions;
-
-                if (transactions != null && transactions.size > 0) {
-                    add_transactions (transactions);
-                }
-                else {
-                    // TODO show nice "No transactions" message instead of grid view
-                }
-            }
-
-            if (transactions.size > 1) {
-                filter_box.show_all ();
-            }
-            else {
-                filter_box.hide ();
-            }
-
-            grid_scroll.show_all ();
-            scroll_box.show_all ();
-            treeview.show_all ();
-
-            account = acct;
-
-            update_view ();
+        private void apply_filters () {
+            load_account (account);
         }
 
         private void build_ui () {
@@ -297,23 +438,27 @@ namespace Envelope.View {
 
             // filters
             filter_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
-            filter_box.border_width = 10;
+            filter_box.border_width = 5;
 
             add (filter_box);
+
+            //var style_context = filter_box.get_style_context ();
+            //style_context.add_class (Gtk.STYLE_CLASS_HIGHLIGHT);
+            //style_context.add_class (Granite.StyleClass.CONTENT_VIEW);
+
+
 
             // import button
             var import_button = new Gtk.Button.with_label (_("Import\u2026"));
             filter_box.pack_start (import_button, false, false);
+
+            import_button.clicked.connect (show_import_dialog);
 
             // this month
             btn_this_month = new Gtk.RadioButton (null);
             btn_this_month.label = _("This month");
             btn_this_month.toggled.connect ( () => {
                 if (btn_this_month.get_active ()) {
-                    date_filter = DateFilter.THIS_MONTH;
-
-                    debug ("account is %d".printf (account.@id));
-
                     load_account (account);
                 }
             });
@@ -323,7 +468,6 @@ namespace Envelope.View {
             btn_last_month = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Last month"));
             btn_last_month.toggled.connect ( () => {
                 if (btn_last_month.get_active ()) {
-                    date_filter = DateFilter.LAST_MONTH;
                     load_account (account);
                 }
             });
@@ -331,15 +475,23 @@ namespace Envelope.View {
 
             // future
             btn_future = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Future"));
+            btn_future.toggled.connect ( () => {
+                if (btn_future.get_active ()) {
+                    load_account (account);
+                }
+            });
             filter_box.add (btn_future);
 
             // manual dates
             btn_manual = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Pick dates:"));
             btn_manual.toggled.connect ( () => {
                 if (btn_manual.get_active ()) {
-                    date_filter = DateFilter.MANUAL;
                     from_date.sensitive = true;
                     to_date.sensitive = true;
+
+                    if (from_date.date != null && to_date.date != null) {
+                        load_account (account);
+                    }
                 }
                 else {
                     from_date.sensitive = false;
@@ -350,11 +502,14 @@ namespace Envelope.View {
 
             from_date = new Granite.Widgets.DatePicker ();
             from_date.sensitive = false;
-            var a_month_ago = new DateTime.now_local ();
-            from_date.date = a_month_ago.add_months (-1);
+            from_date.date = new DateTime.now_local ().add_months (-1);
 
             // we need to be notified of date changes
-            from_date.notify["date"].connect (from_date_selected);
+            from_date.notify["date"].connect ( () => {
+                if (btn_manual.get_active () && from_date.date != null && to_date.date != null) {
+                    load_account (account);
+                }
+            });
             filter_box.add (from_date);
 
             to_date = new Granite.Widgets.DatePicker ();
@@ -362,10 +517,27 @@ namespace Envelope.View {
             to_date.date = new DateTime.now_local ();
 
             // we need to be notified of date changes
-            to_date.notify["date"].connect (to_date_selected);
+            to_date.notify["date"].connect ( () => {
+                if (btn_manual.get_active () && from_date.date != null && to_date.date != null) {
+                    load_account (account);
+                }
+            });
             filter_box.add (to_date);
 
             filter_box.show_all ();
+
+            // infobar shown when filters do not return any transaction
+            infobar = new Gtk.InfoBar /*.with_buttons (_("Clear filters"), InfoBarResponse.CLEAR, null)*/ ();
+            infobar.message_type = Gtk.MessageType.WARNING;
+            infobar.get_content_area ().add (new Gtk.Label(_("No results.")));
+
+            // TEMP FIX add top border to info bar. Hard coded for now. Need to get the color value from the .warning class in gtk css
+            Granite.Widgets.Utils.set_theming (infobar, "GtkInfoBar { border-top-color: #c09e42; border-top-width: 1px; border-top-style: solid; }",
+                null,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+            infobar.hide ();
+            add (infobar);
         }
 
         private void build_transaction_grid_ui () {
@@ -384,6 +556,16 @@ namespace Envelope.View {
             scroll_box.show_all ();
 
             treeview = new Gtk.TreeView ();
+
+            /*
+             According to gtktreeview.c:4801, treeview line color is based on the border-top-color
+             CSS property for the GtkTreeView. Black is ugly, and elementary gtk theme doesn't provide
+             a custom value, so let's specify a value here. Might propose this in elementary-gtk-theme.
+             */
+            Granite.Widgets.Utils.set_theming (treeview, "GtkTreeView { border-top-color: #dddddd; }",
+                null,
+                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+
 
             scroll_box.pack_start (treeview, false, false);
 
@@ -406,6 +588,7 @@ namespace Envelope.View {
             treeview.headers_clickable = true;
             treeview.show_expanders = true;
             treeview.rules_hint = true;
+            treeview.enable_grid_lines = Gtk.TreeViewGridLines.BOTH;
             treeview.set_search_column (1);
             treeview.show_all ();
 
@@ -506,6 +689,7 @@ namespace Envelope.View {
             var crdp = new CellRendererDatePicker (treeview);
             crdp.editable = true;
             crdp.editable_set = true;
+            crdp.xalign = 1.0f;
             crdp.edited.connect ((path, text) => {
 
                 if (crdp.date_selected) {
@@ -518,6 +702,16 @@ namespace Envelope.View {
                 }
             });
 
+            var crb = new Gtk.CellRendererText ();
+            crb.text = _("FUTURE");
+            crb.size_points = 7;
+            crb.size_set = true;
+            crb.weight = 900;
+            crb.weight_set = true;
+            crb.foreground = "#8AADD4"; // from elementary gtk theme's @question_bg_color
+            crb.variant = Pango.Variant.SMALL_CAPS;
+            crb.variant_set = true;
+
             // columns
             var date_column = new Gtk.TreeViewColumn ();
             date_column.set_title (_("Date"));
@@ -525,6 +719,7 @@ namespace Envelope.View {
             date_column.pack_start (crdp, true);
             date_column.resizable = true;
             date_column.set_attributes (crdp, "text", Column.DATE);
+            date_column.set_cell_data_func (crdp, cell_renderer_foreground_func);
             treeview.append_column (date_column);
 
             var merchant_column = new Gtk.TreeViewColumn ();
@@ -532,14 +727,22 @@ namespace Envelope.View {
             merchant_column.max_width = -1;
             merchant_column.pack_start (renderer_label, true);
             merchant_column.resizable = true;
+            merchant_column.set_cell_data_func (renderer_label, cell_renderer_foreground_func);
             merchant_column.set_attributes (renderer_label, "text", Column.MERCHANT);
             treeview.append_column (merchant_column);
+
+            var category_column = new Gtk.TreeViewColumn ();
+            category_column.set_title (_("Category"));
+            category_column.max_width = -1;
+            category_column.resizable = true;
+            treeview.append_column (category_column);
 
             var out_column = new Gtk.TreeViewColumn ();
             out_column.set_title (_("Outflow"));
             out_column.max_width = -1;
             out_column.pack_start (renderer_out, true);
             out_column.resizable = true;
+            out_column.set_cell_data_func (renderer_out, cell_renderer_foreground_func);
             out_column.set_attributes (renderer_out, "text", Column.OUTFLOW);
             treeview.append_column (out_column);
 
@@ -548,6 +751,7 @@ namespace Envelope.View {
             in_column.max_width = -1;
             in_column.pack_start (renderer_in, true);
             in_column.resizable = true;
+            in_column.set_cell_data_func (renderer_in, cell_renderer_foreground_func);
             in_column.set_attributes (renderer_in, "text", Column.INFLOW);
             treeview.append_column (in_column);
 
@@ -555,12 +759,57 @@ namespace Envelope.View {
             memo_column.set_title (_("Memo"));
             memo_column.max_width = -1;
             memo_column.pack_start (renderer_memo, true);
+            memo_column.pack_end (crb, false);
             memo_column.resizable = true;
+            memo_column.spacing = 10;
+            memo_column.set_cell_data_func (renderer_memo, cell_renderer_foreground_func);
+            memo_column.set_cell_data_func (crb, cell_renderer_badge_func);
             memo_column.set_attributes (renderer_memo, "text", Column.MEMO);
             treeview.append_column (memo_column);
 
+            /*var badge_column = new Gtk.TreeViewColumn ();
+            badge_column.pack_start (crb, true);
+            badge_column.resizable = false;
+            badge_column.set_cell_data_func (crb, cell_renderer_badge_func);
+            treeview.append_column (badge_column);
+            */
+
             grid_scroll.show_all ();
             treeview.show_all ();
+        }
+
+        private void cell_renderer_foreground_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+            /*
+            Gtk.CellRendererText cr = renderer as Gtk.CellRendererText;
+            Transaction? transaction = null;
+
+            transactions_store.@get (iter, Column.TRANSACTION, out transaction, -1);
+
+            if (transaction != null) {
+
+                var now = new DateTime.now_local ();
+
+                if (transaction.date.compare (now) == 1) {
+                    // future transaction
+                    //cr.foreground = "gray";
+                    //cr.foreground_set = true;
+                }
+                else {
+                    // now or past
+                    //cr.foreground_set = false;
+                }
+            }
+            else {
+
+            }
+            */
+        }
+
+        private void cell_renderer_badge_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+            Gtk.CellRendererText cr = renderer as Gtk.CellRendererText;
+            Transaction? transaction = null;
+            transactions_store.@get (iter, Column.TRANSACTION, out transaction, -1);
+            cr.visible = transaction != null && transaction.date.compare (now) == 1;
         }
 
         private void add_empty_row (Gtk.TreeIter? parent = null) {
@@ -578,13 +827,14 @@ namespace Envelope.View {
                 Column.CATEGORY, "", -1);
         }
 
-        private void from_date_selected () {
-            debug ("from date selected %s".printf (from_date.date.to_string ()));
+        private void connect_signals () {
+            /*notify["search_term"].connect ( () => {
+                debug ("search term changed!");
+                apply_filters ();
+            });*/
         }
 
-        private void to_date_selected () {
-            debug ("to date selected %s".printf (to_date.date.to_string ()));
-        }
+
 
         private void transaction_edited (Gtk.TreePath path, Gtk.TreeIter iter) {
             if (!populating_from_list) {
