@@ -65,6 +65,83 @@ namespace Envelope.Service {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
+
+        /**
+         * Imports transactions into this account. Will do its best to discard duplicates.
+         */
+        public void import_transactions_from_file (ref Account account, File file) throws ImporterError, ServiceError {
+
+            var path = file.get_path ();
+
+            if (!file.query_exists ()) {
+                throw new ServiceError.ENOENT ("file does not exist: %s".printf (path));
+            }
+
+            var extension = path.substring (path.last_index_of (".") + 1); // eg. "qif"
+
+            Importer importer;
+
+            // TODO: CSV, OFX
+            
+            switch (extension) {
+                case "qif":
+                case "QIF":
+                    importer = QIFImporter.get_default ();
+                    break;
+
+                default:
+                    throw new ImporterError.UNSUPPORTED ("file is of unknown format");
+            }
+
+            try {
+                var transactions = importer.import (path);
+
+                if (transactions != null && transactions.size > 0) {
+
+                    double balance_delta = 0d;
+
+                    foreach (Transaction t in transactions) {
+
+                        switch (t.direction) {
+                            case Transaction.Direction.INCOMING:
+                                balance_delta += t.amount;
+                                break;
+
+                            case Transaction.Direction.OUTGOING:
+                                balance_delta -= t.amount;
+                                break;
+
+                            default:
+                                assert_not_reached ();
+                        }
+
+                        t.account = account;
+                    }
+
+                    info ("adjusting balance for account: %s (new balance: %s)".printf (Envelope.Util.format_currency (account.balance),
+                        Envelope.Util.format_currency (account.balance + balance_delta)));
+
+                    account.balance += balance_delta;
+
+                    var db_transaction = dbm.start_transaction ();
+
+                    dbm.insert_transactions (transactions, ref db_transaction);
+                    dbm.update_account_balance (account, ref db_transaction);
+
+                    db_transaction.commit ();
+
+                    account.transactions.add_all (transactions);
+                    account.transactions.sort ();
+                }
+            }
+            catch (Error err) {
+                throw new ServiceError.IMPORT_ERROR (err.message);
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+
+        }
     }
 
 }
