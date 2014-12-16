@@ -29,11 +29,6 @@ namespace Envelope.Service {
 
     public class AccountManager : Object {
 
-        construct {
-            dbm = DatabaseManager.get_default ();
-            account_manager_instance = this;
-        }
-
         public static new unowned AccountManager get_default () {
             if (account_manager_instance == null) {
                 account_manager_instance = new AccountManager ();
@@ -42,7 +37,12 @@ namespace Envelope.Service {
             return account_manager_instance;
         }
 
-        private DatabaseManager dbm;
+        private AccountManager () {
+            Object ();
+            account_manager_instance = this;
+        }
+
+        private DatabaseManager dbm = DatabaseManager.get_default ();
 
         /**
          * Rename an account. The account object will be updated with the new number upon successful operation.
@@ -83,8 +83,7 @@ namespace Envelope.Service {
 
             // TODO: CSV, OFX
 
-            switch (extension) {
-                case "qif":
+            switch (extension.up ()) {
                 case "QIF":
                     importer = QIFImporter.get_default ();
                     break;
@@ -92,6 +91,9 @@ namespace Envelope.Service {
                 default:
                     throw new ImporterError.UNSUPPORTED ("file is of unknown format");
             }
+
+            // we use this if something goes wrong with the database during import
+            var balance_before_import = account.balance;
 
             try {
                 var transactions = importer.import (path);
@@ -138,13 +140,14 @@ namespace Envelope.Service {
 
                 return 0;
             }
-            catch (Error err) {
-                throw new ServiceError.IMPORT_ERROR (err.message);
-            }
             catch (SQLHeavy.Error err) {
+                account.balance = balance_before_import;
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
-
+            catch (ImporterError err) {
+                account.balance = balance_before_import;
+                throw err;
+            }
         }
     }
 

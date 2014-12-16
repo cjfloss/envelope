@@ -142,7 +142,6 @@ namespace Envelope.View {
 
         private DateFilter date_filter = DateFilter.THIS_MONTH;
 
-        public Gtk.ListStore merchant_store { get; set; }
         public Account account { get; set; }
         public string search_term { get; set; }
 
@@ -262,6 +261,9 @@ namespace Envelope.View {
                         Sidebar.get_default ().select_account (account);
 
                         Envelope.App.toast (_("%d transactions imported in account %s").printf(size, local_account.number));
+
+                        // refresh search autocompletion
+                        MerchantStore.get_default ().reload ();
 
                     } catch (ServiceError err) {
                         error (err.message);
@@ -589,20 +591,6 @@ namespace Envelope.View {
                 typeof (Transaction),
                 typeof (string)); // todo change to category type
 
-            merchant_store = new Gtk.ListStore (2,
-                typeof (string), // merchant
-                typeof (int));   // occurences
-
-            // load merchants
-            var merchants = DatabaseManager.get_default ().get_merchants ();
-
-            foreach (Merchant m in merchants) {
-                Gtk.TreeIter iter;
-                merchant_store.append (out iter);
-                merchant_store.@set (iter, 0, m.label, -1);
-                merchant_store.@set (iter, 1, m.occurences, -1);
-            }
-
             // notify when a transaction changed
             transactions_store.row_changed.connect ((path, iter) => {
 
@@ -633,7 +621,7 @@ namespace Envelope.View {
 
             // label cell renderer
             var renderer_label = new CellRendererTextCompletion ();
-            renderer_label.store = merchant_store;
+            renderer_label.store = MerchantStore.get_default ();
             renderer_label.text_column = 0;
             renderer_label.editable = true;
             renderer_label.edited.connect ((path, text) =>  {

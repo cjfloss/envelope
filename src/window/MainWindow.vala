@@ -102,8 +102,24 @@ namespace Envelope.Window {
             search_entry.placeholder_text = _("Search transactions\u2026");
 
             var search_entry_completion = new Gtk.EntryCompletion ();
-            search_entry_completion.set_model (TransactionView.get_default ().merchant_store);
+            search_entry_completion.set_model (MerchantStore.get_default ());
             search_entry_completion.set_text_column (0);
+            search_entry_completion.popup_completion = true;
+            search_entry_completion.set_match_func ( (completion, key, iter) => {
+
+                if (key.length == 0) {
+                    return false;
+                }
+
+                string store_value;
+                MerchantStore.get_default ().@get (iter, 0, out store_value, -1);
+
+                if (store_value.up ().index_of (key.up ()) != -1) {
+                    return true;
+                }
+
+                return false;
+            });
 
             search_entry.completion = search_entry_completion;
 
