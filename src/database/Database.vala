@@ -73,6 +73,8 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_delete_account_transactions;
         private SQLHeavy.Query q_insert_account_transaction;
 
+        private SQLHeavy.Query q_load_current_transactions;
+
         private SQLHeavy.Query q_get_unique_merchants;
 
         private SQLHeavy.Query q_load_categories;
@@ -300,6 +302,24 @@ namespace Envelope.DB {
             return list;
         }
 
+        public Gee.ArrayList<Transaction> get_current_transactions () throws SQLHeavy.Error {
+
+            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
+
+            SQLHeavy.QueryResult results = q_load_current_transactions.execute ();
+
+            while (!results.finished) {
+                Transaction transaction;
+                query_result_to_transaction (results, out transaction);
+
+                list.add (transaction);
+
+                results.next ();
+            }
+
+            return list;
+        }
+
         private DatabaseManager () {
             init_database ();
         }
@@ -483,6 +503,10 @@ namespace Envelope.DB {
 
             q_delete_category = database.prepare ("""
             DELETE FROM `categories` WHERE `id` = :category_id
+            """);
+
+            q_load_current_transactions = database.prepare("""
+            select * from transactions where date(date, 'unixepoch') between date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days')
             """);
         }
 
