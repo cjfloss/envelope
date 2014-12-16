@@ -22,6 +22,7 @@ using Gee;
 namespace Envelope.Service {
 
     public errordomain ImporterError {
+        ENOENT,
         UNSUPPORTED
     }
 
@@ -32,6 +33,6 @@ namespace Envelope.Service {
         /**
          *
          */
-        public abstract ArrayList<Transaction> import (string path) throws Error;
+        public abstract ArrayList<Transaction> import (string path) throws ServiceError, ImporterError;
     }
 }

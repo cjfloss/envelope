@@ -61,8 +61,8 @@ namespace Envelope.Service {
         private static const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_UNIT_PRICE   = '$';
         private static const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_TAXABLE      = 'F';
 
-
         private struct QIFTransaction {
+            bool split;
             string date;
             double amount;
             string memo;
@@ -72,9 +72,6 @@ namespace Envelope.Service {
             string payee_address;
             string category;
             string reimursable;
-            string split_category;
-            string split_memo;
-            double split_amount;
             double split_percentage;
             string inv_action;
             string security_name;
@@ -93,50 +90,67 @@ namespace Envelope.Service {
         }
 
         public string date_delimiter { get; set; default = "/"; }
-        public string date_format { get; set; default = "M/D/Y"; }
 
         /**
+         * Import transactions from the QIF file specified by path
          *
+         * @param string path the path to the QIF file
+         * @return ArrayList<Transaction> the list of imported transactions
+         * @throws ServiceError
+         * @throws ImporterError
          */
-        public ArrayList<Transaction> import (string path) throws Error {
+        public ArrayList<Transaction> import (string path) throws ServiceError, ImporterError {
 
             info ("importing transactions from %s".printf (path));
 
-            var file = File.new_for_path (path);
-
-            if (!file.query_exists ()) {
-                error ("specified file does not exist");
-            }
-
-            var input_stream = file.read ();
-            var stream = new DataInputStream (input_stream);
-
-            var account_type = stream.read_line (); // eg.: !Type:Bank
-
             ArrayList<Transaction> list = new ArrayList<Transaction> ();
 
-            // now we must parse each section which are delimited by a single '^' line
-            QIFTransaction transaction = QIFTransaction ();
-            string? line = null;
+            try {
+                var file = File.new_for_path (path);
 
-            do {
-                line = stream.read_line ();
-
-                if (line != null && line != "") {
-                    if (!parse_line (line, ref transaction)) {
-                        // transaction is complete; create a real Transaction object from the
-                        // struct and add it to the list
-                        Transaction trans;
-
-                        qif_transaction_to_transaction (transaction, out trans);
-
-                        list.add (trans);
-
-                        // try new transaction
-                        transaction = QIFTransaction ();
-                    }
+                if (!file.query_exists ()) {
+                    throw new ServiceError.ENOENT ("specified file does not exist");
                 }
-            } while (line != null);
+
+                var input_stream = file.read ();
+                var stream = new DataInputStream (input_stream);
+
+                // discard first line
+                stream.read_line (); // eg.: !Type:Bank
+
+                // now we must parse each section which are delimited by a single '^' line
+                QIFTransaction transaction = QIFTransaction ();
+                string? line = null;
+
+                do {
+                    line = stream.read_line ();
+
+                    if (line != null && line.length > 0) {
+
+                        if (!parse_line (line.strip (), ref transaction)) {
+
+                            // transaction is complete; create a real Transaction object from the
+                            // struct and add it to the list
+                            Transaction trans;
+
+                            if (transaction.split) {
+                                // TODO find the first transaction which is split == false in the items before this one in the list
+                                // this is the parent transaction
+                            }
+
+                            qif_transaction_to_transaction (transaction, out trans);
+
+                            list.add (trans);
+
+                            // try new transaction
+                            transaction = QIFTransaction ();
+                        }
+                    }
+                } while (line != null);
+            }
+            catch (Error err) {
+                throw new ServiceError.IO (err.message);
+            }
 
             info ("imported %d transactions from %s".printf (list.size, path));
 
@@ -145,15 +159,42 @@ namespace Envelope.Service {
 
         private bool parse_line (string line, ref QIFTransaction transaction) {
 
-            char type = line[0];
+            assert (line.length > 0);
+
+            char type = line.@get (0);
 
             if (type == LINE_TYPE_TRANSACTION_DELIMITER) {
                 return false;
             }
 
+            // skip if line type is not supported (yet)
+            if (!line_type_supported (type)) {
+                return true;
+            }
+
             var payload = line.substring (1);
 
             switch (type) {
+                case LINE_TYPE_SPLIT:
+                    transaction.split = true;
+                    transaction.category = payload;
+                    break;
+
+                case LINE_TYPE_SPLIT_MEMO:
+                    transaction.split = true;
+                    transaction.memo = payload;
+                    break;
+
+                case LINE_TYPE_SPLIT_AMOUNT:
+                    transaction.split = true;
+                    transaction.amount = double.parse (payload);
+                    break;
+
+                case LINE_TYPE_SPLIT_PERCENT:
+                    transaction.split = true;
+                    transaction.split_percentage = double.parse (payload);
+                    break;
+
                 case LINE_TYPE_DATE:
                     transaction.date = payload;
                     break;
@@ -172,6 +213,10 @@ namespace Envelope.Service {
 
                 case LINE_TYPE_PAYEE:
                     transaction.payee = payload;
+                    break;
+
+                case LINE_TYPE_CATEGORY:
+                    transaction.category = payload;
                     break;
 
                  default:
@@ -213,6 +258,24 @@ namespace Envelope.Service {
             date = new DateTime.local (int.parse (year), int.parse (tokens[0]), int.parse (tokens[1]), 0, 0, 0d);
 
             return true;
+        }
+
+        private static bool line_type_supported (char type) {
+            switch (type) {
+                case LINE_TYPE_DATE:
+                case LINE_TYPE_AMOUNT:
+                case LINE_TYPE_MEMO:
+                case LINE_TYPE_CLEARED:
+                case LINE_TYPE_PAYEE:
+                case LINE_TYPE_SPLIT:
+                case LINE_TYPE_SPLIT_MEMO:
+                case LINE_TYPE_SPLIT_AMOUNT:
+                case LINE_TYPE_SPLIT_PERCENT:
+                    return true;
+
+                default:
+                    return false;
+            }
         }
     }
 }
