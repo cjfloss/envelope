@@ -131,6 +131,7 @@ namespace Envelope.View {
         private Granite.Widgets.DatePicker from_date;
         private Granite.Widgets.DatePicker to_date;
         private Gtk.Button btn_add_transaction;
+        private Gtk.ButtonBox add_transaction_button_box;
         private Gtk.InfoBar infobar;
 
         private Gtk.TreeStore transactions_store;
@@ -145,7 +146,7 @@ namespace Envelope.View {
         public Account account { get; set; }
         public string search_term { get; set; }
 
-        public TransactionView () {
+        private TransactionView () {
 
             Object (orientation: Gtk.Orientation.VERTICAL);
 
@@ -213,27 +214,14 @@ namespace Envelope.View {
             transactions_store.clear ();
         }
 
-        public void load_account (Account acct) {
+        public void load_account (Account account_) {
 
-            debug ("account changed");
-
-            clear();
+            account = account_;
 
             now = new DateTime.now_local ();
 
-            Gee.ArrayList<Transaction>? transactions = null;
-
-            if (acct != null) {
-
-                transactions = acct.transactions;
-
-                if (transactions != null && transactions.size > 0) {
-                    add_transactions (transactions);
-                }
-            }
-
-            account = acct;
-
+            clear();
+            add_transactions (account.transactions);
             update_view ();
         }
 
@@ -268,10 +256,12 @@ namespace Envelope.View {
 
                         var local_account = account;
 
-                        AccountManager.get_default ().import_transactions_from_file (ref local_account, chooser.get_file ());
+                        int size = AccountManager.get_default ().import_transactions_from_file (ref local_account, chooser.get_file ());
 
                         //load_account (account);
                         Sidebar.get_default ().select_account (account);
+
+                        Envelope.App.toast (_("%d transactions imported in account %s").printf(size, local_account.number));
 
                     } catch (ServiceError err) {
                         error (err.message);
@@ -306,80 +296,83 @@ namespace Envelope.View {
         /**
          * Adds a list of transactions to the grid store
          */
-        private void add_transactions (Gee.ArrayList<Transaction> transactions) {
+        private void add_transactions (Gee.ArrayList<Transaction>? transactions) {
 
             debug ("filtering and adding %d transactions".printf (transactions.size));
 
-            populating_from_list = true;
-
-            bool do_filter_search = search_term != null && search_term != "";
-            var search = do_filter_search ? search_term.up () : "";
-
-            DateTime this_month;
-            DateTime last_month;
-            DateTime future;
-            DateTime? from;
-            DateTime? to;
-
-            get_filter_dates (out this_month, out last_month, out future, out from, out to);
-
-            var iter = transactions.iterator ().filter ( (transaction) =>  {
-                // filter on search term
-                if (do_filter_search) {
-
-                    var label = transaction.label.up ();
-                    var desc = (transaction.description != null ? transaction.description : "").up ();
-
-                    if (label.index_of (search) == -1 && desc.index_of (search) == -1) {
-                        return false;
-                    }
-                }
-
-                // honor date radio buttons
-                var tdate = transaction.date;
-
-                if (btn_this_month.get_active ()) {
-                    if (tdate.get_year () == this_month.get_year () && tdate.get_month () == this_month.get_month ()) {
-                        return true;
-                    }
-
-                    return false;
-                }
-                else if (btn_last_month.get_active ()) {
-                    if (tdate.get_year () == last_month.get_year () && tdate.get_month () == last_month.get_month ()) {
-                        return true;
-                    }
-
-                    return false;
-                }
-                else if (btn_future.get_active ()) {
-                    return tdate.compare (future) >= 0;
-                }
-                else if (btn_manual.get_active ()) {
-                    if (from != null && to != null) {
-                        return from.compare (tdate) <= 0 && to.compare (tdate) >= 0;
-                    }
-
-                    return false;
-                }
-
-                return true;
-            });
-
             var count = 0;
 
-            while (iter.next ()) {
-                add_transaction (iter.get());
-                count++;
+            if (transactions != null) {
+
+                populating_from_list = true;
+
+                bool do_filter_search = search_term != null && search_term != "";
+                var search = do_filter_search ? search_term.up () : "";
+
+                DateTime this_month;
+                DateTime last_month;
+                DateTime future;
+                DateTime? from;
+                DateTime? to;
+
+                get_filter_dates (out this_month, out last_month, out future, out from, out to);
+
+                var iter = transactions.iterator ().filter ( (transaction) =>  {
+                    // filter on search term
+                    if (do_filter_search) {
+
+                        var label = transaction.label.up ();
+                        var desc = (transaction.description != null ? transaction.description : "").up ();
+
+                        if (label.index_of (search) == -1 && desc.index_of (search) == -1) {
+                            return false;
+                        }
+                    }
+
+                    // honor date radio buttons
+                    var tdate = transaction.date;
+
+                    if (btn_this_month.get_active ()) {
+                        if (tdate.get_year () == this_month.get_year () && tdate.get_month () == this_month.get_month ()) {
+                            return true;
+                        }
+
+                        return false;
+                    }
+                    else if (btn_last_month.get_active ()) {
+                        if (tdate.get_year () == last_month.get_year () && tdate.get_month () == last_month.get_month ()) {
+                            return true;
+                        }
+
+                        return false;
+                    }
+                    else if (btn_future.get_active ()) {
+                        return tdate.compare (future) >= 0;
+                    }
+                    else if (btn_manual.get_active ()) {
+                        if (from != null && to != null) {
+                            return from.compare (tdate) <= 0 && to.compare (tdate) >= 0;
+                        }
+
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                while (iter.next ()) {
+                    add_transaction (iter.get());
+                    count++;
+                }
             }
 
             if (count > 0) {
                 infobar.hide ();
-                scroll_box.show_all ();
+                //scroll_box.show_all ();
             }
             else {
                 infobar.show_all ();
-                scroll_box.hide ();
+                //scroll_box.hide ();
             }
 
             populating_from_list = false;
@@ -410,7 +403,17 @@ namespace Envelope.View {
         }
 
         private void update_view () {
-            treeview.show_all ();
+
+            if (account.has_transactions) {
+                //treeview.show_all ();
+                filter_box.show ();
+            }
+            else {
+                filter_box.hide ();
+                //treeview.hide ();
+            }
+
+
             //treeview.columns_autosize ();
         }
 
@@ -437,18 +440,6 @@ namespace Envelope.View {
             filter_box.border_width = 5;
 
             add (filter_box);
-
-            //var style_context = filter_box.get_style_context ();
-            //style_context.add_class (Gtk.STYLE_CLASS_HIGHLIGHT);
-            //style_context.add_class (Granite.StyleClass.CONTENT_VIEW);
-
-
-
-            // import button
-            var import_button = new Gtk.Button.with_label (_("Import\u2026"));
-            filter_box.pack_start (import_button, false, false);
-
-            import_button.clicked.connect (show_import_dialog);
 
             // this month
             btn_this_month = new Gtk.RadioButton (null);
@@ -572,12 +563,12 @@ namespace Envelope.View {
                 add_empty_row ();
             });
 
-            var button_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
-            button_box.set_layout (Gtk.ButtonBoxStyle.START);
-            button_box.add (btn_add_transaction);
-            button_box.set_spacing (10);
-            button_box.border_width = 10;
-            scroll_box.add (button_box);
+            add_transaction_button_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
+            add_transaction_button_box.set_layout (Gtk.ButtonBoxStyle.START);
+            add_transaction_button_box.add (btn_add_transaction);
+            add_transaction_button_box.set_spacing (10);
+            add_transaction_button_box.border_width = 10;
+            scroll_box.add (add_transaction_button_box);
 
             treeview.activate_on_single_click = true;
             treeview.reorderable = true;

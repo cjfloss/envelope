@@ -51,6 +51,10 @@ namespace Envelope.Dialog {
 
             try {
                 DatabaseManager.get_default ().create_account (account);
+
+                // show notification
+                Envelope.App.toast (_("Account %s has been created").printf(account.number));
+
                 account_created (account);
             }
             catch (SQLHeavy.Error err) {
