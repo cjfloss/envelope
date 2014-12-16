@@ -29,12 +29,38 @@ namespace Envelope.Service {
             qif_importer_instance = this;
         }
 
-        private static const char LINE_TYPE_TRANSACTION_DELIMITER = '^';
-        private static const char LINE_TYPE_DATE = 'D';
-        private static const char LINE_TYPE_AMOUNT = 'T';
-        private static const char LINE_TYPE_MEMO = 'M';
-        private static const char LINE_TYPE_CLEARED = 'C';
-        private static const char LINE_TYPE_PAYEE = 'P';
+        private static const char LINE_TYPE_TRANSACTION_DELIMITER                   = '^';
+        private static const char LINE_TYPE_DATE                                    = 'D';
+        private static const char LINE_TYPE_AMOUNT                                  = 'T';
+        private static const char LINE_TYPE_MEMO                                    = 'M';
+        private static const char LINE_TYPE_CLEARED                                 = 'C';
+        private static const char LINE_TYPE_CHECK_NUM                               = 'C';
+        private static const char LINE_TYPE_PAYEE                                   = 'P';
+        private static const char LINE_TYPE_PAYEE_ADDRESS                           = 'A';
+        private static const char LINE_TYPE_CATEGORY                                = 'L';
+        private static const char LINE_TYPE_REIMBURSABLE                            = 'F';
+        private static const char LINE_TYPE_SPLIT                                   = 'S';
+        private static const char LINE_TYPE_SPLIT_MEMO                              = 'E';
+        private static const char LINE_TYPE_SPLIT_AMOUNT                            = '$';
+        private static const char LINE_TYPE_SPLIT_PERCENT                           = '%';
+        private static const char LINE_TYPE_INVESTMENT                              = 'N';
+        private static const char LINE_TYPE_SECURITY_NAME                           = 'Y';
+        private static const char LINE_TYPE_PRICE                                   = 'I';
+        private static const char LINE_TYPE_SHARE_QTY_SPLIT_RATIO                   = 'Q';
+        private static const char LINE_TYPE_COMMISSION_COST                         = 'O';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED                        = 'X';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_SHIP_TO_ADDRESS        = 'A';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_TYPE                   = 'I';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_INVOICE_DUE_DATE       = 'E';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_TAX_ACCOUNT            = 'C';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_TAX_RATE               = 'R';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_TAX_AMOUNT             = 'T';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_DESCRIPTION  = 'S';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_CATEGORY     = 'N';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_QTY          = '#';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_UNIT_PRICE   = '$';
+        private static const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_TAXABLE      = 'F';
+
 
         private struct QIFTransaction {
             string date;
