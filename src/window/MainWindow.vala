@@ -19,6 +19,7 @@
 using Envelope.DB;
 using Envelope.View;
 using Envelope.Service;
+using Envelope.Service.Settings;
 
 namespace Envelope.Window {
 
@@ -31,13 +32,14 @@ namespace Envelope.Window {
         public Sidebar                      sidebar { get; private set; }
         public Gtk.MenuButton               app_menu { get; private set; }
         public Menu                         settings_menu { get; private set; }
+        public Granite.Widgets.OverlayBar   overlay_bar {get; private set; }
 
         private Granite.Widgets.ThinPaned   paned;
         private Gtk.MenuItem                preferences_menu_item;
-        private Gtk.Box                     box;
         private Gtk.Popover                 menu_popover;
+        private Gtk.Overlay                 overlay;
 
-        private DatabaseManager dbm = DatabaseManager.get_default ();
+        private DatabaseManager dbm = DatabaseManager.get_default (); // TODO replace this with a call to AccountManager
 
         // fired when the content view changes
         public signal void main_view_changed (Gtk.Widget main_view);
@@ -49,10 +51,24 @@ namespace Envelope.Window {
             connect_signals ();
         }
 
+        public void show_notification (string text) {
+            overlay_bar.hide ();
+            overlay_bar.status = text;
+
+            overlay_bar.show ();
+
+            Timeout.add (Envelope.App.TOAST_TIMEOUT, () => {
+                overlay_bar.hide ();
+                return false;
+            });
+        }
+
         private void build_ui () {
 
-            box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-            this.add (box);
+            overlay = new Gtk.Overlay ();
+            this.add (overlay);
+
+            overlay_bar = new Granite.Widgets.OverlayBar (overlay);
 
             app_menu = new Gtk.MenuButton ();
             settings_menu = new Menu ();
@@ -135,15 +151,33 @@ namespace Envelope.Window {
             paned.position_set = true;
             paned.show_all ();
 
-            box.add (paned);
-            box.show_all ();
+            overlay.add (paned);
+            overlay.show_all ();
+            overlay_bar.hide ();
 
             this.width_request = 1200;
             this.height_request = 800;
-            this.window_position = Gtk.WindowPosition.CENTER;
+
+
+            // restore state
+            var saved_state = SavedState.get_default ();
+
+            this.window_position = saved_state.window_position != null ?
+                saved_state.window_position : Gtk.WindowPosition.CENTER;
+
+            if (saved_state.window_state == Gdk.WindowState.MAXIMIZED) {
+                maximize ();
+            }
+            else if (saved_state.window_width != null && saved_state.window_height != null) {
+                width_request = saved_state.window_width;
+                height_request = saved_state.window_height;
+            }
         }
 
         private void connect_signals () {
+
+            destroy.connect (on_quit);
+
             // connect signals
             TransactionWelcomeScreen.get_default ().add_transaction_selected.connect ( (account) => {
 
@@ -208,7 +242,7 @@ namespace Envelope.Window {
 
         private void determine_initial_content_view (Gee.ArrayList<Account> accounts, out Gtk.Widget widget) {
             if (accounts.size > 0) {
-                widget = TransactionView.get_default ();
+                widget = BudgetOverview.get_default ();
             }
             else {
                 widget = Welcome.get_default ();
@@ -228,6 +262,35 @@ namespace Envelope.Window {
                 widget = TransactionView.get_default ();
                 (widget as TransactionView).load_account (account);
             }
+        }
+
+        private void on_quit () {
+            save_settings ();
+        }
+
+        private void restore_settings () {
+            var saved_state = SavedState.get_default ();
+
+        }
+
+        private void save_settings () {
+            var saved_state = SavedState.get_default ();
+
+            // get window dimensions
+            int height;
+            int width;
+
+            get_size (out width, out height);
+
+            saved_state.window_height = height;
+            saved_state.window_width = width;
+            saved_state.window_state = get_window ().get_state ();
+
+            // sidebar width
+            saved_state.sidebar_width = paned.get_position ();
+
+            // search
+            saved_state.search_term = search_entry.text;
         }
     }
 }

@@ -23,6 +23,7 @@ private Envelope.App application_instance = null;
 public class Envelope.App : Granite.Application {
 
     public const string PROGRAM_NAME = "Envelope";
+    public const int TOAST_TIMEOUT = 3000;
 
     construct {
         // This allows opening files. See the open() method below.
@@ -64,6 +65,10 @@ public class Envelope.App : Granite.Application {
         return application_instance;
     }
 
+    public static void toast (string message) {
+        get_default ().main_window.show_notification (message);
+    }
+
     public MainWindow main_window { get; private set; }
 
     protected override void activate () {
@@ -73,6 +78,8 @@ public class Envelope.App : Granite.Application {
         // force DEBUG for now
         Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.DEBUG;
         Granite.Services.Paths.initialize (Build.PROGRAM_NAME, Build.PKG_DATADIR);
+
+        info ("Report any issues/bugs you might find to %s".printf (bug_url));
 
         if (main_window == null) {
             main_window = new MainWindow ();
