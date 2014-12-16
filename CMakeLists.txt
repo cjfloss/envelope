@@ -59,10 +59,14 @@ vala_precompile(VALA_C ${EXEC_NAME}
   src/service/AccountManager.vala
   src/service/Importer.vala
   src/service/QIFImporter.vala
+  src/service/MerchantStore.vala
+
+  src/service/settings/SavedState.vala
 
   src/view/TransactionView.vala
   src/view/Sidebar.vala
   src/view/WelcomeScreen.vala
+  src/view/BudgetOverview.vala
 
   src/window/MainWindow.vala
 
