@@ -57,6 +57,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
 
   src/service/Error.vala
   src/service/AccountManager.vala
+  src/service/BudgetManager.vala
   src/service/Importer.vala
   src/service/QIFImporter.vala
   src/service/MerchantStore.vala
