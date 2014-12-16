@@ -45,6 +45,10 @@ namespace Envelope {
         public double balance { get; set; default = 0d; }
         public int @id { get; set; }
 
+        public bool has_transactions { get {
+            return transactions != null && transactions.size > 0;
+        } }
+
         public Account () {
             transactions = new Gee.ArrayList<Transaction> ();
         }
