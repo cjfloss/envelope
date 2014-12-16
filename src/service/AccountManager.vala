@@ -69,7 +69,7 @@ namespace Envelope.Service {
         /**
          * Imports transactions into this account. Will do its best to discard duplicates.
          */
-        public void import_transactions_from_file (ref Account account, File file) throws ImporterError, ServiceError {
+        public int import_transactions_from_file (ref Account account, File file) throws ImporterError, ServiceError {
 
             var path = file.get_path ();
 
@@ -82,7 +82,7 @@ namespace Envelope.Service {
             Importer importer;
 
             // TODO: CSV, OFX
-            
+
             switch (extension) {
                 case "qif":
                 case "QIF":
@@ -132,7 +132,11 @@ namespace Envelope.Service {
 
                     account.transactions.add_all (transactions);
                     account.transactions.sort ();
+
+                    return transactions.size;
                 }
+
+                return 0;
             }
             catch (Error err) {
                 throw new ServiceError.IMPORT_ERROR (err.message);
