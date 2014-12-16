@@ -19,6 +19,8 @@
 using Envelope.DB;
 using Envelope.Dialog;
 using Envelope.Widget;
+using Envelope.Service;
+using Envelope.Service.Settings;
 
 namespace Envelope.View {
 
@@ -34,7 +36,7 @@ namespace Envelope.View {
             return sidebar_instance;
         }
 
-        private static const int COLUMN_COUNT = 6;
+        private static const int COLUMN_COUNT = 8;
 
         private enum Action {
             NONE,
@@ -48,11 +50,19 @@ namespace Envelope.View {
             ICON,
             ACTION,
             DESCRIPTION,
-            CATEGORY
+            CATEGORY,
+            STATE,
+            TREE_CATEGORY
         }
 
-        private static const string COLOR_SUBZERO = "red";
-        private static const string COLOR_ZERO = "green";
+        private enum TreeCategory {
+            OVERVIEW,
+            ACCOUNTS,
+            CATEGORIES
+        }
+
+        private static const string COLOR_SUBZERO = "#A62626";
+        private static const string COLOR_ZERO = "#4e9a06";
 
         private Gtk.TreeView treeview;
         private Gtk.TreeStore store;
@@ -64,6 +74,10 @@ namespace Envelope.View {
 
         public Gee.ArrayList<Account> accounts { get; set; }
 
+        public BudgetState budget_state { get; set; }
+
+        private int current_account_id;
+
         public signal void list_account_selected (Account account);
         public signal void list_account_name_updated (Account account, string new_name);
 
@@ -74,7 +88,9 @@ namespace Envelope.View {
                 typeof (string),
                 typeof (Action),
                 typeof (string),
-                typeof (Category)
+                typeof (Category),
+                typeof (string),
+                typeof (TreeCategory)
             );
 
             build_ui ();
@@ -171,6 +187,8 @@ namespace Envelope.View {
 
             // add account to list when a new account is added in the database
             dbm.account_created.connect (add_new_account);
+
+            destroy.connect (on_quit);
         }
 
         public void update_view () {
@@ -179,44 +197,57 @@ namespace Envelope.View {
 
             store.clear ();
 
-            // Add "Accounts" category header
-            account_iter = add_item (null, _("Accounts"), null, null);
+            try {
+                budget_state = BudgetManager.get_default ().compute_current_state ();
 
-            if (accounts != null) {
+                var overview_iter = add_item (null, _("Overview"), TreeCategory.OVERVIEW, null, null, Action.NONE);
 
-                foreach (Account account in accounts) {
-                    add_item (account_iter, account.number, account, null);
+                add_item (overview_iter, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.inflow);
+                add_item (overview_iter, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.outflow);
+                add_item (overview_iter, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.inflow - budget_state.outflow);
+
+                // Add "Accounts" category header
+                account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null);
+
+                if (accounts != null) {
+
+                    foreach (Account account in accounts) {
+                        add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null);
+                    }
                 }
+
+                // Add "Add account..."
+                add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT);
+
+                // Add "Categories" category header
+                category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null);
+
+                // Add mocked categories
+
+                var cat = new Category ();
+
+                add_item (category_iter, _("Groceries"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Fuel"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Public transit"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Restaurants"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Entertainment"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Savings"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Personal care"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Alcohol & Bars"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Emergency fund"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Cigarettes"), TreeCategory.CATEGORIES, null, cat);
+
+                // Add "Add category..."
+                add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY);
             }
-
-            // Add "Add account..."
-            add_item (account_iter, _("Add account\u2026"), null, null, Action.ADD_ACCOUNT);
-
-            // Add "Categories" category header
-            category_iter = add_item (null, _("Spending categories"), null, null);
-
-            // Add mocked categories
-
-            var cat = new Category ();
-
-            add_item (category_iter, _("Groceries"), null, cat);
-            add_item (category_iter, _("Fuel"), null, cat);
-            add_item (category_iter, _("Public transit"), null, cat);
-            add_item (category_iter, _("Restaurants"), null, cat);
-            add_item (category_iter, _("Entertainment"), null, cat);
-            add_item (category_iter, _("Savings"), null, cat);
-            add_item (category_iter, _("Personal care"), null, cat);
-            add_item (category_iter, _("Alcohol & Bars"), null, cat);
-            add_item (category_iter, _("Emergency fund"), null, cat);
-            add_item (category_iter, _("Cigarettes"), null, cat);
-
-            // Add "Add category..."
-            add_item (category_iter, _("Add category\u2026"), null, null, Action.ADD_CATEGORY);
+            catch (ServiceError err) {
+                error (err.message);
+            }
 
             treeview.expand_all ();
         }
 
-        private Gtk.TreeIter add_item (Gtk.TreeIter? parent, string label, Account? account, Category? category, Action action = Action.NONE) {
+        private Gtk.TreeIter add_item (Gtk.TreeIter? parent, string label, TreeCategory tree_category, Account? account, Category? category, Action action = Action.NONE, double? state_amount = null) {
 
             Gtk.TreeIter iter;
 
@@ -227,7 +258,9 @@ namespace Envelope.View {
                 Column.ICON, account != null ? "accessories-calculator" : null,
                 Column.ACTION, action,
                 Column.DESCRIPTION, account != null ? account.description : null,
-                Column.CATEGORY, category, -1);
+                Column.CATEGORY, category,
+                Column.STATE, state_amount,
+                Column.TREE_CATEGORY, tree_category, -1);
 
             return iter;
         }
@@ -238,29 +271,63 @@ namespace Envelope.View {
             Account? account = null;
             Category? category = null;
             Action action;
+            double? state = null;
+            TreeCategory tree_category;
 
             model.@get (iter, Column.ACCOUNT, out account, -1);
             model.@get (iter, Column.ACTION, out action, -1);
             model.@get (iter, Column.CATEGORY, out category, -1);
+            model.@get (iter, Column.STATE, out state, -1);
+            model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
 
-            if (account == null && category == null) {
-                // category name
+            switch (tree_category) {
+                case TreeCategory.OVERVIEW:
+                    if (state == null) {
+                        crt.weight = 900;
+                        crt.weight_set = true;
+                        crt.height = 20;
+                        crt.editable = false;
+                        crt.editable_set = true;
+                    }
+                    else {
+                        crt.weight_set = false;
+                        crt.editable = false;
+                        crt.editable_set = true;
+                    }
+                    break;
 
-                if (action == Action.NONE) {
-                    crt.weight = 900;
-                    crt.weight_set = true;
-                    crt.height = 20;
-                    crt.style_set = false;
-                }
+                case TreeCategory.ACCOUNTS:
+                    if (account == null && action == Action.NONE) {
+                        crt.weight = 900;
+                        crt.weight_set = true;
+                        crt.height = 20;
+                        crt.editable = false;
+                        crt.editable_set = true;
+                    }
+                    else {
+                        crt.weight_set = false;
+                        crt.editable = true;
+                        crt.editable_set = true;
+                    }
+                    break;
 
-                crt.editable = false;
-                crt.editable_set = true;
-            }
-            else {
-                crt.height = -1;
-                crt.weight_set = false;
-                crt.editable_set = true;
-                crt.editable = true;
+                case TreeCategory.CATEGORIES:
+                    if (category == null && action == Action.NONE) {
+                        crt.weight = 900;
+                        crt.weight_set = true;
+                        crt.height = 20;
+                        crt.editable = false;
+                        crt.editable_set = true;
+                    }
+                    else {
+                        crt.weight_set = false;
+                        crt.editable = true;
+                        crt.editable_set = true;
+                    }
+                    break;
+
+                default:
+                    assert_not_reached ();
             }
         }
 
@@ -303,41 +370,67 @@ namespace Envelope.View {
             Account? account = null;
             Category? category = null;
             Action action;
+            double? state = null;
+            TreeCategory tree_category;
 
             model.@get (iter, Column.ACCOUNT, out account, -1);
             model.@get (iter, Column.ACTION, out action, -1);
             model.@get (iter, Column.CATEGORY, out category, -1);
+            model.@get (iter, Column.STATE, out state, -1);
+            model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
 
-            if (account == null && category == null &&  action == Action.NONE) {
+            switch (tree_category) {
+                case TreeCategory.OVERVIEW:
+                    crt.visible = state != null;
 
-                if (accounts == null || accounts.size == 0) {
-                    crt.visible = false;
-                }
-                else {
-                    crt.visible = true;
-                    // calculate balance for all accounts
-                    var balance = 0d;
-
-                    foreach (Account a in accounts) {
-                        balance += a.balance;
+                    if (crt.visible) {
+                        crt.weight_set = false;
+                        crt.text = Envelope.Util.format_currency (state);
+                        crt.foreground = state < 0 ? COLOR_SUBZERO : COLOR_ZERO;
                     }
+                    else {
+                        crt.weight_set = false;
+                    }
+                    break;
 
-                    crt.weight = 900;
-                    crt.weight_set = true;
-                    crt.text = Envelope.Util.format_currency (balance);
-                    crt.foreground = balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
-                }
-            }
-            else if (account != null) {
-                crt.visible = true;
-                crt.weight_set = false;
-                crt.text = Envelope.Util.format_currency (account.balance);
-                crt.foreground = account.balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
-            }
-            else {
-                crt.visible = false;
-            }
+                case TreeCategory.ACCOUNTS:
+                    if (account == null && action == Action.NONE) {
+                        crt.visible = accounts == null || accounts.size == 0;
 
+                        if (crt.visible) {
+                            var balance = 0d;
+
+                            foreach (Account a in accounts) {
+                                balance += a.balance;
+                            }
+
+                            crt.weight_set = false;
+                            crt.text = Envelope.Util.format_currency (balance);
+                            crt.foreground = balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+                        }
+                        else {
+                            crt.weight_set = false;
+                        }
+                    }
+                    else if (account != null) {
+                        crt.visible = true;
+                        crt.weight_set = false;
+                        crt.text = Envelope.Util.format_currency (account.balance);
+                        crt.foreground = account.balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+                    }
+                    else {
+                        crt.visible = false;
+                        crt.weight_set = false;
+                    }
+                    break;
+
+                case TreeCategory.CATEGORIES:
+                    crt.visible = false;
+                    break;
+
+                default:
+                    assert_not_reached ();
+            }
         }
 
         private void treeview_row_activated () {
@@ -449,6 +542,9 @@ namespace Envelope.View {
 
         private void account_selected (Account account) {
             debug ("sidebar account selected : %s".printf (account.number));
+
+            current_account_id = account.@id;
+
             list_account_selected (account);
         }
 
@@ -481,6 +577,11 @@ namespace Envelope.View {
             }
 
             return null;
+        }
+
+        private void on_quit () {
+            var saved_state = SavedState.get_default ();
+            saved_state.selected_account_id = current_account_id;
         }
 
     }
