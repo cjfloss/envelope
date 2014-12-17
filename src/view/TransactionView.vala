@@ -551,7 +551,7 @@ namespace Envelope.View {
              CSS property for the GtkTreeView. Black is ugly, and elementary gtk theme doesn't provide
              a custom value, so let's specify a value here. Might propose this in elementary-gtk-theme.
              */
-            Granite.Widgets.Utils.set_theming (treeview, "GtkTreeView { border-top-color: #dddddd; }",
+            Granite.Widgets.Utils.set_theming (treeview, "GtkTreeView { border-top-color: @border_color; }",
                 null,
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
