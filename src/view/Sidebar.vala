@@ -38,6 +38,12 @@ namespace Envelope.View {
 
         private static const int COLUMN_COUNT = 8;
 
+        private static const string ICON_ACCOUNT    = "accessories-calculator-symbolic";
+        private static const string ICON_OUTFLOW    = "go-up-symbolic";
+        private static const string ICON_INFLOW     = "go-down-symbolic";
+        private static const string ICON_REMAINING  = "view-refresh-symbolic";
+        private static const string ICON_CATEGORY   = "folder-symbolic";
+
         private enum Action {
             NONE,
             ADD_ACCOUNT,
@@ -202,9 +208,9 @@ namespace Envelope.View {
 
                 var overview_iter = add_item (null, _("Overview"), TreeCategory.OVERVIEW, null, null, Action.NONE);
 
-                add_item (overview_iter, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.inflow);
-                add_item (overview_iter, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.outflow);
-                add_item (overview_iter, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.inflow - budget_state.outflow);
+                add_item (overview_iter, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.outflow, ICON_OUTFLOW);
+                add_item (overview_iter, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.inflow, ICON_INFLOW);
+                add_item (overview_iter, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.inflow - budget_state.outflow, ICON_REMAINING);
 
                 // Add "Accounts" category header
                 account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null);
@@ -212,7 +218,7 @@ namespace Envelope.View {
                 if (accounts != null) {
 
                     foreach (Account account in accounts) {
-                        add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null);
+                        add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT);
                     }
                 }
 
@@ -226,16 +232,16 @@ namespace Envelope.View {
 
                 var cat = new Category ();
 
-                add_item (category_iter, _("Groceries"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Fuel"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Public transit"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Restaurants"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Entertainment"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Savings"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Personal care"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Alcohol & Bars"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Emergency fund"), TreeCategory.CATEGORIES, null, cat);
-                add_item (category_iter, _("Cigarettes"), TreeCategory.CATEGORIES, null, cat);
+                add_item (category_iter, _("Groceries"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Fuel"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Public transit"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Restaurants"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Entertainment"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Savings"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Personal care"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Alcohol & Bars"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Emergency fund"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Cigarettes"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
 
                 // Add "Add category..."
                 add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY);
@@ -247,7 +253,14 @@ namespace Envelope.View {
             treeview.expand_all ();
         }
 
-        private Gtk.TreeIter add_item (Gtk.TreeIter? parent, string label, TreeCategory tree_category, Account? account, Category? category, Action action = Action.NONE, double? state_amount = null) {
+        private Gtk.TreeIter add_item (Gtk.TreeIter? parent,
+                                        string label,
+                                        TreeCategory tree_category,
+                                        Account? account,
+                                        Category? category,
+                                        Action action = Action.NONE,
+                                        double? state_amount = null,
+                                        string? icon = null) {
 
             Gtk.TreeIter iter;
 
@@ -255,7 +268,7 @@ namespace Envelope.View {
 
             store.@set (iter, Column.LABEL, label,
                 Column.ACCOUNT, account,
-                Column.ICON, account != null ? "accessories-calculator" : null,
+                Column.ICON, icon,
                 Column.ACTION, action,
                 Column.DESCRIPTION, account != null ? account.description : null,
                 Column.CATEGORY, category,
@@ -381,16 +394,17 @@ namespace Envelope.View {
 
             switch (tree_category) {
                 case TreeCategory.OVERVIEW:
-                    crt.visible = state != null;
+                    crt.visible = true;
 
-                    if (crt.visible) {
-                        crt.weight_set = false;
+                    if (state == null) {
+                        crt.text = new DateTime.now_local ().format ("%B %Y");
+                        crt.foreground_set = false;
+                    }
+                    else {
                         crt.text = Envelope.Util.format_currency (state);
                         crt.foreground = state < 0 ? COLOR_SUBZERO : COLOR_ZERO;
                     }
-                    else {
-                        crt.weight_set = false;
-                    }
+
                     break;
 
                 case TreeCategory.ACCOUNTS:
