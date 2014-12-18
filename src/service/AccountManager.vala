@@ -44,6 +44,49 @@ namespace Envelope.Service {
 
         private DatabaseManager dbm = DatabaseManager.get_default ();
 
+        public signal void account_created (Account account);
+        public signal void account_updated (Account account);
+        public signal void account_deleted (Account account);
+
+        public signal void transaction_recorded     (Transaction transaction);
+        public signal void transactions_imported    (ArrayList<Transaction> transactions);
+        public signal void transaction_updated      (Transaction transaction);
+        public signal void transaction_deleted      (Transaction transaction);
+
+        /**
+         * Create a new account
+         *
+         * @return Account the new account
+         * @throws AccountError
+         * @throws ServiceError
+         */
+        public Account create_account (string number,
+                                       string? description,
+                                       double balance,
+                                       Account.Type account_type) throws AccountError, ServiceError {
+
+            var account = new Account ();
+
+            account.number = number;
+            account.description = description;
+            account.balance = balance;
+            account.account_type = account_type;
+
+            try {
+                dbm.create_account (account);
+                account_created (account);
+
+                return account;
+            }
+            catch (SQLHeavy.Error err) {
+                if (err is SQLHeavy.Error.CONSTRAINT) {
+                    throw new AccountError.ALREADY_EXISTS ("account number already exists");
+                }
+
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
         /**
          * Rename an account. The account object will be updated with the new number upon successful operation.
          *
@@ -56,6 +99,9 @@ namespace Envelope.Service {
             try {
                 dbm.rename_account (account, new_number);
                 account.number = new_number;
+
+                // fire signal
+                account_updated (account);
             }
             catch (SQLHeavy.Error err) {
                 if (err is SQLHeavy.Error.CONSTRAINT) {
@@ -134,6 +180,10 @@ namespace Envelope.Service {
 
                     account.transactions.add_all (transactions);
                     account.transactions.sort ();
+
+                    // fire signals
+                    transactions_imported (transactions);
+                    account_updated (account);
 
                     return transactions.size;
                 }
