@@ -77,12 +77,8 @@ namespace Envelope.Window {
 
             var menu_icon = new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR);
             app_menu.set_image (menu_icon);
-
             settings_menu.append (_("Preferences"), null);
-            //settings_menu.show_all ();
-
             menu_popover = new Gtk.Popover.from_model (app_menu, settings_menu);
-
             app_menu.popover = menu_popover;
 
             paned = new Granite.Widgets.ThinPaned ();
@@ -124,7 +120,6 @@ namespace Envelope.Window {
             search_entry.completion = search_entry_completion;
 
             header_bar.pack_end (search_entry);
-
             header_bar.show_all ();
 
             // sidebar
