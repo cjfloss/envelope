@@ -16,7 +16,7 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
-using Envelope.DB;
+using Envelope.Service;
 
 namespace Envelope.Dialog {
 
@@ -34,30 +34,24 @@ namespace Envelope.Dialog {
             connect_signals ();
         }
 
+        [Deprecated (replacement = "AccountManager.accout_created")]
         public signal void account_created (Account account);
 
         private void create_account () {
-            var account = new Account ();
-
-            debug ("number_entry.text: %s".printf (number_entry.text));
-            debug ("desc_entry.text: %s".printf (desc_entry.text));
-            debug ("balance_entry.text: %s".printf (balance_entry.text));
-            debug ("account_type: %s".printf (current_account_type.to_string ()));
-
-            account.number = number_entry.text;
-            account.description = desc_entry.text;
-            account.balance = double.parse (balance_entry.text);
-            account.account_type = current_account_type;
-
             try {
-                DatabaseManager.get_default ().create_account (account);
+
+                var account = AccountManager.get_default ().create_account (number_entry.text,
+                                                                            desc_entry.text,
+                                                                            double.parse (balance_entry.text),
+                                                                            current_account_type);
 
                 // show notification
                 Envelope.App.toast (_("Account %s has been created").printf(account.number));
-
-                account_created (account);
             }
-            catch (SQLHeavy.Error err) {
+            catch (ServiceError err) {
+                error ("error while creating account (%s)".printf (err.message));
+            }
+            catch (AccountError err) {
                 error ("error while creating account (%s)".printf (err.message));
             }
         }
@@ -128,14 +122,15 @@ namespace Envelope.Dialog {
 
             type_choice.active = 0;
 
-            type_choice.changed.connect (() => {
-                Value val;
+            type_choice.changed.connect ( () => {
 
                 type_choice.get_active_iter (out type_list_store_iter);
-                type_list_store.get_value (type_list_store_iter, 1, out val);
 
-                current_account_type = (Account.Type) val;
-                });
+                int account_type;
+                type_list_store.@get (type_list_store_iter, 1, out account_type, -1);
+
+                current_account_type = Account.Type.from_int (account_type);
+            });
 
             var balance_label = new Gtk.Label (_("Current balance:"));
             balance_label.xalign = 1f;
