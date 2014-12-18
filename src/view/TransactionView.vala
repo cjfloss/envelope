@@ -96,12 +96,6 @@ namespace Envelope.View {
             CLEAR
         }
 
-        private enum DateFilter {
-            THIS_MONTH,
-            LAST_MONTH,
-            MANUAL
-        }
-
         private enum Column {
             DATE,
             MERCHANT,
@@ -124,12 +118,6 @@ namespace Envelope.View {
         private Gtk.Box scroll_box;
 
         // filter widgets
-        private Gtk.RadioButton btn_this_month;
-        private Gtk.RadioButton btn_last_month;
-        private Gtk.RadioButton btn_future;
-        private Gtk.RadioButton btn_manual;
-        private Granite.Widgets.DatePicker from_date;
-        private Granite.Widgets.DatePicker to_date;
         private Gtk.Button btn_add_transaction;
         private Gtk.ButtonBox add_transaction_button_box;
         private Gtk.InfoBar infobar;
@@ -139,8 +127,8 @@ namespace Envelope.View {
         private bool populating_from_list = false;
 
         private DateTime now = new DateTime.now_local ();
-
-        private DateFilter date_filter = DateFilter.THIS_MONTH;
+        private DateTime filter_from = null;
+        private DateTime filter_to = null;
 
         public Account account { get; set; }
         public string search_term { get; set; }
@@ -219,6 +207,10 @@ namespace Envelope.View {
 
             now = new DateTime.now_local ();
 
+            var filter_view = FilterView.get_default ();
+            filter_from = filter_view.from;
+            filter_to = filter_view.to;
+
             clear();
             add_transactions (account.transactions);
             update_view ();
@@ -284,17 +276,6 @@ namespace Envelope.View {
             }
         }
 
-        private void get_filter_dates (out DateTime this_month, out DateTime last_month, out DateTime future, out DateTime from, out DateTime to) {
-            //var now = new DateTime.now_local ();
-
-            this_month = new DateTime.local (now.get_year (), now.get_month (), 1, 0, 0, 0);
-            last_month = new DateTime.local (now.get_year (), now.get_month (), 1, 0, 0, 0).add_months (-1);
-            future = new DateTime.now_local ().add_days (1);
-
-            from = from_date.date;  // might be null
-            to = to_date.date;      // might be null
-        }
-
         /**
          * Adds a list of transactions to the grid store
          */
@@ -310,14 +291,7 @@ namespace Envelope.View {
 
                 bool do_filter_search = search_term != null && search_term != "";
                 var search = do_filter_search ? search_term.up () : "";
-
-                DateTime this_month;
-                DateTime last_month;
-                DateTime future;
-                DateTime? from;
-                DateTime? to;
-
-                get_filter_dates (out this_month, out last_month, out future, out from, out to);
+                FilterView.FilterType filter_type = FilterView.get_default ().filter_type;
 
                 var iter = transactions.iterator ().filter ( (transaction) =>  {
                     // filter on search term
@@ -334,32 +308,10 @@ namespace Envelope.View {
                     // honor date radio buttons
                     var tdate = transaction.date;
 
-                    if (btn_this_month.get_active ()) {
-                        if (tdate.get_year () == this_month.get_year () && tdate.get_month () == this_month.get_month ()) {
-                            return true;
-                        }
+                    var is_after = filter_from != null ? tdate.compare (filter_from) >= 0 : true;
+                    var is_before = filter_to != null ? tdate.compare (filter_to) <= 0 : true;
 
-                        return false;
-                    }
-                    else if (btn_last_month.get_active ()) {
-                        if (tdate.get_year () == last_month.get_year () && tdate.get_month () == last_month.get_month ()) {
-                            return true;
-                        }
-
-                        return false;
-                    }
-                    else if (btn_future.get_active ()) {
-                        return tdate.compare (future) >= 0;
-                    }
-                    else if (btn_manual.get_active ()) {
-                        if (from != null && to != null) {
-                            return from.compare (tdate) <= 0 && to.compare (tdate) >= 0;
-                        }
-
-                        return false;
-                    }
-
-                    return true;
+                    return is_after && is_before;
                 });
 
                 while (iter.next ()) {
@@ -370,11 +322,9 @@ namespace Envelope.View {
 
             if (count > 0) {
                 infobar.hide ();
-                //scroll_box.show_all ();
             }
             else {
                 infobar.show_all ();
-                //scroll_box.hide ();
             }
 
             populating_from_list = false;
@@ -407,16 +357,11 @@ namespace Envelope.View {
         private void update_view () {
 
             if (account.has_transactions) {
-                //treeview.show_all ();
                 filter_box.show ();
             }
             else {
                 filter_box.hide ();
-                //treeview.hide ();
             }
-
-
-            //treeview.columns_autosize ();
         }
 
         private void apply_filters () {
@@ -443,76 +388,7 @@ namespace Envelope.View {
 
             add (filter_box);
 
-            // this month
-            btn_this_month = new Gtk.RadioButton (null);
-            btn_this_month.label = _("This month");
-            btn_this_month.toggled.connect ( () => {
-                if (btn_this_month.get_active ()) {
-                    load_account (account);
-                }
-            });
-            filter_box.add (btn_this_month);
-
-            // last month
-            btn_last_month = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Last month"));
-            btn_last_month.toggled.connect ( () => {
-                if (btn_last_month.get_active ()) {
-                    load_account (account);
-                }
-            });
-            filter_box.add (btn_last_month);
-
-            // future
-            btn_future = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Future"));
-            btn_future.toggled.connect ( () => {
-                if (btn_future.get_active ()) {
-                    load_account (account);
-                }
-            });
-            filter_box.add (btn_future);
-
-            // manual dates
-            btn_manual = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Pick dates:"));
-            btn_manual.toggled.connect ( () => {
-                if (btn_manual.get_active ()) {
-                    from_date.sensitive = true;
-                    to_date.sensitive = true;
-
-                    if (from_date.date != null && to_date.date != null) {
-                        load_account (account);
-                    }
-                }
-                else {
-                    from_date.sensitive = false;
-                    to_date.sensitive = false;
-                }
-            });
-            filter_box.add (btn_manual);
-
-            from_date = new Granite.Widgets.DatePicker ();
-            from_date.sensitive = false;
-            from_date.date = new DateTime.now_local ().add_months (-1);
-
-            // we need to be notified of date changes
-            from_date.notify["date"].connect ( () => {
-                if (btn_manual.get_active () && from_date.date != null && to_date.date != null) {
-                    load_account (account);
-                }
-            });
-            filter_box.add (from_date);
-
-            to_date = new Granite.Widgets.DatePicker ();
-            to_date.sensitive = false;
-            to_date.date = new DateTime.now_local ();
-
-            // we need to be notified of date changes
-            to_date.notify["date"].connect ( () => {
-                if (btn_manual.get_active () && from_date.date != null && to_date.date != null) {
-                    load_account (account);
-                }
-            });
-            filter_box.add (to_date);
-
+            filter_box.pack_start (FilterView.get_default ());
             filter_box.show_all ();
 
             // infobar shown when filters do not return any transaction
@@ -694,7 +570,6 @@ namespace Envelope.View {
             date_column.pack_start (crdp, true);
             date_column.resizable = true;
             date_column.set_attributes (crdp, "text", Column.DATE);
-            date_column.set_cell_data_func (crdp, cell_renderer_foreground_func);
             treeview.append_column (date_column);
 
             var merchant_column = new Gtk.TreeViewColumn ();
@@ -702,7 +577,6 @@ namespace Envelope.View {
             merchant_column.max_width = -1;
             merchant_column.pack_start (renderer_label, true);
             merchant_column.resizable = true;
-            merchant_column.set_cell_data_func (renderer_label, cell_renderer_foreground_func);
             merchant_column.set_attributes (renderer_label, "text", Column.MERCHANT);
             treeview.append_column (merchant_column);
 
@@ -717,7 +591,6 @@ namespace Envelope.View {
             out_column.max_width = -1;
             out_column.pack_start (renderer_out, true);
             out_column.resizable = true;
-            out_column.set_cell_data_func (renderer_out, cell_renderer_foreground_func);
             out_column.set_attributes (renderer_out, "text", Column.OUTFLOW);
             treeview.append_column (out_column);
 
@@ -726,7 +599,6 @@ namespace Envelope.View {
             in_column.max_width = -1;
             in_column.pack_start (renderer_in, true);
             in_column.resizable = true;
-            in_column.set_cell_data_func (renderer_in, cell_renderer_foreground_func);
             in_column.set_attributes (renderer_in, "text", Column.INFLOW);
             treeview.append_column (in_column);
 
@@ -737,47 +609,12 @@ namespace Envelope.View {
             memo_column.pack_end (crb, false);
             memo_column.resizable = true;
             memo_column.spacing = 10;
-            memo_column.set_cell_data_func (renderer_memo, cell_renderer_foreground_func);
             memo_column.set_cell_data_func (crb, cell_renderer_badge_func);
             memo_column.set_attributes (renderer_memo, "text", Column.MEMO);
             treeview.append_column (memo_column);
 
-            /*var badge_column = new Gtk.TreeViewColumn ();
-            badge_column.pack_start (crb, true);
-            badge_column.resizable = false;
-            badge_column.set_cell_data_func (crb, cell_renderer_badge_func);
-            treeview.append_column (badge_column);
-            */
-
             grid_scroll.show_all ();
             treeview.show_all ();
-        }
-
-        private void cell_renderer_foreground_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
-            /*
-            Gtk.CellRendererText cr = renderer as Gtk.CellRendererText;
-            Transaction? transaction = null;
-
-            transactions_store.@get (iter, Column.TRANSACTION, out transaction, -1);
-
-            if (transaction != null) {
-
-                var now = new DateTime.now_local ();
-
-                if (transaction.date.compare (now) == 1) {
-                    // future transaction
-                    //cr.foreground = "gray";
-                    //cr.foreground_set = true;
-                }
-                else {
-                    // now or past
-                    //cr.foreground_set = false;
-                }
-            }
-            else {
-
-            }
-            */
         }
 
         private void cell_renderer_badge_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
@@ -807,6 +644,16 @@ namespace Envelope.View {
                 debug ("search term changed!");
                 apply_filters ();
             });*/
+
+            FilterView.get_default ().date_filter_changed.connect ( () => {
+
+                var filter_view = FilterView.get_default ();
+
+                filter_from = filter_view.from;
+                filter_to = filter_view.to;
+
+                load_account (account);
+            });
         }
 
 
