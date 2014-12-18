@@ -147,7 +147,9 @@ namespace Envelope.Window {
                 }
 
                 paned.add2 (widget);
-                paned.show_all ();
+                //paned.show_all ();
+
+                widget.show ();
 
                 main_view_changed (widget);
             });
