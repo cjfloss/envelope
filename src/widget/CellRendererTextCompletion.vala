@@ -53,6 +53,8 @@ namespace Envelope.Widget {
 
             assert (editable);
 
+            base.start_editing (event, widget, path, background_area, cell_area, flags);
+
             // create new completion every time, since the backing store might
             // have changed since last time
             var entry_completion = new Gtk.EntryCompletion ();
