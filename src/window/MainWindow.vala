@@ -201,6 +201,7 @@ namespace Envelope.Window {
                 paned.remove (current_view);
                 paned.add2 (transaction_view);
                 transaction_view.load_account (account);
+                transaction_view.show ();
             });
 
             // handle account renames
@@ -223,6 +224,16 @@ namespace Envelope.Window {
 
                         // TODO reset the label in the sidebar to the original account number
                     }
+                }
+            });
+
+            Sidebar.get_default ().overview_selected.connect ( () => {
+                if (paned.get_child2 () != BudgetOverview.get_default ()) {
+                    var current_view = paned.get_child2 ();
+                    current_view.@ref ();
+
+                    paned.remove (current_view);
+                    paned.add2 (BudgetOverview.get_default ());
                 }
             });
 
