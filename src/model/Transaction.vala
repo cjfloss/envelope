@@ -64,15 +64,7 @@ namespace Envelope {
 
         public string label {
             get { return _label; }
-            set {
-                if (value == null || value == "") {
-                    // TODO critical setting null or empty label
-                    debug ("cannot set value");
-                }
-                else {
-                    _label = value;
-                }
-            }
+            set { _label = value; }            
         }
 
         public string description {
@@ -88,13 +80,7 @@ namespace Envelope {
         public double amount {
             get { return _amount; }
             set {
-                if (value < 0d) {
-                    // TODO critical trying to set negative value
-                    debug ("cannot set value");
-                }
-                else {
-                    _amount = value;
-                }
+                _amount = Math.fabs (value);
             }
         }
 
