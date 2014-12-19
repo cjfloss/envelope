@@ -235,11 +235,16 @@ namespace Envelope.DB {
             return list;
         }
 
-        public void insert_transaction (Transaction transaction, SQLHeavy.Query? statement = null) throws SQLHeavy.Error {
+        public void insert_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction, SQLHeavy.Query? statement = null) throws SQLHeavy.Error {
 
             debug ("inserting new transaction in account %d".printf (transaction.account.@id));
 
-            var q = statement != null ? statement : q_insert_account_transaction;
+            var q = statement != null ? statement : db_transaction.prepare("""
+                INSERT INTO `transactions`
+                (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`)
+                VALUES
+                (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date)
+                """);
 
             var id = q.execute_insert (
                 "label", typeof (string), transaction.label,
@@ -269,7 +274,7 @@ namespace Envelope.DB {
             """);
 
             foreach (Transaction t in transactions) {
-                insert_transaction (t, stmt);
+                insert_transaction (t, ref transaction, stmt);
             }
         }
 
