@@ -54,24 +54,22 @@ namespace Envelope.Service {
             }
         }
 
-        public BudgetState compute_current_state () throws ServiceError {
+        public void compute_current_state (out double inflow, out double outflow, out DateTime from, out DateTime to) throws ServiceError {
 
-            var state = BudgetState ();
+            compute_dates (out from, out to);
 
-            state.inflow = 0d;
-            state.outflow = 0d;
-
-            compute_dates (out state.from, out state.to);
+            inflow = 0d;
+            outflow = 0d;
 
             foreach (Transaction t in get_current_transactions ()) {
 
                 switch (t.direction) {
                     case Transaction.Direction.INCOMING:
-                        state.inflow += t.amount;
+                        inflow += t.amount;
                         break;
 
                     case Transaction.Direction.OUTGOING:
-                        state.outflow += t.amount;
+                        outflow += t.amount;
                         break;
 
                     default:
@@ -80,11 +78,9 @@ namespace Envelope.Service {
             }
 
             debug ("budget state: inflow: %s, outflow: %s".printf (
-                Envelope.Util.format_currency (state.inflow),
-                Envelope.Util.format_currency (state.outflow)
+                Envelope.Util.format_currency (inflow),
+                Envelope.Util.format_currency (outflow)
                 ));
-
-            return state;
         }
 
         private void compute_dates (out DateTime from, out DateTime to) {
