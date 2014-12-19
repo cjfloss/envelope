@@ -36,7 +36,7 @@ namespace Envelope.View {
             return sidebar_instance;
         }
 
-        private static const int COLUMN_COUNT = 8;
+        private static const int COLUMN_COUNT = 9;
 
         private static const string ICON_ACCOUNT    = "accessories-calculator-symbolic";
         private static const string ICON_OUTFLOW    = "go-up-symbolic";
@@ -47,7 +47,8 @@ namespace Envelope.View {
         private enum Action {
             NONE,
             ADD_ACCOUNT,
-            ADD_CATEGORY
+            ADD_CATEGORY,
+            SHOW_OVERVIEW
         }
 
         private enum Column {
@@ -58,7 +59,8 @@ namespace Envelope.View {
             DESCRIPTION,
             CATEGORY,
             STATE,
-            TREE_CATEGORY
+            TREE_CATEGORY,
+            IS_HEADER
         }
 
         private enum TreeCategory {
@@ -74,6 +76,7 @@ namespace Envelope.View {
         private Gtk.TreeStore store;
         private Gtk.TreeIter account_iter;
         private Gtk.TreeIter category_iter;
+        private Gtk.TreeIter overview_iter;
 
         private Granite.Widgets.CellRendererExpander cre;
         private Gtk.CellRendererText crt_balance_total;
@@ -84,6 +87,7 @@ namespace Envelope.View {
 
         private int current_account_id;
 
+        public signal void overview_selected ();
         public signal void list_account_selected (Account account);
         public signal void list_account_name_updated (Account account, string new_name);
 
@@ -96,7 +100,8 @@ namespace Envelope.View {
                 typeof (string),
                 typeof (Category),
                 typeof (string),
-                typeof (TreeCategory)
+                typeof (TreeCategory),
+                typeof (bool)
             );
 
             build_ui ();
@@ -126,7 +131,8 @@ namespace Envelope.View {
             treeview.activate_on_single_click = true;
             treeview.vexpand = true;
             treeview.vexpand_set = true;
-            treeview.tooltip_column = Column.DESCRIPTION;
+            treeview.fixed_height_mode = true;
+            treeview.tooltip_column = Column.LABEL;
 
             // style
             var style_context = treeview.get_style_context ();
@@ -135,10 +141,11 @@ namespace Envelope.View {
 
             // selection
             var selection = treeview.get_selection ();
-            selection.set_mode (Gtk.SelectionMode.BROWSE);
+            selection.set_mode (Gtk.SelectionMode.SINGLE);
 
             var col = new Gtk.TreeViewColumn ();
             col.max_width = -1;
+            col.sizing = Gtk.TreeViewColumnSizing.FIXED;
             col.expand = true;
             col.spacing = 3;
 
@@ -162,7 +169,7 @@ namespace Envelope.View {
             col.set_cell_data_func (crt, treeview_text_renderer_function);
 
             cre = new Granite.Widgets.CellRendererExpander ();
-            //cre.is_category_expander = true;
+            cre.is_category_expander = true;
             cre.xalign = (float) 1.0;
             col.pack_end (cre, false);
             col.set_cell_data_func (cre, treeview_expander_renderer_function);
@@ -175,7 +182,7 @@ namespace Envelope.View {
             crt_balance_total.size_set = true;
             crt_balance_total.ellipsize = Pango.EllipsizeMode.NONE;
             crt_balance_total.ellipsize_set = true;
-            col.pack_end (crt_balance_total, false);
+            col.pack_end (crt_balance_total, true);
             col.set_cell_data_func (crt_balance_total, treeview_text_renderer_balance_total_function);
 
             add (treeview);
@@ -204,29 +211,45 @@ namespace Envelope.View {
             store.clear ();
 
             try {
-                budget_state = BudgetManager.get_default ().compute_current_state ();
+                double inflow;
+                double outflow;
+                DateTime from;
+                DateTime to;
 
-                var overview_iter = add_item (null, _("Overview"), TreeCategory.OVERVIEW, null, null, Action.NONE);
+                BudgetManager.get_default ().compute_current_state (out inflow, out outflow, out from, out to);
 
-                add_item (overview_iter, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.outflow, ICON_OUTFLOW);
-                add_item (overview_iter, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.inflow, ICON_INFLOW);
-                add_item (overview_iter, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.NONE, budget_state.inflow - budget_state.outflow, ICON_REMAINING);
+                overview_iter = add_item (null, _("Overview"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true);
+
+                debug ("sidebar: budget inflow: %s, outflow: %s".printf (budget_state.inflow.to_string (), budget_state.outflow.to_string ()));
+
+                add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, outflow, ICON_OUTFLOW);
+                add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, inflow, ICON_INFLOW);
+                add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, Math.fabs (inflow) - Math.fabs (outflow), ICON_REMAINING);
 
                 // Add "Accounts" category header
-                account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null);
+                account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
 
-                if (accounts != null) {
+                try {
 
-                    foreach (Account account in accounts) {
-                        add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT);
+                    Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
+
+                    if (account_list != null && account_list.size > 0) {
+
+                        foreach (Account account in accounts) {
+                            add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT);
+                        }
                     }
+
+                }
+                catch (ServiceError err) {
+                    error ("could not load accounts (%s)".printf (err.message));
                 }
 
                 // Add "Add account..."
                 add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT);
 
                 // Add "Categories" category header
-                category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null);
+                category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
 
                 // Add mocked categories
 
@@ -239,7 +262,7 @@ namespace Envelope.View {
                 add_item (category_iter, _("Entertainment"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
                 add_item (category_iter, _("Savings"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
                 add_item (category_iter, _("Personal care"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Alcohol & Bars"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                add_item (category_iter, _("Alcohol &amp; Bars"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
                 add_item (category_iter, _("Emergency fund"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
                 add_item (category_iter, _("Cigarettes"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
 
@@ -250,7 +273,11 @@ namespace Envelope.View {
                 error (err.message);
             }
 
+            treeview.get_selection ().unselect_all ();
             treeview.expand_all ();
+
+            // fix for overview section collapsed
+            //treeview.collapse_row (store.get_path (overview_iter), true);
         }
 
         private Gtk.TreeIter add_item (Gtk.TreeIter? parent,
@@ -260,7 +287,8 @@ namespace Envelope.View {
                                         Category? category,
                                         Action action = Action.NONE,
                                         double? state_amount = null,
-                                        string? icon = null) {
+                                        string? icon = null,
+                                        bool is_header = false) {
 
             Gtk.TreeIter iter;
 
@@ -272,8 +300,9 @@ namespace Envelope.View {
                 Column.ACTION, action,
                 Column.DESCRIPTION, account != null ? account.description : null,
                 Column.CATEGORY, category,
-                Column.STATE, state_amount,
-                Column.TREE_CATEGORY, tree_category, -1);
+                Column.STATE, state_amount != null ? Envelope.Util.format_currency (state_amount) : "",
+                Column.TREE_CATEGORY, tree_category,
+                Column.IS_HEADER, is_header, -1);
 
             return iter;
         }
@@ -364,11 +393,13 @@ namespace Envelope.View {
             Granite.Widgets.CellRendererExpander cre = renderer as Granite.Widgets.CellRendererExpander;
             Account? account = null;
             Category? category = null;
+            Action action;
 
             model.@get (iter, Column.ACCOUNT, out account, -1);
             model.@get (iter, Column.CATEGORY, out category, -1);
+            model.@get (iter, Column.ACTION, out action, -1);
 
-            if (account == null && category == null) {
+            if (account == null && category == null && action == Action.NONE) {
                 // category name
                 cre.visible = true;
             }
@@ -383,26 +414,29 @@ namespace Envelope.View {
             Account? account = null;
             Category? category = null;
             Action action;
-            double? state = null;
+            string state;
             TreeCategory tree_category;
+            bool is_header;
 
             model.@get (iter, Column.ACCOUNT, out account, -1);
             model.@get (iter, Column.ACTION, out action, -1);
             model.@get (iter, Column.CATEGORY, out category, -1);
             model.@get (iter, Column.STATE, out state, -1);
             model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
+            model.@get (iter, Column.IS_HEADER, out is_header, -1);
 
             switch (tree_category) {
                 case TreeCategory.OVERVIEW:
                     crt.visible = true;
+                    crt.weight_set = false;
 
-                    if (state == null) {
+                    if (is_header) {
                         crt.text = new DateTime.now_local ().format ("%B %Y");
                         crt.foreground_set = false;
                     }
                     else {
-                        crt.text = Envelope.Util.format_currency (state);
-                        crt.foreground = state < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+                        crt.text = state;
+                        //crt.foreground = state < 0 ? COLOR_SUBZERO : COLOR_ZERO;
                     }
 
                     break;
@@ -458,15 +492,17 @@ namespace Envelope.View {
 
                 Account account;
                 Action action;
+                TreeCategory tree_category;
 
                 model.@get (iter, Column.ACCOUNT, out account, -1);
                 model.@get (iter, Column.ACTION, out action, -1);
+                model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
 
                 if (account != null) {
                     debug ("account_selected");
                     account_selected (account);
                 }
-                else {
+                else if (action == Action.NONE) {
                     toggle_selected_row_expansion ();
                 }
 
@@ -478,6 +514,10 @@ namespace Envelope.View {
                             var dialog = new AddAccountDialog ();
                             dialog.account_created.connect (s_account_created);
                             dialog.show_all ();
+                            break;
+
+                        case Action.SHOW_OVERVIEW:
+                            overview_selected ();
                             break;
 
                         default:
