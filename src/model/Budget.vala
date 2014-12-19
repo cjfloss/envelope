@@ -16,14 +16,36 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
+using Envelope.Service;
+
 namespace Envelope {
 
     public class Budget : Object {
 
+        private static Budget budget_instance = null;
+
+        public static new Budget get_default () {
+            if (budget_instance == null) {
+                budget_instance = new Budget ();
+            }
+
+            return budget_instance;
+        }
+
         public Gee.ArrayList<Category> categories { get; set; }
 
-        public Budget () {
+        public BudgetState current_state { get; set; }
+
+        private Budget () {
             Object ();
+            connect_signals ();
+        }
+
+        private void connect_signals () {
+            /*
+            connect signals in order to update current_state whenever a transaction/account
+            is added/updated/removed
+            */
         }
     }
 }
