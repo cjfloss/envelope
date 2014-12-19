@@ -53,6 +53,16 @@ namespace Envelope.Service {
         public signal void transaction_updated      (Transaction transaction);
         public signal void transaction_deleted      (Transaction transaction);
 
+        public ArrayList<Account> get_accounts () throws ServiceError {
+
+            try {
+                return dbm.load_all_accounts ();
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
         /**
          * Create a new account
          *
@@ -108,6 +118,47 @@ namespace Envelope.Service {
                     throw new AccountError.ALREADY_EXISTS ("account number already exists");
                 }
 
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
+        public Transaction record_transaction (ref Account account, DateTime date, string label, string description, double amount, Transaction? parent = null) throws ServiceError {
+
+            var old_balance = account.balance;
+
+            try {
+
+                Transaction transaction = new Transaction ();
+
+                transaction.label = label;
+                transaction.parent = parent;
+                transaction.date = date;
+                transaction.description = description;
+                transaction.direction = amount > 0d ? Transaction.Direction.INCOMING : Transaction.Direction.OUTGOING;
+                transaction.amount = Math.fabs (amount);
+                transaction.account = account;
+
+                // TODO category
+
+                var db_transaction = dbm.start_transaction ();
+
+                dbm.insert_transaction (transaction, ref db_transaction);
+
+                account.balance += amount;
+                dbm.update_account_balance (account, ref db_transaction);
+
+                db_transaction.commit ();
+
+                account.transactions.add (transaction);
+                account.transactions.sort ();
+
+                transaction_recorded (transaction);
+                account_updated (account);
+
+                return transaction;
+            }
+            catch (SQLHeavy.Error err) {
+                account.balance = old_balance;
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
