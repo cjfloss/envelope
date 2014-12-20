@@ -72,7 +72,8 @@ public class Envelope.App : Granite.Application {
     public MainWindow main_window { get; private set; }
 
     protected override void activate () {
-        
+
+        Granite.Services.Logger.initialize (PROGRAM_NAME);
         Granite.Services.Logger.DisplayLevel = DEBUG ? Granite.Services.LogLevel.DEBUG : Granite.Services.LogLevel.INFO;
 
         Granite.Services.Paths.initialize (Build.PROGRAM_NAME, Build.PKGDATADIR);
