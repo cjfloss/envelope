@@ -262,6 +262,10 @@ namespace Envelope.Window {
             import_button.clicked.connect ( () => {
                 TransactionView.get_default ().show_import_dialog ();
             });
+
+            AccountManager.get_default ().transaction_recorded.connect ( () => {
+                Envelope.App.toast (_("Transaction recorded"));
+            });
         }
 
         private void determine_initial_content_view (Gee.ArrayList<Account> accounts, out Gtk.Widget widget) {
