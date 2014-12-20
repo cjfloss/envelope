@@ -233,7 +233,7 @@ namespace Envelope.View {
 
                     Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
 
-                    if (account_list != null && account_list.size > 0) {
+                    if (account_list != null && !account_list.is_empty) {
 
                         foreach (Account account in accounts) {
                             add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT);
@@ -443,7 +443,7 @@ namespace Envelope.View {
 
                 case TreeCategory.ACCOUNTS:
                     if (account == null && action == Action.NONE) {
-                        crt.visible = accounts == null || accounts.size == 0;
+                        crt.visible = accounts == null || accounts.is_empty;
 
                         if (crt.visible) {
                             var balance = 0d;

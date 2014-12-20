@@ -56,7 +56,7 @@ namespace Envelope.Service {
         private void load_merchants () throws SQLHeavy.Error {
             ArrayList<Merchant> merchants = DatabaseManager.get_default ().get_merchants ();
 
-            if (merchants.size > 0) {
+            if (!merchants.is_empty) {
 
                 foreach (Merchant m in merchants) {
 

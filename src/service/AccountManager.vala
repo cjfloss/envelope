@@ -195,7 +195,7 @@ namespace Envelope.Service {
             try {
                 var transactions = importer.import (path);
 
-                if (transactions != null && transactions.size > 0) {
+                if (transactions != null && !transactions.is_empty) {
 
                     double balance_delta = 0d;
 
