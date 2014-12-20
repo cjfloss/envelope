@@ -24,11 +24,11 @@ using Envelope.Service.Settings;
 
 namespace Envelope.View {
 
-    private static Sidebar sidebar_instance = null;
-
     public class Sidebar : Gtk.ScrolledWindow {
 
-        public static new unowned Sidebar get_default () {
+        private static Sidebar sidebar_instance = null;
+
+        public static new Sidebar get_default () {
             if (sidebar_instance == null) {
                 sidebar_instance = new Sidebar ();
             }
