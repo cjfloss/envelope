@@ -9,7 +9,7 @@ set (DATADIR "${CMAKE_INSTALL_PREFIX}/share")
 
 set (PROGRAM_NAME "envelope")
 set (CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/config.vala)
-set (PKG_DATADIR "${DATADIR}/envelope")
+set (PKGDATADIR "${DATADIR}/envelope")
 set (EXEC_NAME "envelope")
 set (RELEASE_NAME "An easy to use personal budget application.")
 set (VERSION "0.0.0")

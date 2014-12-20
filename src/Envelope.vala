@@ -31,7 +31,7 @@ public class Envelope.App : Granite.Application {
 
         // App info
         build_data_dir = Build.DATADIR;
-        build_pkg_data_dir = Build.PKG_DATADIR;
+        build_pkg_data_dir = Build.PKGDATADIR;
         build_release_name = Build.RELEASE_NAME;
         build_version = Build.VERSION;
         build_version_info = Build.VERSION_INFO;
@@ -77,7 +77,7 @@ public class Envelope.App : Granite.Application {
         //    Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
         // force DEBUG for now
         Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.DEBUG;
-        Granite.Services.Paths.initialize (Build.PROGRAM_NAME, Build.PKG_DATADIR);
+        Granite.Services.Paths.initialize (Build.PROGRAM_NAME, Build.PKGDATADIR);
 
         info ("Report any issues/bugs you might find to %s".printf (bug_url));
 

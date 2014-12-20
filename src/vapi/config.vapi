@@ -2,7 +2,7 @@
 namespace Build {
   public const string PROGRAM_NAME;
   public const string DATADIR;
-  public const string PKG_DATADIR;
+  public const string PKGDATADIR;
   public const string GETTEXT_PACKAGE;
   public const string RELEASE_NAME;
   public const string VERSION;
