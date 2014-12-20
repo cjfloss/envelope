@@ -72,11 +72,9 @@ public class Envelope.App : Granite.Application {
     public MainWindow main_window { get; private set; }
 
     protected override void activate () {
+        
+        Granite.Services.Logger.DisplayLevel = DEBUG ? Granite.Services.LogLevel.DEBUG : Granite.Services.LogLevel.INFO;
 
-        //if (Granite.Services.Logger.DisplayLevel != Granite.Services.LogLevel.DEBUG)
-        //    Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.INFO;
-        // force DEBUG for now
-        Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.DEBUG;
         Granite.Services.Paths.initialize (Build.PROGRAM_NAME, Build.PKGDATADIR);
 
         info ("Report any issues/bugs you might find to %s".printf (bug_url));
