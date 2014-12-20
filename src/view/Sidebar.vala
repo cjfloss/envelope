@@ -38,11 +38,12 @@ namespace Envelope.View {
 
         private static const int COLUMN_COUNT = 9;
 
-        private static const string ICON_ACCOUNT    = "accessories-calculator-symbolic";
+        private static const string ICON_ACCOUNT    = "text-spreadsheet";
         private static const string ICON_OUTFLOW    = "go-up-symbolic";
         private static const string ICON_INFLOW     = "go-down-symbolic";
         private static const string ICON_REMAINING  = "view-refresh-symbolic";
-        private static const string ICON_CATEGORY   = "folder-symbolic";
+        private static const string ICON_CATEGORY   = "folder";
+        private static const string ICON_ACTION_ADD = "tab-new-symbolic";
 
         private enum Action {
             NONE,
@@ -77,6 +78,9 @@ namespace Envelope.View {
         private Gtk.TreeIter account_iter;
         private Gtk.TreeIter category_iter;
         private Gtk.TreeIter overview_iter;
+        private Gtk.TreeIter overview_inflow_iter;
+        private Gtk.TreeIter overview_outflow_iter;
+        private Gtk.TreeIter overview_remaining_iter;
 
         private Granite.Widgets.CellRendererExpander cre;
         private Gtk.CellRendererText crt_balance_total;
@@ -141,7 +145,7 @@ namespace Envelope.View {
 
             // selection
             var selection = treeview.get_selection ();
-            selection.set_mode (Gtk.SelectionMode.SINGLE);
+            selection.set_mode (Gtk.SelectionMode.BROWSE);
 
             var col = new Gtk.TreeViewColumn ();
             col.max_width = -1;
@@ -201,6 +205,8 @@ namespace Envelope.View {
             // add account to list when a new account is added in the database
             dbm.account_created.connect (add_new_account);
 
+            BudgetManager.get_default ().budget_changed.connect (update_budget_section);
+
             destroy.connect (on_quit);
         }
 
@@ -222,9 +228,9 @@ namespace Envelope.View {
 
                 debug ("sidebar: budget inflow: %s, outflow: %s".printf (budget_state.inflow.to_string (), budget_state.outflow.to_string ()));
 
-                add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, outflow, ICON_OUTFLOW);
-                add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, inflow, ICON_INFLOW);
-                add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, Math.fabs (inflow) - Math.fabs (outflow), ICON_REMAINING);
+                overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, outflow, ICON_OUTFLOW);
+                overview_inflow_iter = add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, inflow, ICON_INFLOW);
+                overview_remaining_iter = add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, Math.fabs (inflow) - Math.fabs (outflow), ICON_REMAINING);
 
                 // Add "Accounts" category header
                 account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
@@ -246,7 +252,7 @@ namespace Envelope.View {
                 }
 
                 // Add "Add account..."
-                add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT);
+                add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT, null, ICON_ACTION_ADD);
 
                 // Add "Categories" category header
                 category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
@@ -267,7 +273,7 @@ namespace Envelope.View {
                 add_item (category_iter, _("Cigarettes"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
 
                 // Add "Add category..."
-                add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY);
+                add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY, null, ICON_ACTION_ADD);
             }
             catch (ServiceError err) {
                 error (err.message);
@@ -278,6 +284,36 @@ namespace Envelope.View {
 
             // fix for overview section collapsed
             //treeview.collapse_row (store.get_path (overview_iter), true);
+        }
+
+        private void update_budget_section () {
+
+            debug ("updating budget section");
+
+            try {
+                double inflow;
+                double outflow;
+                DateTime from;
+                DateTime to;
+
+
+                BudgetManager.get_default ().compute_current_state (out inflow, out outflow, out from, out to);
+
+                store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.format_currency (inflow), -1);
+                store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.format_currency (outflow), -1);
+                store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.format_currency (inflow - outflow), -1);
+            }
+            catch (ServiceError err) {
+                error ("error updating budget section (%s)".printf (err.message));
+            }
+        }
+
+        private void update_accounts_section () {
+
+        }
+
+        private void update_categories_section () {
+
         }
 
         private Gtk.TreeIter add_item (Gtk.TreeIter? parent,
