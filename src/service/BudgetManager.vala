@@ -40,8 +40,32 @@ namespace Envelope.Service {
             return budget_manager_instance;
         }
 
+        public signal void budget_changed ();
+
         private BudgetManager () {
             budget_manager_instance = this;
+            connect_signals ();
+        }
+
+        private void connect_signals () {
+            var am = AccountManager.get_default ();
+
+            // listen to transaction operations
+            am.transaction_recorded.connect ( () =>  {
+                budget_changed ();
+            });
+
+            am.transactions_imported.connect ( () =>  {
+                budget_changed ();
+            });
+
+            am.transaction_updated.connect ( () =>  {
+                budget_changed ();
+            });
+
+            am.transaction_deleted.connect ( () =>  {
+                budget_changed ();
+            });
         }
 
         public ArrayList<Transaction> get_current_transactions () throws ServiceError {
