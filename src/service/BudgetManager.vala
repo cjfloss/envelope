@@ -80,7 +80,7 @@ namespace Envelope.Service {
             debug ("budget state: inflow: %s, outflow: %s".printf (
                 Envelope.Util.format_currency (inflow),
                 Envelope.Util.format_currency (outflow)
-                ));
+            ));
         }
 
         private void compute_dates (out DateTime from, out DateTime to) {
