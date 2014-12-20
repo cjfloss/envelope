@@ -762,15 +762,9 @@ namespace Envelope.View {
             try {
                 var acct_ref = account;
                 AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, null);
-
-                Envelope.App.toast (_("Transaction recorded"));
-
-                Sidebar.get_default ().update_view ();
-
             } catch (ServiceError err) {
                 error (err.message);
             }
-
         }
 
         private void transaction_edited (Gtk.TreePath path, Gtk.TreeIter iter) {
