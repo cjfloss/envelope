@@ -139,6 +139,10 @@ namespace Envelope.View {
 
         private AddTransactionAction current_add_transaction_action = AddTransactionAction.NONE;
 
+        private Gtk.Menu right_click_menu;
+        private Gtk.MenuItem right_click_menu_item_split;
+        private Gtk.MenuItem right_click_menu_item_remove;
+
         public Account account { get; set; }
         public string search_term { get; set; }
 
@@ -197,7 +201,10 @@ namespace Envelope.View {
                 Column.TRANSACTION, transaction,
                 Column.CATEGORY, "", -1);
 
-                update_view ();
+            update_view ();
+
+            // TEMP FIX
+            transaction.account = account;
         }
 
         public void remove_transaction (Transaction transaction) {
@@ -414,22 +421,21 @@ namespace Envelope.View {
             add (infobar);
         }
 
-
-
         private void build_transaction_grid_ui () {
 
             debug ("building transaction grid ui");
 
             grid_scroll = new Gtk.ScrolledWindow (null, null);
-
             grid_scroll.vexpand = true;
             grid_scroll.vexpand_set = true;
+            grid_scroll.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
 
             add (grid_scroll);
 
             scroll_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             Granite.Widgets.Utils.set_theming (scroll_box, "* { background-color: @base_color; }", null, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             grid_scroll.add (scroll_box);
+
             scroll_box.show_all ();
 
             var tree_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
@@ -497,6 +503,7 @@ namespace Envelope.View {
             treeview.rules_hint = true;
             treeview.enable_grid_lines = Gtk.TreeViewGridLines.BOTH;
             treeview.set_search_column (1);
+            treeview.hadjustment.page_size = 10d;
             treeview.show_all ();
 
             transactions_store = new Gtk.TreeStore(COLUMN_COUNT,
@@ -673,6 +680,17 @@ namespace Envelope.View {
             memo_column.set_attributes (renderer_memo, "text", Column.MEMO);
             treeview.append_column (memo_column);
 
+            // right-click menu
+            right_click_menu = new Gtk.Menu ();
+
+            right_click_menu_item_split = new Gtk.MenuItem.with_label (_("Split"));
+            right_click_menu.append (right_click_menu_item_split);
+
+            right_click_menu_item_remove = new Gtk.MenuItem.with_label (_("Remove"));
+            right_click_menu.append (right_click_menu_item_remove);
+
+            right_click_menu.show_all ();
+
             grid_scroll.show_all ();
             treeview.show_all ();
             tree_box.show_all ();
@@ -706,6 +724,9 @@ namespace Envelope.View {
                 Column.TRANSACTION, null,
                 Column.CATEGORY, "", -1);
 
+            //var path = transactions_store.get_path (insert_iter);
+            //treeview.scroll_to_cell (path, null, false, 1.0f, 1.0f);
+
             return insert_iter;
         }
 
@@ -719,6 +740,76 @@ namespace Envelope.View {
 
                 load_account (account);
             });
+
+            treeview.row_activated.connect ( (path, column) => {
+                treeview.scroll_to_cell (path, column, false, 1.0f, 1.0f);
+            });
+
+            // right-click menu
+            treeview.button_press_event.connect ( (button_event) => {
+
+                if (button_event.button == 3) {
+                    // right-click
+                    // get current selection
+
+
+                    // get targeted line
+                    Gtk.TreePath target_path;
+                    Gtk.TreeViewColumn target_column;
+                    int target_x;
+                    int target_y;
+
+                    if (treeview.get_path_at_pos ((int) button_event.x, (int) button_event.y, out target_path, out target_column, out target_x, out target_y)) {
+
+                        var selection = treeview.get_selection ();
+
+                        selection.unselect_all ();
+                        selection.select_path (target_path);
+
+                        right_click_menu.popup (null, null, null, button_event.button, button_event.get_time ());
+                    }
+
+                    return false;
+                }
+
+                return false;
+            });
+
+            // remove transaction on delete key
+            treeview.key_press_event.connect ( (event) => {
+                if (event.keyval == Gdk.Key.Delete) {
+                    // DEL key pressed! delete transaction
+                    popup_menu_remove_activated ();
+                    return false;
+                }
+
+                return false;
+            });
+
+            right_click_menu_item_remove.activate.connect (popup_menu_remove_activated);
+            right_click_menu_item_split.activate.connect (popup_menu_split_activated);
+        }
+
+        private void popup_menu_remove_activated () {
+
+            Gtk.TreeIter iter;
+            treeview.get_selection ().get_selected (null, out iter);
+
+            Transaction transaction;
+            transactions_store.@get (iter, Column.TRANSACTION, out transaction, -1);
+
+            try {
+                AccountManager.get_default ().remove_transaction (ref transaction);
+                transactions_store.remove (ref iter);
+                Envelope.App.toast (_("Transaction removed"));
+            }
+            catch (ServiceError err) {
+                error ("error deleting transaction (%s)".printf (err.message));
+            }
+        }
+
+        private void popup_menu_split_activated () {
+            debug ("popup menu split activated");
         }
 
         private void save_transaction () {

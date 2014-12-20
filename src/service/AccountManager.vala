@@ -163,6 +163,43 @@ namespace Envelope.Service {
             }
         }
 
+        public void remove_transaction (ref Transaction transaction) throws ServiceError {
+
+            //assert (transaction.account != null);
+
+            try {
+                var db_transaction = dbm.start_transaction ();
+
+                dbm.delete_transaction (transaction.@id, ref db_transaction);
+
+                switch (transaction.direction) {
+                    case Transaction.Direction.INCOMING:
+                        transaction.account.balance -= transaction.amount;
+                        break;
+
+                    case Transaction.Direction.OUTGOING:
+                        transaction.account.balance += transaction.amount;
+                        break;
+
+                    default:
+                        assert_not_reached ();
+                }
+
+                dbm.update_account_balance (transaction.account, ref db_transaction);
+
+                db_transaction.commit ();
+
+                if (transaction.account != null && transaction.account.transactions != null) {
+                    transaction.account.transactions.remove (transaction);
+                }
+
+                transaction_deleted (transaction);
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
         /**
          * Imports transactions into this account. Will do its best to discard duplicates.
          */

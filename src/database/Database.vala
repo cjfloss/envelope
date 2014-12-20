@@ -72,6 +72,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_load_account_transactions;
         private SQLHeavy.Query q_delete_account_transactions;
         private SQLHeavy.Query q_insert_account_transaction;
+        private SQLHeavy.Query q_delete_transaction;
 
         private SQLHeavy.Query q_load_current_transactions;
 
@@ -278,6 +279,14 @@ namespace Envelope.DB {
             }
         }
 
+        public void delete_transaction (int transaction_id, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+
+            var stmt = db_transaction.prepare ("DELETE FROM `transactions` WHERE `id` = :id");
+            stmt.set_int ("id", transaction_id);
+
+            stmt.execute ();
+        }
+
         public Gee.ArrayList<Category> load_categories () {
 
             debug ("loading categories");
@@ -478,6 +487,10 @@ namespace Envelope.DB {
 
             q_delete_account_transactions = database.prepare("""
             DELETE FROM `transactions` WHERE `account_id` = :account_id
+            """);
+
+            q_delete_transaction = database.prepare ("""
+            DELETE FROM `transactions` WHERE `id` = :id
             """);
 
             q_insert_account_transaction = database.prepare("""
