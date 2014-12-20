@@ -350,7 +350,7 @@ namespace Envelope.View {
 
                 int val_id;
 
-                model.@get (fe_iter, 5, out val_id, -1);
+                model.@get (fe_iter, Column.ID, out val_id, -1);
 
                 if (val_id == id) {
                     found_iter = fe_iter;
@@ -481,9 +481,6 @@ namespace Envelope.View {
                     default:
                         assert_not_reached ();
                 }
-
-
-                //treeview.set_cursor_on_cell (transactions_store.get_path (iter), treeview.get_column (0), CellRendererDatePicker, true);
             });
 
             add_transaction_button_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
@@ -614,6 +611,8 @@ namespace Envelope.View {
             date_column.max_width = -1;
             date_column.pack_start (crdp, true);
             date_column.resizable = true;
+            date_column.reorderable = true;
+            date_column.sort_column_id = Column.DATE;
             //date_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
             date_column.set_attributes (crdp, "text", Column.DATE);
             treeview.append_column (date_column);
@@ -623,6 +622,8 @@ namespace Envelope.View {
             merchant_column.max_width = -1;
             merchant_column.pack_start (renderer_label, true);
             merchant_column.resizable = true;
+            merchant_column.reorderable = true;
+            merchant_column.sort_column_id = Column.MERCHANT;
             //merchant_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
             merchant_column.set_attributes (renderer_label, "text", Column.MERCHANT);
             treeview.append_column (merchant_column);
@@ -631,6 +632,8 @@ namespace Envelope.View {
             category_column.set_title (_("Category"));
             category_column.max_width = -1;
             category_column.resizable = true;
+            category_column.reorderable = true;
+            //category_column.sort_column_id
             //category_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
             treeview.append_column (category_column);
 
@@ -639,6 +642,8 @@ namespace Envelope.View {
             out_column.max_width = -1;
             out_column.pack_start (renderer_out, true);
             out_column.resizable = true;
+            out_column.reorderable = true;
+            out_column.sort_column_id = Column.OUTFLOW;
             //out_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
             out_column.set_attributes (renderer_out, "text", Column.OUTFLOW);
             treeview.append_column (out_column);
@@ -648,6 +653,8 @@ namespace Envelope.View {
             in_column.max_width = -1;
             in_column.pack_start (renderer_in, true);
             in_column.resizable = true;
+            in_column.reorderable = true;
+            in_column.sort_column_id = Column.INFLOW;
             //in_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
             in_column.set_attributes (renderer_in, "text", Column.INFLOW);
             treeview.append_column (in_column);
@@ -658,6 +665,8 @@ namespace Envelope.View {
             memo_column.pack_start (renderer_memo, true);
             memo_column.pack_end (crb, false);
             memo_column.resizable = true;
+            memo_column.reorderable = true;
+            memo_column.sort_column_id = Column.MEMO;
             //memo_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
             memo_column.spacing = 10;
             memo_column.set_cell_data_func (crb, cell_renderer_badge_func);
