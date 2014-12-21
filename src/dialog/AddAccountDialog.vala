@@ -68,6 +68,7 @@ namespace Envelope.Dialog {
 
                 case Gtk.ResponseType.APPLY:
                     create_account ();
+                    destroy ();
                     break;
             }
         }
