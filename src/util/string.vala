@@ -1,6 +1,6 @@
 namespace Envelope.Util {
 
-    static const string ELLIPSIS = "\u2026";
+    public static const string ELLIPSIS = "\u2026";
 
     public errordomain ParseError {
         INVALID
