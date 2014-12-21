@@ -57,7 +57,7 @@ namespace Envelope.DB {
         public signal void account_deleted (Account account);
         public signal void accout_updated (Account account);
 
-        private static DatabaseManager? dbm = null;
+        private static DatabaseManager database_manager_instance = null;
 
         // database handler
         private SQLHeavy.Database database;
@@ -83,12 +83,12 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_insert_category;
         private SQLHeavy.Query q_delete_category;
 
-        public static DatabaseManager get_default () {
-            if (dbm == null) {
-                dbm = new DatabaseManager ();
+        public static new DatabaseManager get_default () {
+            if (database_manager_instance == null) {
+                database_manager_instance = new DatabaseManager ();
             }
 
-            return dbm;
+            return database_manager_instance;
         }
 
         public SQLHeavy.Transaction start_transaction () throws SQLHeavy.Error {
