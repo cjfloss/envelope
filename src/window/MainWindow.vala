@@ -172,6 +172,8 @@ namespace Envelope.Window {
 
                 widget.show ();
 
+                search_entry.placeholder_text = "Search in %s\u2026".printf (account.number);
+
                 main_view_changed (widget);
             });
 
