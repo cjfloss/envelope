@@ -172,7 +172,7 @@ namespace Envelope.Window {
 
                 widget.show ();
 
-                search_entry.placeholder_text = "Search in %s\u2026".printf (account.number);
+                search_entry.placeholder_text = "Search in %s%s".printf (account.number, Envelope.Util.ELLIPSIS);
 
                 main_view_changed (widget);
             });
