@@ -146,27 +146,22 @@ namespace Envelope.DB {
             }
         }
 
-        public Gee.ArrayList<Account> load_all_accounts () {
+        public Gee.ArrayList<Account> load_all_accounts () throws SQLHeavy.Error {
             var list = new Gee.ArrayList<Account> ();
 
-            try {
-                q_load_all_accounts.clear ();
+            q_load_all_accounts.clear ();
 
-                SQLHeavy.QueryResult results = q_load_all_accounts.execute ();
+            SQLHeavy.QueryResult results = q_load_all_accounts.execute ();
 
-                while (!results.finished) {
-                    Account account;
-                    query_result_to_account (results, out account);
+            while (!results.finished) {
+                Account account;
+                query_result_to_account (results, out account);
 
-                    //account.transactions = get_mocked_transactions ();
+                //account.transactions = get_mocked_transactions ();
 
-                    list.add (account);
+                list.add (account);
 
-                    results.next ();
-                }
-            }
-            catch (SQLHeavy.Error err) {
-                error ("could not load all accounts (%s)".printf (err.message));
+                results.next ();
             }
 
             debug ("loaded %d account(s)".printf (list.size));
