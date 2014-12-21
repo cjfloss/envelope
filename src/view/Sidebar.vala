@@ -36,7 +36,7 @@ namespace Envelope.View {
             return sidebar_instance;
         }
 
-        private static const int COLUMN_COUNT = 9;
+        private static const int COLUMN_COUNT = 10;
 
         private static const string ICON_ACCOUNT    = "text-spreadsheet";
         private static const string ICON_OUTFLOW    = "go-up-symbolic";
@@ -61,7 +61,8 @@ namespace Envelope.View {
             CATEGORY,
             STATE,
             TREE_CATEGORY,
-            IS_HEADER
+            IS_HEADER,
+            COLORIZE
         }
 
         private enum TreeCategory {
@@ -105,6 +106,7 @@ namespace Envelope.View {
                 typeof (Category),
                 typeof (string),
                 typeof (TreeCategory),
+                typeof (bool),
                 typeof (bool)
             );
 
@@ -186,6 +188,7 @@ namespace Envelope.View {
             crt_balance_total.size_set = true;
             crt_balance_total.ellipsize = Pango.EllipsizeMode.NONE;
             crt_balance_total.ellipsize_set = true;
+            crt_balance_total.edited.connect (balance_edited);
             col.pack_end (crt_balance_total, true);
             col.set_cell_data_func (crt_balance_total, treeview_text_renderer_balance_total_function);
 
@@ -206,6 +209,7 @@ namespace Envelope.View {
             dbm.account_created.connect (add_new_account);
 
             BudgetManager.get_default ().budget_changed.connect (update_budget_section);
+            AccountManager.get_default ().account_updated.connect (update_account_item);
 
             destroy.connect (on_quit);
         }
@@ -224,13 +228,13 @@ namespace Envelope.View {
 
                 BudgetManager.get_default ().compute_current_state (out inflow, out outflow, out from, out to);
 
-                overview_iter = add_item (null, _("Overview"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true);
+                overview_iter = add_item (null, "", TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true);
 
                 debug ("sidebar: budget inflow: %s, outflow: %s".printf (budget_state.inflow.to_string (), budget_state.outflow.to_string ()));
 
-                overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, outflow, ICON_OUTFLOW);
-                overview_inflow_iter = add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, inflow, ICON_INFLOW);
-                overview_remaining_iter = add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, Math.fabs (inflow) - Math.fabs (outflow), ICON_REMAINING);
+                overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, outflow, ICON_OUTFLOW, false, false);
+                overview_inflow_iter = add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, inflow, ICON_INFLOW, false, false);
+                overview_remaining_iter = add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, Math.fabs (inflow) - Math.fabs (outflow), ICON_REMAINING, false, true);
 
                 // Add "Accounts" category header
                 account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
@@ -242,7 +246,7 @@ namespace Envelope.View {
                     if (account_list != null && !account_list.is_empty) {
 
                         foreach (Account account in accounts) {
-                            add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT);
+                            add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true);
                         }
                     }
 
@@ -286,6 +290,30 @@ namespace Envelope.View {
             //treeview.collapse_row (store.get_path (overview_iter), true);
         }
 
+        public void s_account_created (Account account) {
+            add_new_account (account);
+        }
+
+        public void add_account (Account account) {
+            accounts.add (account);
+            update_view ();
+        }
+
+        public void add_new_account (Account account) {
+            add_account (account);
+            select_account (account);
+        }
+
+        public void select_account (Account account) {
+
+            Gtk.TreeIter? iter;
+
+            if (get_account_iter (account, out iter)) {
+                treeview.get_selection ().select_iter (iter);
+                account_selected (account);
+            }
+        }
+
         private void update_budget_section () {
 
             debug ("updating budget section");
@@ -310,6 +338,34 @@ namespace Envelope.View {
 
         private void update_accounts_section () {
 
+            try {
+
+                Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
+
+                if (account_list != null && !account_list.is_empty) {
+
+                    foreach (Account account in accounts) {
+                        update_account_item (account);
+                    }
+                }
+
+            }
+            catch (ServiceError err) {
+                error ("could not load accounts (%s)".printf (err.message));
+            }
+
+        }
+
+        /**
+         * Find the item in the tree which corresponds to account and update the account instance in the store
+         */
+        private void update_account_item (Account account) {
+
+            Gtk.TreeIter iter;
+
+            if (get_account_iter (account, out iter)) {
+                store.@set (iter, Column.ACCOUNT, account, -1);
+            }
         }
 
         private void update_categories_section () {
@@ -324,7 +380,8 @@ namespace Envelope.View {
                                         Action action = Action.NONE,
                                         double? state_amount = null,
                                         string? icon = null,
-                                        bool is_header = false) {
+                                        bool is_header = false,
+                                        bool colorize = false) {
 
             Gtk.TreeIter iter;
 
@@ -338,7 +395,8 @@ namespace Envelope.View {
                 Column.CATEGORY, category,
                 Column.STATE, state_amount != null ? Envelope.Util.format_currency (state_amount) : "",
                 Column.TREE_CATEGORY, tree_category,
-                Column.IS_HEADER, is_header, -1);
+                Column.IS_HEADER, is_header,
+                Column.COLORIZE, colorize, -1);
 
             return iter;
         }
@@ -352,11 +410,12 @@ namespace Envelope.View {
             double? state = null;
             TreeCategory tree_category;
 
-            model.@get (iter, Column.ACCOUNT, out account, -1);
-            model.@get (iter, Column.ACTION, out action, -1);
-            model.@get (iter, Column.CATEGORY, out category, -1);
-            model.@get (iter, Column.STATE, out state, -1);
-            model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
+            model.@get (iter,
+                Column.ACCOUNT, out account,
+                Column.ACTION, out action,
+                Column.CATEGORY, out category,
+                Column.STATE, out state,
+                Column.TREE_CATEGORY, out tree_category, -1);
 
             switch (tree_category) {
                 case TreeCategory.OVERVIEW:
@@ -412,54 +471,48 @@ namespace Envelope.View {
         private void treeview_icon_renderer_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
 
             Gtk.CellRendererPixbuf crp = renderer as Gtk.CellRendererPixbuf;
-            string? icon_name = null;
 
+            string? icon_name = null;
             model.@get (iter, Column.ICON, out icon_name, -1);
 
-            if (icon_name != null) {
-                crp.visible = true;
-            }
-            else {
-                crp.visible = false;
-            }
+            crp.visible = icon_name != null;
         }
 
         private void treeview_expander_renderer_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
 
-            Granite.Widgets.CellRendererExpander cre = renderer as Granite.Widgets.CellRendererExpander;
-            Account? account = null;
-            Category? category = null;
-            Action action;
+            bool is_header;
+            TreeCategory category;
 
-            model.@get (iter, Column.ACCOUNT, out account, -1);
-            model.@get (iter, Column.CATEGORY, out category, -1);
-            model.@get (iter, Column.ACTION, out action, -1);
+            model.@get (iter,
+                Column.IS_HEADER, out is_header,
+                Column.TREE_CATEGORY, out category, -1);
 
-            if (account == null && category == null && action == Action.NONE) {
-                // category name
-                cre.visible = true;
-            }
-            else {
-                cre.visible = false;
-            }
+            renderer.visible = is_header && category != TreeCategory.OVERVIEW;
         }
 
         private void treeview_text_renderer_balance_total_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
 
             Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
+
+            crt.editable = false;
+            crt.editable_set = true;
+
             Account? account = null;
             Category? category = null;
             Action action;
             string state;
             TreeCategory tree_category;
             bool is_header;
+            bool colorize;
 
-            model.@get (iter, Column.ACCOUNT, out account, -1);
-            model.@get (iter, Column.ACTION, out action, -1);
-            model.@get (iter, Column.CATEGORY, out category, -1);
-            model.@get (iter, Column.STATE, out state, -1);
-            model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
-            model.@get (iter, Column.IS_HEADER, out is_header, -1);
+            model.@get (iter,
+                Column.ACCOUNT, out account,
+                Column.ACTION, out action,
+                Column.CATEGORY, out category,
+                Column.STATE, out state,
+                Column.TREE_CATEGORY, out tree_category,
+                Column.IS_HEADER, out is_header,
+                Column.COLORIZE, out colorize, -1);
 
             switch (tree_category) {
                 case TreeCategory.OVERVIEW:
@@ -472,7 +525,22 @@ namespace Envelope.View {
                     }
                     else {
                         crt.text = state;
-                        //crt.foreground = state < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+
+                        try {
+
+                            double parsed_state = Envelope.Util.parse_currency (state);
+
+                            if (colorize && parsed_state < 0) {
+                                crt.foreground = COLOR_SUBZERO;
+                                crt.foreground_set = true;
+                            }
+                            else {
+                                crt.foreground_set = false;
+                            }
+                        }
+                        catch (Envelope.Util.ParseError err) {
+                            assert_not_reached ();
+                        }
                     }
 
                     break;
@@ -490,7 +558,14 @@ namespace Envelope.View {
 
                             crt.weight_set = false;
                             crt.text = Envelope.Util.format_currency (balance);
-                            crt.foreground = balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+
+                            if (balance < 0) {
+                                crt.foreground = COLOR_SUBZERO;
+                                crt.foreground_set = true;
+                            }
+                            else {
+                                crt.foreground_set = false;
+                            }
                         }
                         else {
                             crt.weight_set = false;
@@ -500,7 +575,16 @@ namespace Envelope.View {
                         crt.visible = true;
                         crt.weight_set = false;
                         crt.text = Envelope.Util.format_currency (account.balance);
-                        crt.foreground = account.balance < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+                        crt.editable = true;
+                        crt.editable_set = true;
+
+                        if (account.balance < 0) {
+                            crt.foreground = COLOR_SUBZERO;
+                            crt.foreground_set = true;
+                        }
+                        else {
+                            crt.foreground_set = false;
+                        }
                     }
                     else {
                         crt.visible = false;
@@ -517,9 +601,39 @@ namespace Envelope.View {
             }
         }
 
-        private void treeview_row_activated () {
+        private void balance_edited (string path, string new_text) {
 
-            debug ("row activated!");
+            try {
+
+                // parse first; if it fails, nothing expensive below will be executed
+                double amount = Envelope.Util.parse_currency (new_text);
+
+                Gtk.TreeIter iter;
+                if (store.get_iter_from_string (out iter, path)) {
+
+                    Account account;
+                    store.@get (iter, Column.ACCOUNT, out account, -1);
+
+                    assert (account != null);
+
+                    account.balance = amount;
+
+                    AccountManager.get_default ().update_account_balance (ref account);
+                }
+                else {
+                    assert_not_reached (); // should never land here!
+                }
+
+            }
+            catch (Envelope.Util.ParseError err) {
+                warning ("could not update account balance (%s)".printf (err.message));
+            }
+            catch (ServiceError err) {
+                warning ("could not update account balance (%s)".printf (err.message));
+            }
+        }
+
+        private void treeview_row_activated () {
 
             Gtk.TreeIter iter;
             Gtk.TreeModel model;
@@ -530,66 +644,47 @@ namespace Envelope.View {
                 Action action;
                 TreeCategory tree_category;
 
-                model.@get (iter, Column.ACCOUNT, out account, -1);
-                model.@get (iter, Column.ACTION, out action, -1);
-                model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
+                model.@get (iter,
+                    Column.ACCOUNT, out account,
+                    Column.ACTION, out action,
+                    Column.TREE_CATEGORY, out tree_category, -1);
 
                 if (account != null) {
-                    debug ("account_selected");
                     account_selected (account);
                 }
                 else if (action == Action.NONE) {
                     toggle_selected_row_expansion ();
                 }
 
-                debug ("action is %s".printf (action.to_string ()));
+                switch (action) {
+                    case Action.ADD_ACCOUNT:
+                        var dialog = new AddAccountDialog ();
+                        dialog.account_created.connect (s_account_created);
+                        dialog.show_all ();
+                        break;
 
-                if (action != Action.NONE) {
-                    switch (action) {
-                        case Action.ADD_ACCOUNT:
-                            var dialog = new AddAccountDialog ();
-                            dialog.account_created.connect (s_account_created);
-                            dialog.show_all ();
-                            break;
+                    case Action.SHOW_OVERVIEW:
+                        overview_selected ();
+                        break;
 
-                        case Action.SHOW_OVERVIEW:
-                            overview_selected ();
-                            break;
+                    case Action.NONE:
+                        break;
 
-                        default:
-                            assert_not_reached ();
-                    }
+                    default:
+                        assert_not_reached ();
                 }
-
             }
         }
 
-        public void s_account_created (Account account) {
-            add_account (account);
-            select_account (account);
+        private void account_selected (Account account) {
+            debug ("sidebar account selected : %s".printf (account.number));
+
+            current_account_id = account.@id;
+
+            list_account_selected (account);
         }
 
-        public void add_account (Account account) {
-            accounts.add (account);
-            update_view ();
-        }
-
-        public void add_new_account (Account account) {
-            add_account (account);
-            select_account (account);
-        }
-
-        public void select_account (Account account) {
-            Gtk.TreeIter? iter;
-            get_account_iter (account, out iter);
-
-            if (iter != null) {
-                treeview.get_selection ().select_iter (iter);
-                account_selected (account);
-            }
-        }
-
-        private void get_account_iter (Account account, out Gtk.TreeIter iter) {
+        private bool get_account_iter (Account account, out Gtk.TreeIter iter) {
 
             debug ("looking for tree iterator matching account %d".printf (account.@id));
 
@@ -611,6 +706,8 @@ namespace Envelope.View {
             });
 
             iter = found_iter;
+
+            return found_iter != null;
         }
 
         private void toggle_selected_row_expansion () {
@@ -628,14 +725,6 @@ namespace Envelope.View {
                     }
                 }
             }
-        }
-
-        private void account_selected (Account account) {
-            debug ("sidebar account selected : %s".printf (account.number));
-
-            current_account_id = account.@id;
-
-            list_account_selected (account);
         }
 
         private void account_renamed (string path, string text) {
