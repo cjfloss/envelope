@@ -15,6 +15,7 @@ set (RELEASE_NAME "An easy to use personal budget application.")
 set (VERSION "0.0.0")
 set (VERSION_INFO "development")
 set (GETTEXT_PACKAGE "envelope")
+set (CC_OPTS "-w")
 
 configure_file (${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
 
@@ -31,7 +32,7 @@ pkg_check_modules(DEPS REQUIRED
 
 add_definitions(${DEPS_CFLAGS})
 add_definitions ("-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"")
-add_definitions ("-w")
+add_definitions (${CC_OPTS})
 
 link_libraries(${DEPS_LIBRARIES})
 link_directories(${DEPS_LIBRARY_DIRS})
@@ -40,7 +41,7 @@ find_package(Vala REQUIRED)
 
 include(ValaVersion)
 
-ensure_vala_version("0.16" MINIMUM)
+ensure_vala_version("0.23.2" MINIMUM)
 
 include(ValaPrecompile)
 
