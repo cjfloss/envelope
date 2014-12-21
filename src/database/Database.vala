@@ -25,7 +25,7 @@ namespace Envelope.DB {
             `description` TEXT,
             `balance` DOUBLE,
             `type` INT)
-            """;
+        """;
 
     static const string TRANSACTIONS = """
         CREATE TABLE IF NOT EXISTS transactions (
@@ -38,10 +38,10 @@ namespace Envelope.DB {
             `category_id` INT,
             `parent_transaction_id` INT,
             `date` TIMESTAMP NOT NULL,
-            FOREIGN KEY (`parent_transaction_id`) REFERENCES `transactions`(`id`),
-            FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`),
-            FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`))
-            """;
+        FOREIGN KEY (`parent_transaction_id`) REFERENCES `transactions`(`id`),
+        FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`),
+        FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`))
+        """;
 
     static const string CATEGORIES = """
         CREATE TABLE IF NOT EXISTS categories (
@@ -50,8 +50,8 @@ namespace Envelope.DB {
             `description` TEXT,
             `amount_budgeted` DOUBLE NOT NULL,
             `parent_category_id` INT,
-            FOREIGN KEY (`parent_category_id`) REFERENCES `category`(`id`))
-            """;
+        FOREIGN KEY (`parent_category_id`) REFERENCES `category`(`id`))
+        """;
 
     class DatabaseManager : Object {
 
@@ -446,6 +446,8 @@ namespace Envelope.DB {
             catch (SQLHeavy.Error err) {
                 error ("error occured during database setup (%s)".printf (err.message));
             }
+
+            // TODO check if there are categories. If not, then create the default ones
 
             // TODO check if this is necessary
             database.synchronous = SQLHeavy.SynchronousMode.OFF;
