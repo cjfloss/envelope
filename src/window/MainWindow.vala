@@ -28,6 +28,7 @@ namespace Envelope.Window {
         // window elements
         public Gtk.HeaderBar                header_bar { get; private set; }
         public Gtk.Button                   import_button { get; private set; }
+        public Gtk.Button                   add_transaction_button { get; private set; }
         public Gtk.SearchEntry              search_entry { get; private set; }
         public Sidebar                      sidebar { get; private set; }
         public Gtk.MenuButton               app_menu { get; private set; }
@@ -104,6 +105,11 @@ namespace Envelope.Window {
             import_button.tooltip_text = _("Import transactions");
             header_bar.pack_start (import_button);
 
+            // add transaction button
+            add_transaction_button = new Gtk.Button.from_icon_name ("document-new", Gtk.IconSize.LARGE_TOOLBAR);
+            add_transaction_button.tooltip_text = _("Record transaction");
+            header_bar.pack_start (add_transaction_button);
+
             // search entry & completion
             search_entry = new Gtk.SearchEntry ();
             search_entry.placeholder_text = _("Search transactions\u2026");
@@ -127,6 +133,7 @@ namespace Envelope.Window {
             search_entry.completion = search_entry_completion;
 
             header_bar.pack_end (search_entry);
+
             header_bar.show_all ();
 
             // sidebar
@@ -173,6 +180,7 @@ namespace Envelope.Window {
             Gtk.Widget content_view;
             determine_initial_content_view (accounts, out content_view);
             paned.pack2 (content_view, true, false);
+            main_view_changed (content_view);
 
             configure_window ();
 
@@ -247,6 +255,7 @@ namespace Envelope.Window {
 
                     paned.remove (current_view);
                     paned.add2 (BudgetOverview.get_default ());
+                    main_view_changed (BudgetOverview.get_default ());
                 }
             });
 
@@ -255,6 +264,7 @@ namespace Envelope.Window {
                 if (widget is TransactionView) {
 
                     import_button.show ();
+                    add_transaction_button.show ();
                     search_entry.show ();
                     search_entry.text = ""; // TODO don't overwrite search entry from saved state!
 
@@ -265,6 +275,7 @@ namespace Envelope.Window {
                 }
                 else if (widget is AccountWelcomeScreen) {
                     import_button.show ();
+                    add_transaction_button.show ();
 
                     if (paned.get_child1 () == null) {
                         paned.pack1 (Sidebar.get_default (), true, false);
@@ -272,6 +283,7 @@ namespace Envelope.Window {
                 }
                 else {
                     import_button.hide();
+                    add_transaction_button.hide ();
                     search_entry.hide ();
                     search_entry.text = "";
                 }
@@ -284,6 +296,19 @@ namespace Envelope.Window {
 
             import_button.clicked.connect ( () => {
                 TransactionView.get_default ().show_import_dialog ();
+            });
+
+            add_transaction_button.clicked.connect ( () => {
+                TransactionView.get_default ().add_transaction_row ();
+
+                var child2 = paned.get_child2 ();
+
+                if (!(child2 is TransactionView)) {
+                    paned.remove (child2);
+                    paned.pack2 (TransactionView.get_default (), true, false);
+                    paned.show_all ();
+                    main_view_changed (TransactionView.get_default ());
+                }
             });
 
             AccountManager.get_default ().transaction_recorded.connect ( () => {
@@ -307,6 +332,7 @@ namespace Envelope.Window {
             else {
                 search_entry.hide ();
                 import_button.hide ();
+                add_transaction_button.hide ();
             }
         }
 

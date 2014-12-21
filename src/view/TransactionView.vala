@@ -248,6 +248,36 @@ namespace Envelope.View {
             }
         }
 
+        public void add_transaction_row () {
+            switch (current_add_transaction_action) {
+
+                case AddTransactionAction.NONE:
+                // add a row
+                current_editing_iter = add_empty_row ();
+                treeview.get_selection ().select_iter (current_editing_iter);
+
+                btn_add_transaction.get_style_context ().add_class("suggested-action");
+                btn_add_transaction.label = _("Apply");
+                //btn_add_transaction.sensitive = false;
+
+                current_add_transaction_action = AddTransactionAction.EDITING;
+
+                break;
+
+                case AddTransactionAction.EDITING:
+                save_transaction ();
+
+                // restore previous state
+                current_add_transaction_action = AddTransactionAction.NONE;
+                btn_add_transaction.get_style_context ().remove_class("suggested-action");
+                btn_add_transaction.label = _("Add transaction");
+                break;
+
+                default:
+                assert_not_reached ();
+            }
+        }
+
         /**
          * Adds a list of transactions to the grid store
          */
