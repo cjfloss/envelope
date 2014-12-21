@@ -33,6 +33,8 @@ namespace Envelope.Service {
             return merchant_store_instance;
         }
 
+        public static const int COLUMN = 0;
+
         private MerchantStore () {
             Object ();
             build_store ();
@@ -63,7 +65,7 @@ namespace Envelope.Service {
                     Gtk.TreeIter iter;
                     append (out iter);
 
-                    @set (iter, 0, m.label, 1, m.occurences, -1);
+                    @set (iter, COLUMN, m.label, 1, m.occurences, -1);
                 }
             }
         }
