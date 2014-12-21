@@ -22,71 +22,11 @@ using Envelope.Service;
 
 namespace Envelope.View {
 
-    private static TransactionWelcomeScreen transaction_welcome_screen_instance = null;
-
-    public class TransactionWelcomeScreen : Granite.Widgets.Welcome {
-
-        public static new unowned TransactionWelcomeScreen get_default () {
-            if (transaction_welcome_screen_instance == null) {
-                transaction_welcome_screen_instance = new TransactionWelcomeScreen ();
-            }
-
-            return transaction_welcome_screen_instance;
-        }
-
-        private enum Action {
-            ADD_TRANSACTION,
-            IMPORT_TRANSACTIONS
-        }
-
-        public Account account { get; set; }
-
-        public signal void add_transaction_selected (Account account);
-
-        public TransactionWelcomeScreen () {
-            base (_("Spend! Get paid!"), _("There are currently no transactions in this account"));
-            build_ui ();
-            connect_signals ();
-        }
-
-        private void build_ui () {
-            append ("add", _("Record a transaction"),
-                _("Record a fresh new transaction for this account. Or, plan a future one!"));
-
-            append ("document-import", _("Import transactions"),
-                _("Import from a QIF file obtained from another application"));
-
-            show_all ();
-        }
-
-        private void connect_signals () {
-            activated.connect (item_activated);
-        }
-
-        private void item_activated (int index ) {
-            switch (index) {
-
-                case Action.ADD_TRANSACTION:
-                    add_transaction_selected (account);
-                    break;
-
-                case Action.IMPORT_TRANSACTIONS:
-                    var view = TransactionView.get_default();
-                    view.account = account;
-                    view.show_import_dialog ();
-                    break;
-
-                default:
-                    assert_not_reached ();
-            }
-        }
-    }
-
-    private static TransactionView transaction_view_instance = null;
-
     public class TransactionView : Gtk.Box {
 
-        public static new unowned TransactionView get_default () {
+        private static TransactionView transaction_view_instance = null;
+
+        public static new TransactionView get_default () {
             if (transaction_view_instance == null) {
                 transaction_view_instance = new TransactionView ();
             }
@@ -149,6 +89,16 @@ namespace Envelope.View {
         private TransactionView () {
 
             Object (orientation: Gtk.Orientation.VERTICAL);
+
+            transactions_store = new Gtk.TreeStore(COLUMN_COUNT,
+                typeof (string),
+                typeof (string),
+                typeof (string),
+                typeof (string),
+                typeof (string),
+                typeof (int),
+                typeof (Transaction),
+                typeof (string)); // todo change to category type
 
             build_ui ();
             connect_signals ();
@@ -245,7 +195,13 @@ namespace Envelope.View {
 
             chooser.select_multiple = false;
             chooser.create_folders = false;
-            chooser.set_current_folder_file (Granite.Services.Paths.home_folder);
+
+            try {
+                chooser.set_current_folder_file (Granite.Services.Paths.home_folder);
+            }
+            catch (Error err) {
+                warning ("could not point chooser to home folder (%s)".printf (err.message));
+            }
 
             var filter = new Gtk.FileFilter ();
             chooser.set_filter (filter);
@@ -299,6 +255,7 @@ namespace Envelope.View {
 
             debug ("filtering and adding %d transactions".printf (transactions.size));
 
+            var total = transactions != null ? transactions.size : 0;
             var count = 0;
 
             if (transactions != null) {
@@ -339,7 +296,7 @@ namespace Envelope.View {
             if (count > 0) {
                 infobar.hide ();
             }
-            else {
+            else if (count != total) {
                 infobar.show_all ();
             }
 
@@ -348,7 +305,7 @@ namespace Envelope.View {
 
         private void get_transaction_iter (Transaction transaction, out Gtk.TreeIter? iter) {
 
-            debug ("looking for tree iterator matching parent transaction %d".printf (transaction.@id));
+            debug ("looking for tree iterator matching transaction %d".printf (transaction.@id));
 
             Gtk.TreeIter? found_iter = null;
             int id = transaction.@id;
@@ -502,35 +459,10 @@ namespace Envelope.View {
             treeview.show_expanders = true;
             treeview.rules_hint = true;
             treeview.enable_grid_lines = Gtk.TreeViewGridLines.BOTH;
+            treeview.set_model (transactions_store);
             treeview.set_search_column (1);
             treeview.hadjustment.page_size = 10d;
             treeview.show_all ();
-
-            transactions_store = new Gtk.TreeStore(COLUMN_COUNT,
-                typeof (string),
-                typeof (string),
-                typeof (string),
-                typeof (string),
-                typeof (string),
-                typeof (int),
-                typeof (Transaction),
-                typeof (string)); // todo change to category type
-
-            // notify when a transaction changed
-            transactions_store.row_changed.connect ((path, iter) => {
-
-                transaction_edited (path, iter);
-
-                // add new empty row if iter is last
-                //if (!transactions_store.iter_next (ref iter)) {
-                    // iter has no next, append
-                if (!populating_from_list) {
-                    //add_empty_row ();
-                }
-                //}
-            });
-
-            treeview.set_model (transactions_store);
 
             // memo cell renderer
             renderer_memo = new Gtk.CellRendererText();
@@ -731,6 +663,22 @@ namespace Envelope.View {
         }
 
         private void connect_signals () {
+
+            // notify when a transaction changed
+            transactions_store.row_changed.connect ((path, iter) => {
+
+                transaction_edited (path, iter);
+
+                // add new empty row if iter is last
+                //if (!transactions_store.iter_next (ref iter)) {
+                // iter has no next, append
+                if (!populating_from_list) {
+                    //add_empty_row ();
+                }
+                //}
+            });
+
+
             FilterView.get_default ().date_filter_changed.connect ( () => {
 
                 var filter_view = FilterView.get_default ();
