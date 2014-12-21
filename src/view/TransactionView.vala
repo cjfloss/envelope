@@ -597,9 +597,6 @@ namespace Envelope.View {
                 Column.TRANSACTION, null,
                 Column.CATEGORY, "", -1);
 
-            //var path = transactions_store.get_path (insert_iter);
-            //treeview.scroll_to_cell (path, null, false, 1.0f, 1.0f);
-
             return insert_iter;
         }
 
@@ -607,18 +604,8 @@ namespace Envelope.View {
 
             // notify when a transaction changed
             transactions_store.row_changed.connect ((path, iter) => {
-
                 transaction_edited (path, iter);
-
-                // add new empty row if iter is last
-                //if (!transactions_store.iter_next (ref iter)) {
-                // iter has no next, append
-                if (!populating_from_list) {
-                    //add_empty_row ();
-                }
-                //}
             });
-
 
             FilterView.get_default ().date_filter_changed.connect ( () => {
 
@@ -638,10 +625,6 @@ namespace Envelope.View {
             treeview.button_press_event.connect ( (button_event) => {
 
                 if (button_event.button == 3) {
-                    // right-click
-                    // get current selection
-
-
                     // get targeted line
                     Gtk.TreePath target_path;
                     Gtk.TreeViewColumn target_column;
