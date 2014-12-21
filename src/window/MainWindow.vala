@@ -51,6 +51,9 @@ namespace Envelope.Window {
             connect_signals ();
         }
 
+        /**
+         * Show a brief message in the overlay bar for a specified time, then hide it afterwards
+         */
         public void show_notification (string text) {
             overlay_bar.hide ();
             overlay_bar.status = text;
@@ -68,8 +71,10 @@ namespace Envelope.Window {
             overlay = new Gtk.Overlay ();
             this.add (overlay);
 
+            // overlay bar for toast notifitcations
             overlay_bar = new Granite.Widgets.OverlayBar (overlay);
 
+            // Menus
             app_menu = new Gtk.MenuButton ();
             settings_menu = new Menu ();
 
@@ -81,12 +86,17 @@ namespace Envelope.Window {
             menu_popover = new Gtk.Popover.from_model (app_menu, settings_menu);
             app_menu.popover = menu_popover;
 
+            // main paned widget
             paned = new Granite.Widgets.ThinPaned ();
+            paned.position = 250;
+            paned.position_set = true;
+            paned.show_all ();
+            overlay.add (paned);
 
+            // header bar
             header_bar = new Gtk.HeaderBar ();
             header_bar.show_close_button = true;
             set_titlebar (header_bar);
-
             header_bar.pack_end (app_menu);
 
             // import button
@@ -94,12 +104,13 @@ namespace Envelope.Window {
             import_button.tooltip_text = _("Import transactions");
             header_bar.pack_start (import_button);
 
+            // search entry & completion
             search_entry = new Gtk.SearchEntry ();
             search_entry.placeholder_text = _("Search transactions\u2026");
 
             var search_entry_completion = new Gtk.EntryCompletion ();
             search_entry_completion.set_model (MerchantStore.get_default ());
-            search_entry_completion.set_text_column (0);
+            search_entry_completion.set_text_column (MerchantStore.COLUMN);
             search_entry_completion.popup_completion = true;
             search_entry_completion.set_match_func ( (completion, key, iter) => {
 
@@ -108,13 +119,9 @@ namespace Envelope.Window {
                 }
 
                 string store_value;
-                MerchantStore.get_default ().@get (iter, 0, out store_value, -1);
+                MerchantStore.get_default ().@get (iter, MerchantStore.COLUMN, out store_value, -1);
 
-                if (store_value.up ().index_of (key.up ()) != -1) {
-                    return true;
-                }
-
-                return false;
+                return store_value.up ().index_of (key.up ()) != -1;
             });
 
             search_entry.completion = search_entry_completion;
@@ -124,10 +131,17 @@ namespace Envelope.Window {
 
             // sidebar
             sidebar = new Sidebar ();
-            paned.pack1 (sidebar, true, false);
 
-            Gee.ArrayList<Account> accounts = dbm.load_all_accounts ();
-            sidebar.accounts = accounts;
+            Gee.ArrayList<Account> accounts;
+
+            try {
+                accounts = AccountManager.get_default ().get_accounts ();
+                sidebar.accounts = accounts;
+            }
+            catch (ServiceError err) {
+                warning ("could not load accounts (%s)".printf (err.message));
+                accounts = new Gee.ArrayList<Account> ();
+            }
 
             sidebar.update_view ();
             sidebar.show_all ();
@@ -160,23 +174,22 @@ namespace Envelope.Window {
             determine_initial_content_view (accounts, out content_view);
             paned.pack2 (content_view, true, false);
 
-            paned.position = 250;
-            paned.position_set = true;
-            paned.show_all ();
+            configure_window ();
 
-            overlay.add (paned);
+            // done! show all
             overlay.show_all ();
             overlay_bar.hide ();
+        }
 
-            this.width_request = 1200;
-            this.height_request = 800;
-
+        private void configure_window () {
+            // configure window
+            width_request = 1200;
+            height_request = 800;
 
             // restore state
             var saved_state = SavedState.get_default ();
 
-            this.window_position = saved_state.window_position != null ?
-                saved_state.window_position : Gtk.WindowPosition.CENTER;
+            window_position = saved_state.window_position != null ? saved_state.window_position : Gtk.WindowPosition.CENTER;
 
             if (saved_state.window_state == Gdk.WindowState.MAXIMIZED) {
                 maximize ();
@@ -192,7 +205,7 @@ namespace Envelope.Window {
             destroy.connect (on_quit);
 
             // connect signals
-            TransactionWelcomeScreen.get_default ().add_transaction_selected.connect ( (account) => {
+            AccountWelcomeScreen.get_default ().add_transaction_selected.connect ( (account) => {
 
                 var transaction_view = TransactionView.get_default ();
                 var current_view = paned.get_child2 ();
@@ -240,12 +253,22 @@ namespace Envelope.Window {
             main_view_changed.connect ( (window, widget) => {
                 // check if we need to show the transaction search entry
                 if (widget is TransactionView) {
+
                     import_button.show ();
                     search_entry.show ();
-                    search_entry.text = "";
+                    search_entry.text = ""; // TODO don't overwrite search entry from saved state!
+
+                    // show sidebar if it was not there yet
+                    if (paned.get_child1 () == null) {
+                        paned.pack1 (Sidebar.get_default (), true, false);
+                    }
                 }
-                else if (widget is TransactionWelcomeScreen) {
+                else if (widget is AccountWelcomeScreen) {
                     import_button.show ();
+
+                    if (paned.get_child1 () == null) {
+                        paned.pack1 (Sidebar.get_default (), true, false);
+                    }
                 }
                 else {
                     import_button.hide();
@@ -275,6 +298,16 @@ namespace Envelope.Window {
             else {
                 widget = Welcome.get_default ();
             }
+
+            if (widget != Welcome.get_default ()) {
+                if (paned.get_child1 () == null) {
+                    paned.pack1 (Sidebar.get_default (), true, false);
+                }
+            }
+            else {
+                search_entry.hide ();
+                import_button.hide ();
+            }
         }
 
         private void determine_content_view (Account account, out Gtk.Widget widget) {
@@ -283,8 +316,8 @@ namespace Envelope.Window {
             account.transactions = transactions;
 
             if (transactions.size == 0) {
-                widget = TransactionWelcomeScreen.get_default ();
-                (widget as TransactionWelcomeScreen).account = account;
+                widget = AccountWelcomeScreen.get_default ();
+                (widget as AccountWelcomeScreen).account = account;
             }
             else {
                 widget = TransactionView.get_default ();

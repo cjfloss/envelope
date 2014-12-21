@@ -67,6 +67,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
   src/view/TransactionView.vala
   src/view/Sidebar.vala
   src/view/WelcomeScreen.vala
+  src/view/AccountWelcomeScreen.vala
   src/view/BudgetOverview.vala
   src/view/FilterView.vala
 
