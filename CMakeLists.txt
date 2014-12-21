@@ -76,6 +76,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
   src/window/MainWindow.vala
 
   src/dialog/AddAccountDialog.vala
+  src/dialog/ImportTransactionsDialog.vala
 
   src/widget/CellRendererDatePicker.vala
   src/widget/CellRendererTextCompletion.vala

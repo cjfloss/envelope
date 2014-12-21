@@ -19,6 +19,7 @@
 using Envelope.DB;
 using Envelope.Widget;
 using Envelope.Service;
+using Envelope.Dialog;
 
 namespace Envelope.View {
 
@@ -154,66 +155,7 @@ namespace Envelope.View {
         }
 
         public void show_import_dialog () {
-            // show open file dialog
-            var chooser = new Gtk.FileChooserDialog (_("Import a QIF file"), Envelope.App.get_default ().main_window,
-            Gtk.FileChooserAction.OPEN,
-            "_Cancel",
-            Gtk.ResponseType.CANCEL,
-            "_Open",
-            Gtk.ResponseType.ACCEPT);
-
-            debug ("setting file chooser to this path: %s".printf (Granite.Services.Paths.home_folder.get_path ()));
-
-            chooser.select_multiple = false;
-            chooser.create_folders = false;
-
-            try {
-                chooser.set_current_folder_file (Granite.Services.Paths.home_folder);
-            }
-            catch (Error err) {
-                warning ("could not point chooser to home folder (%s)".printf (err.message));
-            }
-
-            var filter = new Gtk.FileFilter ();
-            chooser.set_filter (filter);
-            filter.add_pattern ("*.qif");
-
-            var response = chooser.run ();
-
-            switch (response) {
-                case Gtk.ResponseType.ACCEPT:
-                case Gtk.ResponseType.OK:
-
-                    chooser.close ();
-
-                    try {
-
-                        var account_ref = Sidebar.get_default ().selected_account;
-
-                        int size = AccountManager.get_default ().import_transactions_from_file (ref account_ref, chooser.get_file ());
-
-                        Envelope.App.toast (_("%d transactions imported in account %s").printf(size, account_ref.number));
-
-                        // refresh search autocompletion
-                        MerchantStore.get_default ().reload ();
-
-                    } catch (ServiceError err) {
-                        error (err.message);
-                    } catch (ImporterError err) {
-                        assert (!(err is ImporterError.UNSUPPORTED));
-                        error (err.message);
-                    }
-
-                    break;
-
-                case Gtk.ResponseType.CANCEL:
-                case Gtk.ResponseType.CLOSE:
-                    chooser.close ();
-                    break;
-
-                default:
-                    assert_not_reached ();
-            }
+            new ImportTransactionsDialog ().execute ();
         }
 
         public void add_transaction_row () {
