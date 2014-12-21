@@ -122,6 +122,17 @@ namespace Envelope.Service {
             }
         }
 
+        public void update_account_balance (ref Account account) throws ServiceError {
+            try {
+                var db_transaction = dbm.start_transaction ();
+                dbm.update_account_balance (account, ref db_transaction);
+                db_transaction.commit ();
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
         public Transaction record_transaction (ref Account account, DateTime date, string label, string description, double amount, Transaction? parent = null) throws ServiceError {
 
             var old_balance = account.balance;
