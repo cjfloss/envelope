@@ -11,7 +11,7 @@ namespace Envelope.Util {
     }
 
     public static string format_currency (double amount) {
-        char buffer[20];
+        char[] buffer = new char[double.DTOSTR_BUF_SIZE];
         Monetary.strfmon(buffer, "%11n", amount);
         return ((string) buffer).strip ();
     }
