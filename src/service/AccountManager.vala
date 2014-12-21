@@ -222,7 +222,7 @@ namespace Envelope.Service {
                 throw new ServiceError.ENOENT ("file does not exist: %s".printf (path));
             }
 
-            var extension = path.substring (path.last_index_of (".") + 1); // eg. "qif"
+            var extension = path.substring (path.last_index_of (".") + 1).strip (); // eg. "qif"
 
             Importer importer;
 
