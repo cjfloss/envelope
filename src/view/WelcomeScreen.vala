@@ -40,8 +40,6 @@ namespace Envelope.View {
 
         private void build_ui () {
             append ("add", "Add an account", "Create an account to record your transactions");
-            append ("document-import", _("Import transactions"),
-                _("Import from a QIF file obtained from another application"));
         }
 
         private void connect_signals () {
