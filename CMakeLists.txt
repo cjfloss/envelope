@@ -31,6 +31,7 @@ pkg_check_modules(DEPS REQUIRED
 
 add_definitions(${DEPS_CFLAGS})
 add_definitions ("-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"")
+add_definitions ("-w")
 
 link_libraries(${DEPS_LIBRARIES})
 link_directories(${DEPS_LIBRARY_DIRS})
