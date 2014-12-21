@@ -68,7 +68,7 @@ namespace Envelope.View {
 
                 case Action.IMPORT_TRANSACTIONS:
                 var view = TransactionView.get_default();
-                view.account = account;
+                view.transactions = account.transactions;
                 view.show_import_dialog ();
                 break;
 

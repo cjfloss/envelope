@@ -83,8 +83,9 @@ namespace Envelope.View {
         private Gtk.MenuItem right_click_menu_item_split;
         private Gtk.MenuItem right_click_menu_item_remove;
 
-        public Account account { get; set; }
         public string search_term { get; set; }
+
+        public Gee.ArrayList<Transaction> transactions { get; set; }
 
         private TransactionView () {
 
@@ -103,12 +104,6 @@ namespace Envelope.View {
             build_ui ();
             connect_signals ();
             transaction_view_instance = this;
-        }
-
-        public TransactionView.with_account (Account account) {
-            this ();
-            this.account = account;
-            load_account (account);
         }
 
         public void set_search_filter (string term) {
@@ -152,9 +147,6 @@ namespace Envelope.View {
                 Column.CATEGORY, "", -1);
 
             update_view ();
-
-            // TEMP FIX
-            transaction.account = account;
         }
 
         public void remove_transaction (Transaction transaction) {
@@ -163,23 +155,7 @@ namespace Envelope.View {
         }
 
         public void clear () {
-            debug ("clear");
             transactions_store.clear ();
-        }
-
-        public void load_account (Account account_) {
-
-            account = account_;
-
-            now = new DateTime.now_local ();
-
-            var filter_view = FilterView.get_default ();
-            filter_from = filter_view.from;
-            filter_to = filter_view.to;
-
-            clear();
-            add_transactions (account.transactions);
-            update_view ();
         }
 
         public void show_import_dialog () {
@@ -217,14 +193,11 @@ namespace Envelope.View {
 
                     try {
 
-                        var local_account = account;
+                        var account_ref = Sidebar.get_default ().selected_account;
 
-                        int size = AccountManager.get_default ().import_transactions_from_file (ref local_account, chooser.get_file ());
+                        int size = AccountManager.get_default ().import_transactions_from_file (ref account_ref, chooser.get_file ());
 
-                        //load_account (account);
-                        Sidebar.get_default ().select_account (account);
-
-                        Envelope.App.toast (_("%d transactions imported in account %s").printf(size, local_account.number));
+                        Envelope.App.toast (_("%d transactions imported in account %s").printf(size, account_ref.number));
 
                         // refresh search autocompletion
                         MerchantStore.get_default ().reload ();
@@ -281,9 +254,11 @@ namespace Envelope.View {
         /**
          * Adds a list of transactions to the grid store
          */
-        private void add_transactions (Gee.ArrayList<Transaction>? transactions) {
+        private void add_transactions () {
 
             debug ("filtering and adding %d transactions".printf (transactions.size));
+
+            clear ();
 
             var total = transactions != null ? transactions.size : 0;
             var count = 0;
@@ -359,7 +334,7 @@ namespace Envelope.View {
 
         private void update_view () {
 
-            if (account.has_transactions) {
+            if (transactions != null && !transactions.is_empty) {
                 filter_box.show ();
             }
             else {
@@ -368,7 +343,7 @@ namespace Envelope.View {
         }
 
         private void apply_filters () {
-            load_account (account);
+            add_transactions ();
         }
 
         private void build_ui () {
@@ -716,7 +691,7 @@ namespace Envelope.View {
                 filter_from = filter_view.from;
                 filter_to = filter_view.to;
 
-                load_account (account);
+                add_transactions ();
             });
 
             treeview.row_activated.connect ( (path, column) => {
@@ -766,6 +741,15 @@ namespace Envelope.View {
 
             right_click_menu_item_remove.activate.connect (popup_menu_remove_activated);
             right_click_menu_item_split.activate.connect (popup_menu_split_activated);
+
+            notify["transactions"].connect ( () => {
+                if (transactions != null) {
+                    add_transactions ();
+                }
+                else {
+                    clear ();
+                }
+            });
         }
 
         private void popup_menu_remove_activated () {
@@ -829,7 +813,7 @@ namespace Envelope.View {
             var date = new DateTime.local ((int) year, (int) month + 1, (int) day, 0, 0, 0);
 
             try {
-                var acct_ref = account;
+                var acct_ref = Sidebar.get_default ().selected_account;
                 AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, null);
             } catch (ServiceError err) {
                 error (err.message);

@@ -90,6 +90,8 @@ namespace Envelope.View {
 
         public BudgetState budget_state { get; set; }
 
+        public Account selected_account { get; private set; }
+
         private int current_account_id;
 
         public signal void overview_selected ();
@@ -680,6 +682,7 @@ namespace Envelope.View {
             debug ("sidebar account selected : %s".printf (account.number));
 
             current_account_id = account.@id;
+            selected_account = account;
 
             list_account_selected (account);
         }

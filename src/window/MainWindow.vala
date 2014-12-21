@@ -221,7 +221,7 @@ namespace Envelope.Window {
 
                 paned.remove (current_view);
                 paned.add2 (transaction_view);
-                transaction_view.load_account (account);
+                transaction_view.transactions = account.transactions;
                 transaction_view.show ();
             });
 
@@ -347,7 +347,7 @@ namespace Envelope.Window {
             }
             else {
                 widget = TransactionView.get_default ();
-                (widget as TransactionView).load_account (account);
+                (widget as TransactionView).transactions = account.transactions;
             }
         }
 
