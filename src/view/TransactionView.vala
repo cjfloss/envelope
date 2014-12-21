@@ -149,11 +149,6 @@ namespace Envelope.View {
             update_view ();
         }
 
-        public void remove_transaction (Transaction transaction) {
-            // TODO
-            update_view ();
-        }
-
         public void clear () {
             transactions_store.clear ();
         }
