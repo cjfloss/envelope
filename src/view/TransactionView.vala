@@ -269,7 +269,6 @@ namespace Envelope.View {
 
                 bool do_filter_search = search_term != null && search_term != "";
                 var search = do_filter_search ? search_term.up () : "";
-                FilterView.FilterType filter_type = FilterView.get_default ().filter_type;
 
                 var iter = transactions.iterator ().filter ( (transaction) =>  {
                     // filter on search term
@@ -776,7 +775,6 @@ namespace Envelope.View {
 
         private void save_transaction () {
             // save transaction
-            Transaction transaction;
             string t_date;
             string t_label;
             string t_description;
