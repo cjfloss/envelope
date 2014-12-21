@@ -35,9 +35,11 @@ namespace Envelope.DB {
             `direction` INT NOT NULL,
             `amount` DOUBLE NOT NULL,
             `account_id` INT NOT NULL,
+            `category_id` INT,
             `parent_transaction_id` INT,
             `date` TIMESTAMP NOT NULL,
             FOREIGN KEY (`parent_transaction_id`) REFERENCES `transactions`(`id`),
+            FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`),
             FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`))
             """;
 
