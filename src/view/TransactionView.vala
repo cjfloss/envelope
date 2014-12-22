@@ -650,9 +650,11 @@ namespace Envelope.View {
             // remove transaction on delete key
             treeview.key_press_event.connect ( (event) => {
                 if (event.keyval == Gdk.Key.Delete) {
-                    // DEL key pressed! delete transaction
-                    popup_menu_remove_activated ();
-                    return false;
+
+                    if (current_add_transaction_action != AddTransactionAction.EDITING) {
+                        // DEL key pressed! delete transaction
+                        popup_menu_remove_activated ();
+                    }
                 }
 
                 return false;
