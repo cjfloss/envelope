@@ -201,7 +201,7 @@ namespace Envelope.Window {
 
             window_position = saved_state.window_position != null ? saved_state.window_position : Gtk.WindowPosition.CENTER;
 
-            if (saved_state.window_state == Gdk.WindowState.MAXIMIZED) {
+            if (saved_state.maximized) {
                 maximize ();
             }
             else if (saved_state.window_width != null && saved_state.window_height != null) {
@@ -373,7 +373,7 @@ namespace Envelope.Window {
 
             saved_state.window_height = height;
             saved_state.window_width = width;
-            saved_state.window_state = get_window ().get_state ();
+            saved_state.maximized = get_window ().get_state () == Gdk.WindowState.MAXIMIZED;
 
             // sidebar width
             saved_state.sidebar_width = paned.get_position ();
