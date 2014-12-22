@@ -1,6 +1,7 @@
 language: c
 compiler: gcc
 before_install:
+  - sudo apt-get update -qq
   - sudo apt-get install -qq vala gobject-introspection libsqlheavy-dev libgtk-3-dev libgranite-dev cmake
 script:
   - mkdir build
