@@ -5,6 +5,8 @@ is written in Vala and uses the [Granite](https://launchpad.net/granite) framewo
 
 http://nlaplante.github.io/envelope
 
+[![Build Status](https://travis-ci.org/nlaplante/envelope.svg)](https://travis-ci.org/nlaplante/envelope)
+
 ## Introduction
 
 Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system). You designate spending categories (envelopes) and distribute your monthly income into them.
