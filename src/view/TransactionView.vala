@@ -674,7 +674,9 @@ namespace Envelope.View {
         private void popup_menu_remove_activated () {
 
             Gtk.TreeIter iter;
-            treeview.get_selection ().get_selected (null, out iter);
+            if (!treeview.get_selection ().get_selected (null, out iter)) {
+                return;
+            }
 
             Transaction transaction;
             transactions_store.@get (iter, Column.TRANSACTION, out transaction, -1);
