@@ -22,7 +22,7 @@ namespace Envelope.Service.Settings {
 
     public class SavedState : /*Granite.Services.Settings*/ Object {
 
-        public Gdk.WindowState? window_state { get; set; }
+        public bool maximized { get; set; default = false; }
         public Gtk.WindowPosition? window_position { get; set; }
 
         public int? window_width { get; set; }
