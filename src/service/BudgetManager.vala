@@ -42,6 +42,8 @@ namespace Envelope.Service {
 
         public signal void budget_changed ();
 
+        private DatabaseManager dbm = DatabaseManager.get_default ();
+
         private BudgetManager () {
             budget_manager_instance = this;
             connect_signals ();
@@ -68,10 +70,28 @@ namespace Envelope.Service {
             });
         }
 
+        public ArrayList<Category> get_categories () throws ServiceError {
+            
+            try {
+                var categories = dbm.load_categories ();
+
+                if (!categories.is_empty) {
+                    categories.sort ();
+                }
+
+                debug ("loaded %d categorie(s)".printf (categories.size));
+
+                return categories;
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
         public ArrayList<Transaction> get_current_transactions () throws ServiceError {
 
             try {
-                return DatabaseManager.get_default ().get_current_transactions ();
+                return dbm.get_current_transactions ();
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
