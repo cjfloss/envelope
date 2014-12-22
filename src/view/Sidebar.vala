@@ -173,7 +173,7 @@ namespace Envelope.View {
             crt.ellipsize_set = true;
             crt.edited.connect (account_renamed);
 
-            col.set_attributes (crt, "text", Column.LABEL);
+            col.set_attributes (crt, "markup", Column.LABEL);
             col.set_cell_data_func (crt, treeview_text_renderer_function);
 
             cre = new Granite.Widgets.CellRendererExpander ();
