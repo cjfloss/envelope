@@ -70,6 +70,7 @@ namespace Envelope.View {
         private Gtk.InfoBar infobar;
 
         private Gtk.TreeStore transactions_store;
+        private Gtk.TreeModelFilter view_store;
         private Gtk.TreeIter current_editing_iter;
 
         private bool populating_from_list = false;
@@ -101,6 +102,9 @@ namespace Envelope.View {
                 typeof (int),
                 typeof (Transaction),
                 typeof (string)); // todo change to category type
+
+            view_store = new Gtk.TreeModelFilter (transactions_store, null);
+            view_store.set_visible_func (view_store_filter_func);
 
             build_ui ();
             connect_signals ();
@@ -188,12 +192,43 @@ namespace Envelope.View {
             }
         }
 
+        private bool view_store_filter_func (Gtk.TreeModel model, Gtk.TreeIter iter) {
+
+            Transaction transaction;
+            model.@get (iter, Column.TRANSACTION, out transaction, -1);
+
+            if (transaction == null) {
+                return false;
+            }
+
+            var search = search_term != null && search_term.strip ().length > 0 ? search_term.up () : "";
+
+            if (search.length > 0) {
+                var label = transaction.label.up ();
+                var desc = (transaction.description != null ? transaction.description : "").up ();
+
+                if (label.index_of (search) == -1 && desc.index_of (search) == -1) {
+                    return false;
+                }
+            }
+
+            // no search, or transaction matches search, continue with dates
+            var tdate = transaction.date;
+
+            var is_after = filter_from != null ? tdate.compare (filter_from) >= 0 : true;
+            var is_before = filter_to != null ? tdate.compare (filter_to) <= 0 : true;
+
+            bool visible = is_after && is_before;
+
+            return visible;
+        }
+
         /**
          * Adds a list of transactions to the grid store
          */
         private void add_transactions () {
 
-            debug ("filtering and adding %d transactions".printf (transactions.size));
+            populating_from_list = true;
 
             clear ();
 
@@ -202,43 +237,9 @@ namespace Envelope.View {
 
             if (transactions != null) {
 
-                populating_from_list = true;
-
-                bool do_filter_search = search_term != null && search_term != "";
-                var search = do_filter_search ? search_term.up () : "";
-
-                var iter = transactions.iterator ().filter ( (transaction) =>  {
-                    // filter on search term
-                    if (do_filter_search) {
-
-                        var label = transaction.label.up ();
-                        var desc = (transaction.description != null ? transaction.description : "").up ();
-
-                        if (label.index_of (search) == -1 && desc.index_of (search) == -1) {
-                            return false;
-                        }
-                    }
-
-                    // honor date radio buttons
-                    var tdate = transaction.date;
-
-                    var is_after = filter_from != null ? tdate.compare (filter_from) >= 0 : true;
-                    var is_before = filter_to != null ? tdate.compare (filter_to) <= 0 : true;
-
-                    return is_after && is_before;
-                });
-
-                while (iter.next ()) {
-                    add_transaction (iter.get());
-                    count++;
+                foreach (Transaction transaction in transactions) {
+                    add_transaction (transaction);
                 }
-            }
-
-            if (count > 0) {
-                infobar.hide ();
-            }
-            else if (count != total) {
-                infobar.show_all ();
             }
 
             populating_from_list = false;
@@ -306,7 +307,7 @@ namespace Envelope.View {
             filter_box.show_all ();
 
             // infobar shown when filters do not return any transaction
-            infobar = new Gtk.InfoBar /*.with_buttons (_("Clear filters"), InfoBarResponse.CLEAR, null)*/ ();
+            infobar = new Gtk.InfoBar  ();
             infobar.message_type = Gtk.MessageType.WARNING;
             infobar.get_content_area ().add (new Gtk.Label(_("No results.")));
 
@@ -400,7 +401,7 @@ namespace Envelope.View {
             treeview.show_expanders = true;
             treeview.rules_hint = true;
             treeview.enable_grid_lines = Gtk.TreeViewGridLines.BOTH;
-            treeview.set_model (transactions_store);
+            treeview.set_model (view_store);
             treeview.set_search_column (1);
             treeview.hadjustment.page_size = 10d;
             treeview.show_all ();
@@ -570,9 +571,12 @@ namespace Envelope.View {
         }
 
         private void cell_renderer_badge_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+
             Gtk.CellRendererText cr = renderer as Gtk.CellRendererText;
-            Transaction? transaction = null;
-            transactions_store.@get (iter, Column.TRANSACTION, out transaction, -1);
+
+            Transaction transaction = null;
+            view_store.@get (iter, Column.TRANSACTION, out transaction, -1);
+
             cr.visible = transaction != null && transaction.date.compare (now) == 1;
         }
 
