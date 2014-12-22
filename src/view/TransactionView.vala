@@ -198,7 +198,7 @@ namespace Envelope.View {
             model.@get (iter, Column.TRANSACTION, out transaction, -1);
 
             if (transaction == null) {
-                return false;
+                return true; //editing... always shown
             }
 
             var search = search_term != null && search_term.strip ().length > 0 ? search_term.up () : "";
@@ -364,11 +364,14 @@ namespace Envelope.View {
                     case AddTransactionAction.NONE:
                         // add a row
                         current_editing_iter = add_empty_row ();
-                        treeview.get_selection ().select_iter (current_editing_iter);
+
+                        // convert to child model iter
+                        Gtk.TreeIter child_iter;
+                        view_store.convert_child_iter_to_iter (out child_iter, current_editing_iter);
+                        treeview.get_selection ().select_iter (child_iter);
 
                         btn_add_transaction.get_style_context ().add_class("suggested-action");
                         btn_add_transaction.label = _("Apply");
-                        //btn_add_transaction.sensitive = false;
 
                         current_add_transaction_action = AddTransactionAction.EDITING;
 
@@ -410,11 +413,15 @@ namespace Envelope.View {
             renderer_memo = new Gtk.CellRendererText();
             renderer_memo.editable = true;
             renderer_memo.edited.connect ((path, text) => {
+
                 Gtk.TreeIter iter;
 
-                if (transactions_store.get_iter_from_string (out iter, path)) {
-                    debug ("edited: setting memo in store");
-                    transactions_store.@set (iter, Column.MEMO, text, -1);
+                if (view_store.get_iter_from_string (out iter, path)) {
+
+                    Gtk.TreeIter store_iter;
+                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+
+                    transactions_store.@set (store_iter, Column.MEMO, text, -1);
                 }
             });
 
@@ -424,11 +431,15 @@ namespace Envelope.View {
             renderer_label.text_column = 0;
             renderer_label.editable = true;
             renderer_label.edited.connect ((path, text) =>  {
+
                 Gtk.TreeIter iter;
 
-                if (transactions_store.get_iter_from_string (out iter, path)) {
-                    debug ("edited: setting merchant in store");
-                    transactions_store.@set (iter, Column.MERCHANT, text, -1);
+                if (view_store.get_iter_from_string (out iter, path)) {
+
+                    Gtk.TreeIter store_iter;
+                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+
+                    transactions_store.@set (store_iter, Column.MERCHANT, text, -1);
                 }
             });
 
@@ -438,11 +449,15 @@ namespace Envelope.View {
             renderer_out.foreground = CELL_COLOR_OUTGOING;
             renderer_out.xalign = 1.0f;
             renderer_out.edited.connect ((path, text) =>  {
+
                 Gtk.TreeIter iter;
 
-                if (transactions_store.get_iter_from_string (out iter, path)) {
-                    debug ("edited: setting outgoing amount in store");
-                    transactions_store.@set (iter, Column.OUTFLOW, Envelope.Util.format_currency (double.parse (text)), -1);
+                if (view_store.get_iter_from_string (out iter, path)) {
+
+                    Gtk.TreeIter store_iter;
+                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+
+                    transactions_store.@set (store_iter, Column.OUTFLOW, Envelope.Util.format_currency (double.parse (text)), -1);
                 }
             });
 
@@ -452,11 +467,15 @@ namespace Envelope.View {
             renderer_in.foreground = CELL_COLOR_INCOMING;
             renderer_in.xalign = 1.0f;
             renderer_in.edited.connect ((path, text) =>  {
+
                 Gtk.TreeIter iter;
 
-                if (transactions_store.get_iter_from_string (out iter, path)) {
-                    debug ("edited: setting incoming amount in store");
-                    transactions_store.@set (iter, Column.INFLOW, Envelope.Util.format_currency (double.parse (text)), -1);
+                if (view_store.get_iter_from_string (out iter, path)) {
+
+                    Gtk.TreeIter store_iter;
+                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+
+                    transactions_store.@set (store_iter, Column.INFLOW, Envelope.Util.format_currency (double.parse (text)), -1);
                 }
             });
 
@@ -467,11 +486,15 @@ namespace Envelope.View {
             crdp.edited.connect ((path, text) => {
 
                 if (crdp.date_selected) {
+
                     Gtk.TreeIter iter;
 
-                    if (transactions_store.get_iter_from_string (out iter, path)) {
-                        debug ("edited: setting date in store");
-                        transactions_store.@set (iter, Column.DATE, text, -1);
+                    if (view_store.get_iter_from_string (out iter, path)) {
+
+                        Gtk.TreeIter store_iter;
+                        view_store.convert_iter_to_child_iter (out store_iter, iter);
+
+                        transactions_store.@set (store_iter, Column.DATE, text, -1);
                     }
                 }
             });
@@ -574,7 +597,7 @@ namespace Envelope.View {
 
             Gtk.CellRendererText cr = renderer as Gtk.CellRendererText;
 
-            Transaction transaction = null;
+            Transaction transaction;
             view_store.@get (iter, Column.TRANSACTION, out transaction, -1);
 
             cr.visible = transaction != null && transaction.date.compare (now) == 1;
@@ -598,7 +621,7 @@ namespace Envelope.View {
                 Column.OUTFLOW, "",
                 Column.INFLOW, "",
                 Column.ID, null,
-                Column.TRANSACTION, null,
+                Column.TRANSACTION, transaction,
                 Column.CATEGORY, "", -1);
 
             return insert_iter;
@@ -685,7 +708,7 @@ namespace Envelope.View {
             }
 
             Transaction transaction;
-            transactions_store.@get (iter, Column.TRANSACTION, out transaction, -1);
+            view_store.@get (iter, Column.TRANSACTION, out transaction, -1);
 
             try {
                 AccountManager.get_default ().remove_transaction (ref transaction);
@@ -710,39 +733,43 @@ namespace Envelope.View {
             string t_out_amount;
             string t_category;
 
-            transactions_store.@get (current_editing_iter, Column.DATE, out t_date,
-                Column.MERCHANT, out t_label,
-                Column.MEMO, out t_description,
-                Column.INFLOW, out t_in_amount,
-                Column.OUTFLOW, out t_out_amount,
-                Column.CATEGORY, out t_category, -1);
+            Gtk.TreeIter view_iter;
+            if (view_store.convert_child_iter_to_iter (out view_iter, current_editing_iter)) {
 
-            // amount
-            double amount = 0d;
+                view_store.@get (view_iter, Column.DATE, out t_date,
+                    Column.MERCHANT, out t_label,
+                    Column.MEMO, out t_description,
+                    Column.INFLOW, out t_in_amount,
+                    Column.OUTFLOW, out t_out_amount,
+                    Column.CATEGORY, out t_category, -1);
 
-            try {
-                if (t_in_amount != "") {
-                    amount = Envelope.Util.parse_currency (t_in_amount);
+                // amount
+                double amount = 0d;
+
+                try {
+                    if (t_in_amount != "") {
+                        amount = Envelope.Util.parse_currency (t_in_amount);
+                    }
+                    else if (t_out_amount != "") {
+                        amount = - Envelope.Util.parse_currency (t_out_amount);
+                    }
                 }
-                else if (t_out_amount != "") {
-                    amount = - Envelope.Util.parse_currency (t_out_amount);
+                catch (Envelope.Util.ParseError err) {
+                    error ("could not parse transaction amount (%s)".printf (err.message));
                 }
-            }
-            catch (Envelope.Util.ParseError err) {
-                error ("could not parse transaction amount (%s)".printf (err.message));
-            }
 
-            // date
-            uint year, month, day;
-            crdp.calendar.get_date (out year, out month, out day);
+                // date
+                uint year, month, day;
+                crdp.calendar.get_date (out year, out month, out day);
 
-            var date = new DateTime.local ((int) year, (int) month + 1, (int) day, 0, 0, 0);
+                var date = new DateTime.local ((int) year, (int) month + 1, (int) day, 0, 0, 0);
 
-            try {
-                var acct_ref = Sidebar.get_default ().selected_account;
-                AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, null);
-            } catch (ServiceError err) {
-                error (err.message);
+                try {
+                    var acct_ref = Sidebar.get_default ().selected_account;
+                    AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, null);
+                } catch (ServiceError err) {
+                    error (err.message);
+                }
             }
         }
 
