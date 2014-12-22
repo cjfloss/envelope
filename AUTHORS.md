@@ -1,9 +1,11 @@
-Authors:
-    Nicolas Laplante <nicolas.laplante@gmail.com>
+# Authors
 
-Maintainers:
+* Nicolas Laplante <nicolas.laplante@gmail.com>
 
-Designers:
-    Nicolas Laplante <nicolas.laplante@gmail.com>
+# Maintainers:
 
-Contributors:
+# Designers:
+
+* Nicolas Laplante <nicolas.laplante@gmail.com>
+
+# Contributors:
