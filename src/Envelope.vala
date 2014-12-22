@@ -40,7 +40,7 @@ public class Envelope.App : Granite.Application {
         exec_name = "envelope";
 
         app_copyright = "2014";
-        application_id = "net.launchpad.envelope";
+        application_id = "org.envelope.envelope";
         app_icon = "multimedia-audio-player";
         app_launcher = "envelope.desktop";
         app_years = "2014";
@@ -89,7 +89,7 @@ public class Envelope.App : Granite.Application {
     }
 
     public string get_id () {
-        return "net.launchpad.envelope";
+        return application_id;
     }
 
     public string get_name () {
