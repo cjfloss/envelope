@@ -9,6 +9,6 @@ TODO
 In elementary OS, Envelope is known as Budget.
 
 
-# Installation & Licensing
+# Licensing
 
-Please consult the INSTALL and COPYING files for more information.
+Please consult the LICENCE.md file for more information.
