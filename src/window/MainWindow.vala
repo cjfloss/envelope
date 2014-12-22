@@ -340,7 +340,7 @@ namespace Envelope.Window {
 
         private void determine_content_view (Account account, out Gtk.Widget widget) {
 
-            var transactions = dbm.load_account_transactions (account.@id);
+            var transactions = dbm.load_account_transactions (account);
             account.transactions = transactions;
 
             if (transactions.size == 0) {
