@@ -286,9 +286,6 @@ namespace Envelope.View {
 
             treeview.get_selection ().unselect_all ();
             treeview.expand_all ();
-
-            // fix for overview section collapsed
-            //treeview.collapse_row (store.get_path (overview_iter), true);
         }
 
         public void s_account_created (Account account) {
