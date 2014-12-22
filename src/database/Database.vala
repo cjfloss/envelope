@@ -48,7 +48,7 @@ namespace Envelope.DB {
             `id` INTEGER PRIMARY KEY AUTOINCREMENT,
             `name` TEXT NOT NULL,
             `description` TEXT,
-            `amount_budgeted` DOUBLE NOT NULL,
+            `amount_budgeted` DOUBLE,
             `parent_category_id` INT,
         FOREIGN KEY (`parent_category_id`) REFERENCES `category`(`id`))
         """;
@@ -286,30 +286,25 @@ namespace Envelope.DB {
             stmt.execute ();
         }
 
-        public Gee.ArrayList<Category> load_categories () {
+        public Gee.ArrayList<Category> load_categories () throws SQLHeavy.Error {
 
             debug ("loading categories");
 
             Gee.ArrayList<Category> list = new Gee.ArrayList<Category> ();
 
-            try {
-                SQLHeavy.QueryResult results = q_load_categories.execute ();
+            SQLHeavy.QueryResult results = q_load_categories.execute ();
 
-                while (!results.finished) {
-                    Category category;
-                    int parent_id;
+            while (!results.finished) {
+                Category category;
+                int parent_id;
 
-                    query_result_to_category (results, out category, out parent_id);
+                query_result_to_category (results, out category, out parent_id);
 
-                    // TODO add to parent ???
+                // TODO add to parent ???
 
-                    list.add (category);
+                list.add (category);
 
-                    results.next ();
-                }
-            }
-            catch (SQLHeavy.Error err) {
-                error ("could not load categories (%s)".printf (err.message));
+                results.next ();
             }
 
             return list;
@@ -450,6 +445,37 @@ namespace Envelope.DB {
             }
 
             // TODO check if there are categories. If not, then create the default ones
+            try {
+                var result = database.execute ("SELECT COUNT(*) AS category_count from categories");
+
+                assert (!result.finished);
+                var category_count = result.get_int ("category_count");
+
+                if (category_count == 0) {
+
+                    var db_transaction = start_transaction ();
+
+                    // create default categories
+                    var default_categories = new string[] { _("Groceries"),
+                                                            _("Fuel"),
+                                                            _("Public transit"),
+                                                            _("Restaurants"),
+                                                            _("Entertainment"),
+                                                            _("Savings"),
+                                                            _("Personal care"),
+                                                            _("Alcohol &amp; Bars"),
+                                                            _("Emergency fund")};
+
+                    foreach (string name in default_categories) {
+                        db_transaction.execute_insert ("INSERT INTO `categories` (`name`) VALUES (:name);", "name", typeof (string), name);
+                    }
+
+                    db_transaction.commit ();
+                }
+            }
+            catch (SQLHeavy.Error err) {
+                error ("could not initialize default categories (%s)".printf (err.message));
+            }
 
             // TODO check if this is necessary
             database.synchronous = SQLHeavy.SynchronousMode.OFF;
