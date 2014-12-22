@@ -206,28 +206,30 @@ namespace Envelope.DB {
                 .execute ("balance", typeof (double), account.balance, "account_id", typeof (int), account.@id);
         }
 
-        public Gee.ArrayList<Transaction> load_account_transactions (int account_id) {
+        public Gee.ArrayList<Transaction> load_account_transactions (Account account) {
 
-            debug ("loading transactions for account %d".printf (account_id));
+            debug ("loading transactions for account %d".printf (account.@id));
 
             Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
 
             try {
                 q_load_account_transactions.clear ();
-                q_load_account_transactions.set_int ("account_id", account_id);
+                q_load_account_transactions.set_int ("account_id", account.@id);
 
                 SQLHeavy.QueryResult results = q_load_account_transactions.execute ();
 
                 while (!results.finished) {
                     Transaction transaction;
                     query_result_to_transaction (results, out transaction);
+
+                    transaction.account = account;
                     list.add (transaction);
 
                     results.next ();
                 }
             }
             catch (SQLHeavy.Error err) {
-                error ("could not load transactions for account %d (%s)".printf (account_id, err.message));
+                error ("could not load transactions for account %d (%s)".printf (account.@id, err.message));
             }
 
             return list;
