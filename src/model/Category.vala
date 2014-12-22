@@ -32,7 +32,15 @@ namespace Envelope {
         }
 
         public int compare_to (Category category) {
-            return 1;
+            if (name == category.name) {
+                return 0;
+            }
+
+            if (name > category.name) {
+                return 1;
+            }
+
+            return -1;
         }
 
         public double get_amount_spent (DateTime? from = null, DateTime? to = null) {
