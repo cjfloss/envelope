@@ -248,6 +248,7 @@ namespace Envelope.View {
                     if (account_list != null && !account_list.is_empty) {
 
                         foreach (Account account in accounts) {
+                            debug ("adding account %s".printf (account.number));
                             add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true);
                         }
                     }
@@ -263,20 +264,18 @@ namespace Envelope.View {
                 // Add "Categories" category header
                 category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
 
-                // Add mocked categories
+                // Add categories
+                try {
+                    Gee.ArrayList<Category> categories = BudgetManager.get_default ().get_categories ();
 
-                var cat = new Category ();
-
-                add_item (category_iter, _("Groceries"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Fuel"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Public transit"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Restaurants"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Entertainment"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Savings"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Personal care"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Alcohol &amp; Bars"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Emergency fund"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
-                add_item (category_iter, _("Cigarettes"), TreeCategory.CATEGORIES, null, cat, Action.NONE, null, ICON_CATEGORY);
+                    foreach (Category category in categories) {
+                        debug ("adding category %s".printf (category.name));
+                        add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, null, ICON_CATEGORY);
+                    }
+                }
+                catch (ServiceError err) {
+                    error ("could not load categories (%s)".printf (err.message));
+                }
 
                 // Add "Add category..."
                 add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY, null, ICON_ACTION_ADD);
