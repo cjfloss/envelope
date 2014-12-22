@@ -47,7 +47,7 @@ include(ValaPrecompile)
 
 vala_precompile(VALA_C ${EXEC_NAME}
 
-  src/util/string.vala
+  src/util/String.vala
 
   src/model/Account.vala
   src/model/Budget.vala
