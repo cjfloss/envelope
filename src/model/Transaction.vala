@@ -50,6 +50,8 @@ namespace Envelope {
 
         private DateTime _date;
 
+        public Category category { get; set; }
+
         public Transaction () {
             _amount = 0d;
             _label = "Untitled";
@@ -64,7 +66,7 @@ namespace Envelope {
 
         public string label {
             get { return _label; }
-            set { _label = value; }            
+            set { _label = value; }
         }
 
         public string description {
