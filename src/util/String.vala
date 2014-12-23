@@ -21,11 +21,14 @@ namespace Envelope.Util {
     public static double parse_currency (string amount) throws ParseError {
 
         if (REGEX_NON_AMOUNT == null) {
+
+            Monetary.lconv *locale_info = Monetary.localeconv ();
+            
             try {
-                REGEX_NON_AMOUNT = new Regex ("[^0-9\\.]*");
+                REGEX_NON_AMOUNT = new Regex ("[^0-9\\%c]*".printf (*(locale_info->decimal_point)));
             }
             catch (RegexError err) {
-                assert_not_reached ();
+                error (err.message);
             }
         }
 
