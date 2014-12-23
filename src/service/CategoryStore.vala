@@ -50,7 +50,7 @@ namespace Envelope.Service {
                 }
             }
             catch (ServiceError err) {
-                error ("could not load categories (%s)", err.message);
+                warning ("could not load categories; autocompletion won't work in the transaction view (%s)", err.message);
             }
         }
 
