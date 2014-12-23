@@ -1,5 +1,7 @@
 namespace Envelope.Util {
 
+    private static Regex REGEX_NON_AMOUNT;
+
     public static const string ELLIPSIS = "\u2026";
 
     public errordomain ParseError {
@@ -17,9 +19,20 @@ namespace Envelope.Util {
     }
 
     public static double parse_currency (string amount) throws ParseError {
+
+        if (REGEX_NON_AMOUNT == null) {
+            try {
+                REGEX_NON_AMOUNT = new Regex ("[^0-9\\.]*");
+            }
+            catch (RegexError err) {
+                assert_not_reached ();
+            }
+        }
+
         double result;
 
-        var sanitized = amount.replace ("$", "").replace (",", "").replace (" ", "");
+        // replace all non-currency characters (except . and separator)
+        var sanitized = REGEX_NON_AMOUNT.replace_literal(amount, -1, 0, "").strip ();
 
         if (!double.try_parse (sanitized, out result)) {
             throw new ParseError.INVALID ("cannot parse %s".printf (amount));
