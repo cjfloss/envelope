@@ -42,6 +42,9 @@ namespace Envelope.Service {
 
         public signal void budget_changed ();
 
+        public signal void category_added (Category category);
+        public signal void category_deleted (Category category);
+
         private DatabaseManager dbm = DatabaseManager.get_default ();
 
         private BudgetManager () {
@@ -71,7 +74,7 @@ namespace Envelope.Service {
         }
 
         public ArrayList<Category> get_categories () throws ServiceError {
-            
+
             try {
                 var categories = dbm.load_categories ();
 
@@ -82,6 +85,23 @@ namespace Envelope.Service {
                 debug ("loaded %d categorie(s)".printf (categories.size));
 
                 return categories;
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
+        public Category create_category (string name) throws ServiceError {
+
+            try {
+                Category category = new Category ();
+                category.name = name;
+
+                dbm.create_category (category);
+
+                category_added (category);
+
+                return category;
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);

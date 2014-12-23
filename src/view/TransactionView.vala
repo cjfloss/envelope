@@ -443,6 +443,47 @@ namespace Envelope.View {
                 }
             });
 
+            // category cell renderer
+            var renderer_category = new CellRendererTextCompletion ();
+            renderer_category.store = CategoryStore.get_default ();
+            renderer_category.text_column = CategoryStore.Column.LABEL;
+            renderer_category.editable = true;
+            renderer_category.edited.connect ((path, text) => {
+
+                if (text.strip () == "") {
+                    return;
+                }
+                
+                Gtk.TreeIter iter;
+
+                if (view_store.get_iter_from_string (out iter, path)) {
+
+                    var category = CategoryStore.get_default ().get_category_by_name (text);
+
+                    if (category == null) {
+
+                        info ("creating new category '%s'".printf (text));
+                        // we must create a new category
+                        try {
+                            category = BudgetManager.get_default ().create_category (text);
+                        }
+                        catch (ServiceError err) {
+                            error ("could not create category '%s' (%s)", text, err.message);
+                        }
+                    }
+
+                    Gtk.TreeIter store_iter;
+                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+
+                    // update transaction object
+                    Transaction transaction;
+                    transactions_store.@get (store_iter, Column.TRANSACTION, out transaction, -1);
+                    transaction.category = category;
+
+                    transactions_store.@set (store_iter, Column.CATEGORY, category.name, -1);
+                }
+            });
+
             // cell renderer for outgoing transactions
             Gtk.CellRendererText renderer_out = new Gtk.CellRendererText();
             renderer_out.editable = true;
@@ -535,10 +576,12 @@ namespace Envelope.View {
             var category_column = new Gtk.TreeViewColumn ();
             category_column.set_title (_("Category"));
             category_column.max_width = -1;
+            category_column.pack_start (renderer_category, true);
             category_column.resizable = true;
             category_column.reorderable = true;
             //category_column.sort_column_id
             //category_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
+            category_column.set_attributes (renderer_category, "text", Column.CATEGORY);
             treeview.append_column (category_column);
 
             var out_column = new Gtk.TreeViewColumn ();
