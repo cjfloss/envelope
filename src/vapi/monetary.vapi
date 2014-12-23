@@ -12,6 +12,16 @@ namespace Monetary {
       char* mon_grouping;
       char* int_frac_digits;
       char* frac_digits;
+      char* currency_symbol;
+      char* int_currency_symbol;
+      char p_cs_precedes;
+      char n_cs_precedes;
+      char p_sep_by_space;
+      char n_sep_by_space;
+      char* positive_sign;
+      char* negative_sign;
+      char p_sign_posn;
+      char n_sign_posn;
     }
 
     [CCode (cheader_filename = "locale.h", cname = "localeconv")]
