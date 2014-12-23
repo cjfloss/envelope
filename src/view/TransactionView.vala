@@ -453,7 +453,7 @@ namespace Envelope.View {
                 if (text.strip () == "") {
                     return;
                 }
-                
+
                 Gtk.TreeIter iter;
 
                 if (view_store.get_iter_from_string (out iter, path)) {
@@ -498,7 +498,7 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    transactions_store.@set (store_iter, Column.OUTFLOW, Envelope.Util.format_currency (double.parse (text)), -1);
+                    transactions_store.@set (store_iter, Column.OUTFLOW, Envelope.Util.format_currency (Envelope.Util.parse_currency (text)), -1);
                 }
             });
 
@@ -516,7 +516,7 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    transactions_store.@set (store_iter, Column.INFLOW, Envelope.Util.format_currency (double.parse (text)), -1);
+                    transactions_store.@set (store_iter, Column.INFLOW, Envelope.Util.format_currency (Envelope.Util.parse_currency (text)), -1);
                 }
             });
 
@@ -800,6 +800,8 @@ namespace Envelope.View {
                 catch (Envelope.Util.ParseError err) {
                     error ("could not parse transaction amount (%s)".printf (err.message));
                 }
+
+                debug ("parsed amount: %f", amount);
 
                 // date
                 uint year, month, day;
