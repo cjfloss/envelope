@@ -86,11 +86,14 @@ namespace Envelope.Service {
         }
 
         private void connect_signals () {
-            BudgetManager.get_default ().category_added.connect ( (category) => {
+
+            var budget_manager = BudgetManager.get_default ();
+
+            budget_manager.category_added.connect ( (category) => {
                 reload ();
             });
 
-            BudgetManager.get_default ().category_deleted.connect ( (category) => {
+            budget_manager.category_deleted.connect ( (category) => {
                 reload ();
             });
         }
