@@ -59,6 +59,8 @@ namespace Envelope.DB {
         public signal void account_deleted (Account account);
         public signal void accout_updated (Account account);
 
+        public signal void category_created (Category category);
+
         private static DatabaseManager database_manager_instance = null;
 
         // database handler
@@ -169,6 +171,24 @@ namespace Envelope.DB {
             debug ("loaded %d account(s)".printf (list.size));
 
             return list;
+        }
+
+        public void create_category (Category category) throws SQLHeavy.Error {
+
+            debug ("inserting category '%s' in database".printf (category.name));
+
+            var id = q_insert_category.execute_insert (
+                "name", typeof (string), category.name,
+                "description", typeof (string), category.description,
+                "amount_budgeted", typeof (double), category.amount_budgeted,
+                "parent_category_id", typeof (int), null
+            );
+
+            debug ("category created with id %d".printf ((int) id));
+
+            category.@id = (int) id;
+
+            category_created (category);
         }
 
         public void create_account (Account account) throws SQLHeavy.Error {
