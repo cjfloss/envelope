@@ -90,10 +90,12 @@ namespace Envelope.Service {
             var budget_manager = BudgetManager.get_default ();
 
             budget_manager.category_added.connect ( (category) => {
+                debug ("category added; reloading store");
                 reload ();
             });
 
             budget_manager.category_deleted.connect ( (category) => {
+                debug ("category deleted; reloading store");
                 reload ();
             });
         }
