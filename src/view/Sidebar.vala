@@ -211,6 +211,7 @@ namespace Envelope.View {
             dbm.account_created.connect (add_new_account);
 
             BudgetManager.get_default ().budget_changed.connect (update_budget_section);
+            BudgetManager.get_default ().category_added.connect (update_view);
             AccountManager.get_default ().account_updated.connect (update_account_item);
 
             destroy.connect (on_quit);
