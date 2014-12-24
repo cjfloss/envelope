@@ -23,7 +23,8 @@ namespace Envelope.Service {
 
     public errordomain ImporterError {
         ENOENT,
-        UNSUPPORTED
+        UNSUPPORTED,
+        PARSE
     }
 
     /**
