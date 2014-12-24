@@ -139,8 +139,12 @@ namespace Envelope.View {
                 get_transaction_iter (parent_transaction, out parent_iter);
             }
 
-            transactions_store.append (out iter, parent_iter);
+            var category_name = "";
+            if (transaction.category != null) {
+                category_name = transaction.category.name;
+            }
 
+            transactions_store.append (out iter, parent_iter);
             transactions_store.@set (iter,
                 Column.DATE, transaction.date.format (CELL_DATE_FORMAT),
                 Column.MERCHANT, transaction.label,
@@ -149,7 +153,7 @@ namespace Envelope.View {
                 Column.MEMO, transaction.description,
                 Column.ID, transaction.@id,
                 Column.TRANSACTION, transaction,
-                Column.CATEGORY, "", -1);
+                Column.CATEGORY, category_name, -1);
 
             update_view ();
         }
@@ -480,7 +484,7 @@ namespace Envelope.View {
                     transactions_store.@get (store_iter, Column.TRANSACTION, out transaction, -1);
                     transaction.category = category;
 
-                    transactions_store.@set (store_iter, Column.CATEGORY, category.name, -1);
+                    transactions_store.@set (store_iter, Column.CATEGORY, category != null ? category.name : "", -1);
                 }
             });
 
@@ -809,9 +813,14 @@ namespace Envelope.View {
 
                 var date = new DateTime.local ((int) year, (int) month + 1, (int) day, 0, 0, 0);
 
+                // category
+                Category? category = CategoryStore.get_default ().get_category_by_name (t_category);
+
+                debug ("found category %d in store", category != null ? category.@id : -1);
+
                 try {
                     var acct_ref = Sidebar.get_default ().selected_account;
-                    AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, null);
+                    AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, category,  null);
                 } catch (ServiceError err) {
                     error (err.message);
                 }
@@ -859,6 +868,8 @@ namespace Envelope.View {
                     transaction.amount = amount;
 
                     // TODO date
+
+                    // TODO save
                 }
             }
         }

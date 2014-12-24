@@ -22,57 +22,52 @@ using Envelope.DB;
 namespace Envelope.Service {
 
     public struct BudgetState {
+
         DateTime from;
         DateTime to;
+
         double inflow;
         double outflow;
+
+        ArrayList<Transaction> transactions;
+        ArrayList<Category> categories;
     }
 
-    public class BudgetManager {
+    private static BudgetManager budget_manager_instance = null;
 
-        private static BudgetManager budget_manager_instance = null;
+    public class BudgetManager : Object {
 
-        public static new unowned BudgetManager get_default () {
+        public static BudgetManager get_default () {
+
             if (budget_manager_instance == null) {
+
                 budget_manager_instance = new BudgetManager ();
+
+                try {
+                    budget_manager_instance.compute_current_state ();
+                }
+                catch (ServiceError err) {
+                    error ("could not initialize budget state (%s)", err.message);
+                }
             }
 
             return budget_manager_instance;
         }
 
-        public signal void budget_changed ();
+        public BudgetState? state { get; private set; }
+
+        public signal void budget_changed (BudgetState state);
 
         public signal void category_added (Category category);
         public signal void category_deleted (Category category);
 
         private DatabaseManager dbm = DatabaseManager.get_default ();
 
-        private BudgetManager () {
-            budget_manager_instance = this;
-            connect_signals ();
-        }
-
-        private void connect_signals () {
-            var am = AccountManager.get_default ();
-
-            // listen to transaction operations
-            am.transaction_recorded.connect ( () =>  {
-                budget_changed ();
-            });
-
-            am.transactions_imported.connect ( () =>  {
-                budget_changed ();
-            });
-
-            am.transaction_updated.connect ( () =>  {
-                budget_changed ();
-            });
-
-            am.transaction_deleted.connect ( () =>  {
-                budget_changed ();
-            });
-        }
-
+        /**
+         * Get all categories
+         *
+         * @return {Gee.ArrayList<Category>} list of categories
+         */
         public ArrayList<Category> get_categories () throws ServiceError {
 
             try {
@@ -91,6 +86,12 @@ namespace Envelope.Service {
             }
         }
 
+        /**
+         * Create a new category having the specified name
+         *
+         * @param {string} name - the name of the category
+         * @return {Category} the new category
+         */
         public Category create_category (string name) throws ServiceError {
 
             try {
@@ -108,6 +109,9 @@ namespace Envelope.Service {
             }
         }
 
+        /**
+         * Get the transactions for the current month
+         */
         public ArrayList<Transaction> get_current_transactions () throws ServiceError {
 
             try {
@@ -118,12 +122,76 @@ namespace Envelope.Service {
             }
         }
 
-        public void compute_current_state (out double inflow, out double outflow, out DateTime from, out DateTime to) throws ServiceError {
+        /**
+         * Get the total inflow and outflow in the current month for the specified category
+         *
+         * @param {Category} category
+         * @param {double} inflow
+         * @param {double} outflow
+         */
+        public void compute_current_category_operations (Category category, out double inflow, out double outflow) {
+            try {
+                ArrayList<Transaction> transactions = dbm.get_current_transactions_for_category (category);
+
+                debug ("transaction for category %s: %d", category.name, transactions.size);
+
+                inflow = 0d;
+                outflow = 0d;
+
+                foreach (Transaction transaction in transactions) {
+                    switch (transaction.direction) {
+                        case Transaction.Direction.INCOMING:
+                            inflow += transaction.amount;
+                            break;
+                        case Transaction.Direction.OUTGOING:
+                            outflow += transaction.amount;
+                            break;
+                        default:
+                            assert_not_reached ();
+                    }
+                }
+            }
+            catch (SQLHeavy.Error err) {
+
+            }
+        }
+
+        private BudgetManager () {
+            connect_signals ();
+        }
+
+        private void connect_signals () {
+            var am = AccountManager.get_default ();
+
+            // listen to transaction operations
+            am.transaction_recorded.connect ( () =>  {
+                compute_state_and_fire_changed_event ();
+            });
+
+            am.transactions_imported.connect ( () =>  {
+                compute_state_and_fire_changed_event ();
+            });
+
+            am.transaction_updated.connect ( () =>  {
+                compute_state_and_fire_changed_event ();
+            });
+
+            am.transaction_deleted.connect ( () =>  {
+                compute_state_and_fire_changed_event ();
+            });
+        }
+
+        /**
+         * Compute the budget state for the current month
+         */
+        private void compute_current_state () throws ServiceError {
+
+            DateTime from;
+            DateTime to;
+            double inflow = 0d;
+            double outflow = 0d;
 
             compute_dates (out from, out to);
-
-            inflow = 0d;
-            outflow = 0d;
 
             foreach (Transaction t in get_current_transactions ()) {
 
@@ -141,12 +209,19 @@ namespace Envelope.Service {
                 }
             }
 
-            debug ("budget state: inflow: %s, outflow: %s".printf (
-                Envelope.Util.format_currency (inflow),
-                Envelope.Util.format_currency (outflow)
-            ));
+            var budget_state = state == null ? BudgetState () : state;
+
+            budget_state.from = from;
+            budget_state.to = to;
+            budget_state.inflow = inflow;
+            budget_state.outflow = outflow;
+
+            state = budget_state;
         }
 
+        /**
+         * Determine start and end dates for current month
+         */
         private void compute_dates (out DateTime from, out DateTime to) {
 
             var now = new DateTime.now_local ();
@@ -157,6 +232,21 @@ namespace Envelope.Service {
             // compute last day
             to = to.add_months (1).add_days (-1);
         }
-    }
 
+        /**
+         * Compute the budget state and fire the budget_changed signal with it
+         */
+        private void compute_state_and_fire_changed_event () {
+
+            debug ("compute_state_and_fire_changed_event");
+
+            try {
+                compute_current_state ();
+                budget_changed (state);
+            }
+            catch (ServiceError err) {
+                error ("could not compute budget state (%s)", err.message);
+            }
+        }
+    }
 }

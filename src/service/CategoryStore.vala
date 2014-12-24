@@ -21,11 +21,13 @@ using Gee;
 
 namespace Envelope.Service {
 
+    private static CategoryStore category_store_instance = null;
+
     public class CategoryStore : Gtk.ListStore {
 
-        private static CategoryStore category_store_instance = null;
 
-        public static new CategoryStore get_default () {
+
+        public static new unowned CategoryStore get_default () {
             if (category_store_instance == null) {
                 category_store_instance = new CategoryStore ();
             }
@@ -60,11 +62,30 @@ namespace Envelope.Service {
             @foreach ( (model, path, iter) => {
 
                 Category fe_category;
-                string fe_name;
+                model.@get (iter, Column.CATEGORY, out fe_category, -1);
 
-                model.@get (iter, Column.LABEL, out fe_name, Column.CATEGORY, out fe_category, -1);
+                if (fe_category != null && fe_category.name.up () == name.strip ().up ()) {
+                    debug ("search (%s) --> %s", name, fe_category.name);
+                    category = fe_category;
+                }
 
-                if (fe_name.up () == name.strip ().up ()) {
+                return category != null;
+            });
+
+            return category;
+        }
+
+        public Category get_category_by_id (int id) {
+            Category? category = null;
+
+            @foreach ( (model, path, iter) => {
+
+                Category fe_category;
+
+                model.@get (iter, Column.CATEGORY, out fe_category, -1);
+
+                if (fe_category.@id == id) {
+                    debug ("search (%d) --> %s", id, fe_category.name);
                     category = fe_category;
                 }
 

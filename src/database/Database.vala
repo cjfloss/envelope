@@ -79,6 +79,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_delete_transaction;
 
         private SQLHeavy.Query q_load_current_transactions;
+        private SQLHeavy.Query q_load_current_transactions_for_category;
 
         private SQLHeavy.Query q_get_unique_merchants;
 
@@ -261,10 +262,26 @@ namespace Envelope.DB {
 
             var q = statement != null ? statement : db_transaction.prepare("""
                 INSERT INTO `transactions`
-                (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`)
+                (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`, `category_id`)
                 VALUES
-                (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date)
+                (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date, :category_id)
                 """);
+
+            // optional category id
+            if (transaction.category != null) {
+                q.set_int ("category_id", transaction.category.@id);
+            }
+            else {
+                q.set_null ("category_id");
+            }
+
+            // optional parent transaction id
+            if (transaction.parent != null) {
+                q.set_int ("parent_transaction_id", transaction.parent.@id);
+            }
+            else {
+                q.set_null ("parent_transaction_id");
+            }
 
             var id = q.execute_insert (
                 "label", typeof (string), transaction.label,
@@ -272,7 +289,6 @@ namespace Envelope.DB {
                 "amount", typeof (double), transaction.amount,
                 "direction", typeof (int), (int) transaction.direction,
                 "account_id", typeof (int), transaction.account.@id,
-                "parent_transaction_id", typeof (int), null,
                 "date", typeof (int), (int) transaction.date.to_unix ()
             );
 
@@ -288,9 +304,9 @@ namespace Envelope.DB {
 
             var stmt = transaction.prepare ("""
             INSERT INTO `transactions`
-            (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`)
+            (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`, 'category_id')
             VALUES
-            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date)
+            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date, :category_id)
             """);
 
             foreach (Transaction t in transactions) {
@@ -348,6 +364,27 @@ namespace Envelope.DB {
             return list;
         }
 
+        public Gee.ArrayList<Transaction> get_current_transactions_for_category (Category category) throws SQLHeavy.Error {
+
+            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
+
+            q_load_current_transactions_for_category.clear ();
+            q_load_current_transactions_for_category.set_int ("category_id", category.@id);
+
+            SQLHeavy.QueryResult results = q_load_current_transactions_for_category.execute ();
+
+            while (!results.finished) {
+                Transaction transaction;
+                query_result_to_transaction (results, out transaction, category);
+
+                list.add (transaction);
+
+                results.next ();
+            }
+
+            return list;
+        }
+
         private DatabaseManager () {
             init_database ();
         }
@@ -371,7 +408,7 @@ namespace Envelope.DB {
             account.account_type = Account.Type.from_int (account_type);
         }
 
-        private void query_result_to_transaction (SQLHeavy.QueryResult results, out Transaction transaction) throws SQLHeavy.Error {
+        private void query_result_to_transaction (SQLHeavy.QueryResult results, out Transaction transaction, Category? category = null) throws SQLHeavy.Error {
             assert (!results.finished);
 
             var id = results.get_int ("id");
@@ -382,8 +419,7 @@ namespace Envelope.DB {
             var account_id = results.get_int ("account_id");
             var parent_id = results.get_int ("parent_transaction_id");
             var timestamp = results.get_int64 ("date");
-
-            //debug ("timestamp is %d".printf (timestamp));
+            int? category_id = results.get_int ("category_id");
 
             transaction = new Transaction ();
 
@@ -394,6 +430,17 @@ namespace Envelope.DB {
             transaction.amount = amount;
             transaction.date = new DateTime.from_unix_local (timestamp);
 
+            if (category != null) {
+                transaction.category = category;
+            }
+            else if (category_id != null) {
+                var cat = Envelope.Service.CategoryStore.get_default ().get_category_by_id (category_id);
+
+                if (cat != null) {
+                    transaction.category = cat;
+                    debug ("transaction category: %s", transaction.category.name);
+                }
+            }
         }
 
         private void query_result_to_merchant (SQLHeavy.QueryResult results, out Merchant merchant) throws SQLHeavy.Error {
@@ -408,6 +455,7 @@ namespace Envelope.DB {
         private void query_result_to_category (SQLHeavy.QueryResult results, out Category category, out int parent_id) throws SQLHeavy.Error {
             assert (!results.finished);
 
+            var id = results.get_int ("id");
             var name = results.get_string ("name");
             var description = results.get_string ("description");
             var amount_budgeted = results.get_double ("amount_budgeted");
@@ -417,6 +465,7 @@ namespace Envelope.DB {
 
             category = new Category ();
 
+            category.@id = id;
             category.name = name;
             category.description = description;
             category.amount_budgeted = amount_budgeted;
@@ -571,7 +620,11 @@ namespace Envelope.DB {
             """);
 
             q_load_current_transactions = database.prepare("""
-            select * from transactions where date(date, 'unixepoch') between date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days')
+            SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days')
+            """);
+
+            q_load_current_transactions_for_category = database.prepare("""
+            SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id
             """);
         }
 

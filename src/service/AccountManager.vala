@@ -133,7 +133,20 @@ namespace Envelope.Service {
             }
         }
 
-        public Transaction record_transaction (ref Account account, DateTime date, string label, string description, double amount, Transaction? parent = null) throws ServiceError {
+        public void load_account_transactions (Account account) throws ServiceError {
+            try {
+                Gee.ArrayList<Transaction> transactions = dbm.load_account_transactions (account);
+
+                /*foreach (Transaction transaction in transactions) {
+                    transaction.category =
+                }*/
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
+        public Transaction record_transaction (ref Account account, DateTime date, string label, string description, double amount, Category category, Transaction? parent = null) throws ServiceError {
 
             var old_balance = account.balance;
 
@@ -148,8 +161,9 @@ namespace Envelope.Service {
                 transaction.direction = amount > 0d ? Transaction.Direction.INCOMING : Transaction.Direction.OUTGOING;
                 transaction.amount = Math.fabs (amount);
                 transaction.account = account;
+                transaction.category = category;
 
-                // TODO category
+                debug ("transaction category: %d", category.@id);
 
                 var db_transaction = dbm.start_transaction ();
 

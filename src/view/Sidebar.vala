@@ -36,7 +36,7 @@ namespace Envelope.View {
             return sidebar_instance;
         }
 
-        private static const int COLUMN_COUNT = 10;
+        private static const int COLUMN_COUNT = 11;
 
         private static const string ICON_ACCOUNT    = "text-spreadsheet";
         private static const string ICON_OUTFLOW    = "go-up-symbolic";
@@ -62,7 +62,8 @@ namespace Envelope.View {
             STATE,
             TREE_CATEGORY,
             IS_HEADER,
-            COLORIZE
+            COLORIZE,
+            TOOLTIP
         }
 
         private enum TreeCategory {
@@ -109,7 +110,8 @@ namespace Envelope.View {
                 typeof (string),
                 typeof (TreeCategory),
                 typeof (bool),
-                typeof (bool)
+                typeof (bool),
+                typeof (string)
             );
 
             build_ui ();
@@ -140,7 +142,7 @@ namespace Envelope.View {
             treeview.vexpand = true;
             treeview.vexpand_set = true;
             treeview.fixed_height_mode = true;
-            treeview.tooltip_column = Column.LABEL;
+            treeview.tooltip_column = Column.TOOLTIP;
 
             // style
             var style_context = treeview.get_style_context ();
@@ -210,7 +212,7 @@ namespace Envelope.View {
             // add account to list when a new account is added in the database
             dbm.account_created.connect (add_new_account);
 
-            BudgetManager.get_default ().budget_changed.connect (update_budget_section);
+            BudgetManager.get_default ().budget_changed.connect (update_view);
             BudgetManager.get_default ().category_added.connect (update_view);
             AccountManager.get_default ().account_updated.connect (update_account_item);
 
@@ -224,20 +226,25 @@ namespace Envelope.View {
             store.clear ();
 
             try {
-                double inflow;
-                double outflow;
-                DateTime from;
-                DateTime to;
 
-                BudgetManager.get_default ().compute_current_state (out inflow, out outflow, out from, out to);
+                var budget_state = BudgetManager.get_default ().state;
+                var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
 
-                overview_iter = add_item (null, "", TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true);
+                var month_label = new DateTime.now_local ().format ("%B %Y");
 
-                debug ("sidebar: budget inflow: %s, outflow: %s".printf (budget_state.inflow.to_string (), budget_state.outflow.to_string ()));
+                debug ("remaining: %f", remaining);
 
-                overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, outflow, ICON_OUTFLOW, false, false);
-                overview_inflow_iter = add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, inflow, ICON_INFLOW, false, false);
-                overview_remaining_iter = add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, Math.fabs (inflow) - Math.fabs (outflow), ICON_REMAINING, false, true);
+                overview_iter = add_item (null, _("Your budget"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true,
+                    false, "Budget overview for %s".printf (month_label));
+
+                overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.outflow, ICON_OUTFLOW, false, false,
+                    "Money spent in %s".printf (month_label));
+
+                overview_inflow_iter = add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.inflow, ICON_INFLOW, false, false,
+                    "Money earned in %s".printf (month_label));
+
+                overview_remaining_iter = add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, remaining, ICON_REMAINING, false, true,
+                    "Remaining balance for %s".printf (month_label));
 
                 // Add "Accounts" category header
                 account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
@@ -250,7 +257,8 @@ namespace Envelope.View {
 
                         foreach (Account account in accounts) {
                             debug ("adding account %s".printf (account.number));
-                            add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true);
+                            add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true,
+                                account.description != null ? "%s - %s".printf (account.number, account.description) : account.number);
                         }
                     }
 
@@ -271,7 +279,14 @@ namespace Envelope.View {
 
                     foreach (Category category in categories) {
                         debug ("adding category %s".printf (category.name));
-                        add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, null, ICON_CATEGORY);
+
+                        double cat_inflow;
+                        double cat_outflow;
+                        BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
+
+                        debug ("category inflow: %f, category outflow: %f", cat_inflow, cat_outflow);
+
+                        add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, cat_inflow - cat_outflow, ICON_CATEGORY);
                     }
                 }
                 catch (ServiceError err) {
@@ -318,17 +333,12 @@ namespace Envelope.View {
             debug ("updating budget section");
 
             try {
-                double inflow;
-                double outflow;
-                DateTime from;
-                DateTime to;
+                var budget_state = BudgetManager.get_default ().state;
+                var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
 
-
-                BudgetManager.get_default ().compute_current_state (out inflow, out outflow, out from, out to);
-
-                store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.format_currency (inflow), -1);
-                store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.format_currency (outflow), -1);
-                store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.format_currency (inflow - outflow), -1);
+                store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.format_currency (budget_state.inflow), -1);
+                store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.format_currency (budget_state.outflow), -1);
+                store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.format_currency (remaining), -1);
             }
             catch (ServiceError err) {
                 error ("error updating budget section (%s)".printf (err.message));
@@ -380,11 +390,18 @@ namespace Envelope.View {
                                         double? state_amount = null,
                                         string? icon = null,
                                         bool is_header = false,
-                                        bool colorize = false) {
+                                        bool colorize = false,
+                                        string tooltip = "") {
 
             Gtk.TreeIter iter;
 
             store.append(out iter, parent);
+
+            var state_currency = "";
+            if (state_amount != null) {
+                state_currency = Envelope.Util.format_currency (state_amount);
+                debug ("state_currency: %s", state_currency);
+            }
 
             store.@set (iter, Column.LABEL, label,
                 Column.ACCOUNT, account,
@@ -392,10 +409,11 @@ namespace Envelope.View {
                 Column.ACTION, action,
                 Column.DESCRIPTION, account != null ? account.description : null,
                 Column.CATEGORY, category,
-                Column.STATE, state_amount != null ? Envelope.Util.format_currency (state_amount) : "",
+                Column.STATE, state_currency,
                 Column.TREE_CATEGORY, tree_category,
                 Column.IS_HEADER, is_header,
-                Column.COLORIZE, colorize, -1);
+                Column.COLORIZE, colorize,
+                Column.TOOLTIP, tooltip != "" ? tooltip : label, -1);
 
             return iter;
         }
@@ -408,28 +426,31 @@ namespace Envelope.View {
             Action action;
             double? state = null;
             TreeCategory tree_category;
+            bool is_header;
 
             model.@get (iter,
                 Column.ACCOUNT, out account,
                 Column.ACTION, out action,
                 Column.CATEGORY, out category,
                 Column.STATE, out state,
-                Column.TREE_CATEGORY, out tree_category, -1);
+                Column.TREE_CATEGORY, out tree_category,
+                Column.IS_HEADER, out is_header, -1);
 
             switch (tree_category) {
                 case TreeCategory.OVERVIEW:
-                    if (state == null) {
+
+                    crt.editable = false;
+                    crt.editable_set = true;
+
+                    if (is_header) {
                         crt.weight = 900;
                         crt.weight_set = true;
                         crt.height = 20;
-                        crt.editable = false;
-                        crt.editable_set = true;
                     }
                     else {
                         crt.weight_set = false;
-                        crt.editable = false;
-                        crt.editable_set = true;
                     }
+
                     break;
 
                 case TreeCategory.ACCOUNTS:
@@ -592,7 +613,14 @@ namespace Envelope.View {
                     break;
 
                 case TreeCategory.CATEGORIES:
-                    crt.visible = false;
+
+                    if (state != "") {
+                        crt.text = state;
+                        crt.visible = true;
+                    }
+                    else {
+                        crt.visible = false;
+                    }
                     break;
 
                 default:
@@ -731,15 +759,13 @@ namespace Envelope.View {
             Gtk.TreeIter iter;
 
             if (store.get_iter_from_string (out iter, path)) {
-                string old_name = "";
+
                 Account account;
+                store.@get (iter, Column.ACCOUNT, out account, -1);
 
-                store.@get (iter, Column.LABEL, out old_name,
-                    Column.ACCOUNT, out account, -1);
-
-                debug ("account '%s' renamed to '%s'".printf (old_name, text));
-
-                store.@set (iter, Column.LABEL, text, -1);
+                store.@set (iter,
+                    Column.LABEL, text,
+                    Column.TOOLTIP, account.description != null ? "%s - %s".printf (text, account.description) : text, -1);
 
                 // fire signal list_account_name_updated
                 list_account_name_updated (account, text);
