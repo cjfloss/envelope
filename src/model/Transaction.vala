@@ -17,6 +17,7 @@
  */
 
 namespace Envelope {
+
     public class Transaction : Object, Gee.Comparable<Transaction> {
 
         public enum Direction {
@@ -35,80 +36,31 @@ namespace Envelope {
             }
         }
 
-        private int _id;
-
-        private string _label;
-        private string _description;
-
-        private Transaction.Direction _direction;
-
-        private double _amount;
-
-        private Account _account;
-
-        private Transaction _parent;
-
-        private DateTime _date;
-
+        public string label { get; set; }
+        public string description { get; set; }
+        public Transaction.Direction direction { get; set; }
+        public double amount { get; set; }
+        public Account account { get; set; }
+        public DateTime date { get; set; }
+        public int @id { get; set; }
+        public Transaction? parent { get; set; }
         public Category category { get; set; }
 
         public Transaction () {
-            _amount = 0d;
-            _label = "Untitled";
-            _description = "";
-            _account = null;
+            amount = 0d;
+            label = "Untitled";
+            description = "";
+            account = null;
         }
 
         public Transaction.from_parent (ref Transaction transaction) {
             this();
-            _parent = transaction;
-        }
-
-        public string label {
-            get { return _label; }
-            set { _label = value; }
-        }
-
-        public string description {
-            get { return _description; }
-            set { _description = value; }
-        }
-
-        public Transaction.Direction direction {
-            get { return _direction; }
-            set { _direction = value; }
-        }
-
-        public double amount {
-            get { return _amount; }
-            set {
-                _amount = Math.fabs (value);
-            }
-        }
-
-        public Account account {
-            get { return _account; }
-            set { _account = value; }
-        }
-
-        public DateTime date {
-            get { return _date; }
-            set { _date = value; }
-        }
-
-        public int @id {
-            get { return _id; }
-            set { _id = value; }
-        }
-
-        public Transaction? parent {
-            get { return _parent; }
-            set { _parent = value; }
+            parent = transaction;
         }
 
         // compare by date
         public int compare_to (Transaction transaction) {
-            return -_date.compare(transaction.date);
+            return -date.compare(transaction.date);
         }
     }
 }
