@@ -19,6 +19,7 @@
 using Envelope.DB;
 using Envelope.Dialog;
 using Envelope.Widget;
+using Envelope.Service;
 
 namespace Envelope.View {
 
@@ -30,6 +31,10 @@ namespace Envelope.View {
     private static const string STYLE_CLASS_OUTFLOW = ".outflow { font-weight: 900; font-size: 18px; color: #A62626; }";
 
     public class BudgetOverview : Gtk.Box {
+
+        private Gtk.Label inflow_value_label;
+        private Gtk.Label outflow_value_label;
+        private Gtk.Label remaining_value_label;
 
         public static new unowned BudgetOverview get_default () {
             if (budget_overview_instance == null) {
@@ -55,6 +60,8 @@ namespace Envelope.View {
 
             build_summary_ui ();
             build_top_categories_ui ();
+
+            budget_changed ();
         }
 
         private void build_summary_ui () {
@@ -80,7 +87,7 @@ namespace Envelope.View {
             Granite.Widgets.Utils.set_theming (inflow_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             inflow_box.pack_start (inflow_label, false);
 
-            var inflow_value_label = new Gtk.Label (Envelope.Util.format_currency(4910.23d));
+            inflow_value_label = new Gtk.Label (Envelope.Util.format_currency(4910.23d));
             Granite.Widgets.Utils.set_theming (inflow_value_label, STYLE_CLASS_INFLOW, "inflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             inflow_box.pack_start (inflow_value_label, false);
 
@@ -92,7 +99,7 @@ namespace Envelope.View {
             Granite.Widgets.Utils.set_theming (outflow_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             outflow_box.pack_start (outflow_label, false);
 
-            var outflow_value_label = new Gtk.Label (Envelope.Util.format_currency(4192.88d));
+            outflow_value_label = new Gtk.Label (Envelope.Util.format_currency(4192.88d));
             Granite.Widgets.Utils.set_theming (outflow_value_label, STYLE_CLASS_OUTFLOW, "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             outflow_box.pack_start (outflow_value_label, false);
 
@@ -104,7 +111,7 @@ namespace Envelope.View {
             Granite.Widgets.Utils.set_theming (remaining_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             remaining_box.pack_start (remaining_label, false);
 
-            var remaining_value_label = new Gtk.Label (Envelope.Util.format_currency(788.19d));
+            remaining_value_label = new Gtk.Label (Envelope.Util.format_currency(788.19d));
             Granite.Widgets.Utils.set_theming (remaining_value_label, STYLE_CLASS_OUTFLOW, "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             remaining_box.pack_start (remaining_value_label, false);
         }
@@ -121,11 +128,15 @@ namespace Envelope.View {
         }
 
         private void connect_signals () {
-            notify["budget"].connect (budget_changed);
+            BudgetManager.get_default ().budget_changed.connect (budget_changed);
         }
 
         private void budget_changed () {
+            var budget_state = BudgetManager.get_default ().state;
 
+            inflow_value_label.label = Envelope.Util.format_currency (budget_state.inflow);
+            outflow_value_label.label = Envelope.Util.format_currency (budget_state.outflow);
+            remaining_value_label.label = Envelope.Util.format_currency (Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow));
         }
 
         private static void set_class (Gtk.Widget widget, string style_class) {
