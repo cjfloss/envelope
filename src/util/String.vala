@@ -25,16 +25,16 @@ namespace Envelope.Util {
         double result;
 
         // replace all non-currency characters (except . and separator)
-        var sanitized = regex_parse_currency.replace_literal(amount, -1, 0, "");
-
-        debug ("parsing %s", sanitized);
+        string sanitized = amount;
+        try {
+            sanitized = regex_parse_currency.replace_literal(amount, -1, 0, "");
+        }
+        catch (RegexError err) {
+            error ("error occured while sanitizing input string '%s' (%s))", amount, err.message);
+        }
 
         char *r;
         result = Monetary.strtod (sanitized, &r);
-
-        //if (!double.try_parse (sanitized, out result)) {
-        //    throw new ParseError.INVALID ("cannot parse %s".printf (amount));
-        //}
 
         return result;
     }
