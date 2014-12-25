@@ -38,9 +38,10 @@ There ain't no binary package distribution yet. To use Envelope now, you'll have
 ```sh
 $ git clone https://github.com/nlaplante/envelope
 $ cd envelope
+$ git submodule init
 $ mkdir build
 $ cd build
-$ cmake ..
+$ cmake -DCMAKE_BUILD_TYPE=Debug ..
 $ make
 ```
 From there you can either use the binary in `build/envelope` or install it:
