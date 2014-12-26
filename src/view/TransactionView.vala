@@ -205,7 +205,7 @@ namespace Envelope.View {
                 return true; //editing... always shown
             }
 
-            var search = search_term != null && search_term.strip ().length > 0 ? search_term.up () : "";
+            var search = search_term != null && search_term.strip ().length > 0 ? search_term.strip ().up () : "";
 
             if (search.length > 0) {
                 var label = transaction.label.up ();
