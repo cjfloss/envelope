@@ -759,7 +759,11 @@ namespace Envelope.View {
 
             try {
                 AccountManager.get_default ().remove_transaction (ref transaction);
-                transactions_store.remove (ref iter);
+
+                Gtk.TreeIter child_iter;
+                view_store.convert_iter_to_child_iter (out child_iter, iter);
+                transactions_store.remove (ref child_iter);
+
                 Envelope.App.toast (_("Transaction removed"));
             }
             catch (ServiceError err) {
