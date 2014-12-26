@@ -222,9 +222,7 @@ namespace Envelope.View {
             var is_after_start = filter_from != null ? tdate.compare (filter_from) >= 0 : true;
             var is_before_end = filter_to != null ? tdate.compare (filter_to) <= 0 : true;
 
-            bool visible = is_after_start && is_before_end;
-
-            return visible;
+            return is_after_start && is_before_end;
         }
 
         /**
