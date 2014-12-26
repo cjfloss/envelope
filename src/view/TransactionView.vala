@@ -201,7 +201,7 @@ namespace Envelope.View {
             Transaction transaction;
             model.@get (iter, Column.TRANSACTION, out transaction, -1);
 
-            if (transaction == null) {
+            if (transaction == null || transaction.@id == null) {
                 return true; //editing... always shown
             }
 
