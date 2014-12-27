@@ -66,6 +66,8 @@ namespace Envelope.View {
 
         private void build_summary_ui () {
 
+            var budget_state = BudgetManager.get_default ().state;
+
             var summary_container = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             set_class (summary_container, Granite.StyleClass.CONTENT_VIEW);
             pack_start (summary_container);
@@ -87,7 +89,7 @@ namespace Envelope.View {
             Granite.Widgets.Utils.set_theming (inflow_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             inflow_box.pack_start (inflow_label, false);
 
-            inflow_value_label = new Gtk.Label (Envelope.Util.String.format_currency(4910.23d));
+            inflow_value_label = new Gtk.Label (Envelope.Util.String.format_currency(budget_state.inflow));
             Granite.Widgets.Utils.set_theming (inflow_value_label, STYLE_CLASS_INFLOW, "inflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             inflow_box.pack_start (inflow_value_label, false);
 
@@ -99,7 +101,7 @@ namespace Envelope.View {
             Granite.Widgets.Utils.set_theming (outflow_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             outflow_box.pack_start (outflow_label, false);
 
-            outflow_value_label = new Gtk.Label (Envelope.Util.String.format_currency(4192.88d));
+            outflow_value_label = new Gtk.Label (Envelope.Util.String.format_currency(budget_state.outflow));
             Granite.Widgets.Utils.set_theming (outflow_value_label, STYLE_CLASS_OUTFLOW, "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             outflow_box.pack_start (outflow_value_label, false);
 
@@ -111,7 +113,7 @@ namespace Envelope.View {
             Granite.Widgets.Utils.set_theming (remaining_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             remaining_box.pack_start (remaining_label, false);
 
-            remaining_value_label = new Gtk.Label (Envelope.Util.String.format_currency(788.19d));
+            remaining_value_label = new Gtk.Label (Envelope.Util.String.format_currency(budget_state.remaining));
             Granite.Widgets.Utils.set_theming (remaining_value_label, STYLE_CLASS_OUTFLOW, "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             remaining_box.pack_start (remaining_value_label, false);
         }
