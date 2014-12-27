@@ -5,7 +5,8 @@ namespace Envelope.Tests.Service.Importer.QIF {
 
     public void test_import_success () {
         try {
-            ArrayList<Transaction>? transactions = QIFImporter.get_default ().import ("../../tests/data/sample.qif");
+            ArrayList<Transaction>? transactions = QIFImporter.get_default ()
+                .import (test_data_path ("sample.qif"));
 
             assert_nonnull (transactions);
             assert_true (transactions.size == 29);
@@ -20,7 +21,8 @@ namespace Envelope.Tests.Service.Importer.QIF {
 
     public void test_import_file_not_found () {
         try {
-            ArrayList<Transaction>? transactions = QIFImporter.get_default ().import ("../../tests/data/noexist.qif");
+            ArrayList<Transaction>? transactions = QIFImporter.get_default ()
+                .import (test_data_path ("enoent"));
             Test.fail ();
         }
         catch (ServiceError err) {
@@ -28,6 +30,10 @@ namespace Envelope.Tests.Service.Importer.QIF {
         catch (ImporterError err) {
             Test.fail ();
         }
+    }
+
+    private string test_data_path (string filename) {
+        return Test.build_filename (Test.FileType.DIST, "data", filename);
     }
 }
 
