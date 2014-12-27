@@ -136,10 +136,6 @@ namespace Envelope.Service {
         public void load_account_transactions (Account account) throws ServiceError {
             try {
                 Gee.ArrayList<Transaction> transactions = dbm.load_account_transactions (account);
-
-                /*foreach (Transaction transaction in transactions) {
-                    transaction.category =
-                }*/
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -169,7 +165,7 @@ namespace Envelope.Service {
 
                 dbm.insert_transaction (transaction, ref db_transaction);
 
-                account.balance += amount;
+                adjust_balance (account, transaction);
                 dbm.update_account_balance (account, ref db_transaction);
 
                 db_transaction.commit ();
@@ -206,33 +202,11 @@ namespace Envelope.Service {
                 // update transaction
                 dbm.update_transaction (transaction, ref db_transaction);
 
-                // first replay old transaction
-                switch (current_transaction.direction) {
-                    case Transaction.Direction.INCOMING:
-                        transaction.account.balance -= current_transaction.amount;
-                        break;
-
-                    case Transaction.Direction.OUTGOING:
-                        transaction.account.balance += current_transaction.amount;
-                        break;
-
-                    default:
-                        assert_not_reached ();
-                }
+                // first cancel old transaction
+                adjust_balance (transaction.account, current_transaction, true);
 
                 // update account balance
-                switch (transaction.direction) {
-                    case Transaction.Direction.INCOMING:
-                        transaction.account.balance += transaction.amount;
-                        break;
-
-                    case Transaction.Direction.OUTGOING:
-                        transaction.account.balance -= transaction.amount;
-                        break;
-
-                    default:
-                        assert_not_reached ();
-                }
+                adjust_balance (transaction.account, transaction);
 
                 dbm.update_account_balance (transaction.account, ref db_transaction);
 
@@ -247,28 +221,17 @@ namespace Envelope.Service {
             }
         }
 
+        /**
+         * Remove a transaction from the database, adjusting the affected account's balance
+         */
         public void remove_transaction (ref Transaction transaction) throws ServiceError {
-
-            //assert (transaction.account != null);
 
             try {
                 var db_transaction = dbm.start_transaction ();
 
                 dbm.delete_transaction (transaction.@id, ref db_transaction);
 
-                switch (transaction.direction) {
-                    case Transaction.Direction.INCOMING:
-                        transaction.account.balance -= transaction.amount;
-                        break;
-
-                    case Transaction.Direction.OUTGOING:
-                        transaction.account.balance += transaction.amount;
-                        break;
-
-                    default:
-                        assert_not_reached ();
-                }
-
+                adjust_balance (transaction.account, transaction, true);
                 dbm.update_account_balance (transaction.account, ref db_transaction);
 
                 db_transaction.commit ();
@@ -278,6 +241,7 @@ namespace Envelope.Service {
                 }
 
                 transaction_deleted (transaction);
+                account_updated (transaction.account);
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -370,6 +334,47 @@ namespace Envelope.Service {
                 account.balance = balance_before_import;
                 throw err;
             }
+        }
+
+        /**
+         * Adjust an account's balance according to the transaction's amount and direction
+         *
+         * @param account the account to adjust the balance on
+         * @param transaction the transaction used to calculate amounts
+         * @param cancel if true, will invert the calculations to actually cancel a transaction
+         * @return the new account's balance
+         */
+        private static double adjust_balance (Account account, Transaction transaction, bool cancel = false) {
+
+            switch (transaction.direction) {
+
+                case Transaction.Direction.INCOMING:
+
+                    if (cancel) {
+                        account.balance -= transaction.amount;
+                    }
+                    else {
+                        account.balance += transaction.amount;
+                    }
+
+                    break;
+
+                case Transaction.Direction.OUTGOING:
+
+                    if (cancel) {
+                        account.balance += transaction.amount;
+                    }
+                    else {
+                        account.balance -= transaction.amount;
+                    }
+
+                    break;
+
+                default:
+                    assert_not_reached ();
+            }
+
+            return account.balance;
         }
     }
 
