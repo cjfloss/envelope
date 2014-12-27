@@ -139,7 +139,7 @@ namespace Envelope.Dialog {
 
             balance_entry = new Gtk.Entry ();
             balance_entry.expand = true;
-            balance_entry.placeholder_text = Envelope.Util.format_currency (0d);
+            balance_entry.placeholder_text = Envelope.Util.String.format_currency (0d);
             grid.attach (balance_entry, 1, 3, 1, 1);
 
             var desc_label = new Gtk.Label (_("Description:"));

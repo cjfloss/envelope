@@ -302,8 +302,8 @@ namespace Envelope.Service {
                         t.account = account;
                     }
 
-                    info ("adjusting balance for account: %s (new balance: %s)".printf (Envelope.Util.format_currency (account.balance),
-                        Envelope.Util.format_currency (account.balance + balance_delta)));
+                    info ("adjusting balance for account: %s (new balance: %s)".printf (Envelope.Util.String.format_currency (account.balance),
+                        Envelope.Util.String.format_currency (account.balance + balance_delta)));
 
                     account.balance += balance_delta;
 

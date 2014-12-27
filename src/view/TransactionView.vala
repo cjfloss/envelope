@@ -119,7 +119,7 @@ namespace Envelope.View {
         public void add_transaction (Transaction transaction) {
             var in_amount = "";
             var out_amount = "";
-            var formatted_amount = Envelope.Util.format_currency (transaction.amount);
+            var formatted_amount = Envelope.Util.String.format_currency (transaction.amount);
 
             switch (transaction.direction) {
                 case Transaction.Direction.INCOMING:
@@ -500,7 +500,8 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    transactions_store.@set (store_iter, Column.OUTFLOW, Envelope.Util.format_currency (Envelope.Util.parse_currency (text)), -1);
+                    transactions_store.@set (store_iter,
+                        Column.OUTFLOW, Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text)), -1);
                 }
             });
 
@@ -518,7 +519,8 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    transactions_store.@set (store_iter, Column.INFLOW, Envelope.Util.format_currency (Envelope.Util.parse_currency (text)), -1);
+                    transactions_store.@set (store_iter,
+                        Column.INFLOW, Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text)), -1);
                 }
             });
 
@@ -797,13 +799,13 @@ namespace Envelope.View {
 
                 try {
                     if (t_in_amount != "") {
-                        amount = Envelope.Util.parse_currency (t_in_amount);
+                        amount = Envelope.Util.String.parse_currency (t_in_amount);
                     }
                     else if (t_out_amount != "") {
-                        amount = - Envelope.Util.parse_currency (t_out_amount);
+                        amount = - Envelope.Util.String.parse_currency (t_out_amount);
                     }
                 }
-                catch (Envelope.Util.ParseError err) {
+                catch (Envelope.Util.String.ParseError err) {
                     error ("could not parse transaction amount (%s)".printf (err.message));
                 }
 
@@ -858,15 +860,15 @@ namespace Envelope.View {
 
                     try {
                         if (in_amount != "") {
-                            transaction.amount = Envelope.Util.parse_currency (in_amount);
+                            transaction.amount = Envelope.Util.String.parse_currency (in_amount);
                             transaction.direction = Transaction.Direction.INCOMING;
                         }
                         else if (out_amount != "") {
-                            transaction.amount = Envelope.Util.parse_currency (out_amount);
+                            transaction.amount = Envelope.Util.String.parse_currency (out_amount);
                             transaction.direction = Transaction.Direction.OUTGOING;
                         }
                     }
-                    catch (Envelope.Util.ParseError err) {
+                    catch (Envelope.Util.String.ParseError err) {
                         error ("could not parse transaction amount (%s)".printf (err.message));
                     }
 

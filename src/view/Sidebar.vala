@@ -336,9 +336,9 @@ namespace Envelope.View {
                 var budget_state = BudgetManager.get_default ().state;
                 var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
 
-                store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.format_currency (budget_state.inflow), -1);
-                store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.format_currency (budget_state.outflow), -1);
-                store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.format_currency (remaining), -1);
+                store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.inflow), -1);
+                store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.outflow), -1);
+                store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.String.format_currency (remaining), -1);
             }
             catch (ServiceError err) {
                 error ("error updating budget section (%s)".printf (err.message));
@@ -399,7 +399,7 @@ namespace Envelope.View {
 
             var state_currency = "";
             if (state_amount != null) {
-                state_currency = Envelope.Util.format_currency (state_amount);
+                state_currency = Envelope.Util.String.format_currency (state_amount);
                 debug ("state_currency: %s", state_currency);
             }
 
@@ -548,7 +548,7 @@ namespace Envelope.View {
 
                         try {
 
-                            double parsed_state = Envelope.Util.parse_currency (state);
+                            double parsed_state = Envelope.Util.String.parse_currency (state);
 
                             if (colorize && parsed_state < 0) {
                                 crt.foreground = COLOR_SUBZERO;
@@ -558,7 +558,7 @@ namespace Envelope.View {
                                 crt.foreground_set = false;
                             }
                         }
-                        catch (Envelope.Util.ParseError err) {
+                        catch (Envelope.Util.String.ParseError err) {
                             assert_not_reached ();
                         }
                     }
@@ -577,7 +577,7 @@ namespace Envelope.View {
                             }
 
                             crt.weight_set = false;
-                            crt.text = Envelope.Util.format_currency (balance);
+                            crt.text = Envelope.Util.String.format_currency (balance);
 
                             if (balance < 0) {
                                 crt.foreground = COLOR_SUBZERO;
@@ -594,7 +594,7 @@ namespace Envelope.View {
                     else if (account != null) {
                         crt.visible = true;
                         crt.weight_set = false;
-                        crt.text = Envelope.Util.format_currency (account.balance);
+                        crt.text = Envelope.Util.String.format_currency (account.balance);
                         crt.editable = true;
                         crt.editable_set = true;
 
@@ -633,7 +633,7 @@ namespace Envelope.View {
             try {
 
                 // parse first; if it fails, nothing expensive below will be executed
-                double amount = Envelope.Util.parse_currency (new_text);
+                double amount = Envelope.Util.String.parse_currency (new_text);
 
                 Gtk.TreeIter iter;
                 if (store.get_iter_from_string (out iter, path)) {
@@ -652,7 +652,7 @@ namespace Envelope.View {
                 }
 
             }
-            catch (Envelope.Util.ParseError err) {
+            catch (Envelope.Util.String.ParseError err) {
                 warning ("could not update account balance (%s)".printf (err.message));
             }
             catch (ServiceError err) {

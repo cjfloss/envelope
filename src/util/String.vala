@@ -1,4 +1,4 @@
-namespace Envelope.Util {
+namespace Envelope.Util.String {
 
     public static const string ELLIPSIS = "\u2026";
 
