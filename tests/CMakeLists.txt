@@ -57,3 +57,6 @@ vala_precompile (VALA_C_TEST ${EXEC_NAME_TESTS}
 
 add_executable(${EXEC_NAME_TESTS} ${VALA_C_TEST})
 add_test (${EXEC_NAME_TESTS} ${CMAKE_CURRENT_BINARY_DIR}/envelope-tests)
+
+# copy test data
+file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
