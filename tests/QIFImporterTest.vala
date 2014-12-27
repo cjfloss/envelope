@@ -26,6 +26,7 @@ namespace Envelope.Tests.Service.Importer.QIF {
             Test.fail ();
         }
         catch (ServiceError err) {
+            assert (err is ServiceError.ENOENT);
         }
         catch (ImporterError err) {
             Test.fail ();
