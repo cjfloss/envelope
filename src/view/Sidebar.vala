@@ -225,81 +225,75 @@ namespace Envelope.View {
 
             store.clear ();
 
+            var budget_state = BudgetManager.get_default ().state;
+            var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
+
+            var month_label = new DateTime.now_local ().format ("%B %Y");
+
+            debug ("remaining: %f", remaining);
+
+            overview_iter = add_item (null, _("Your budget"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true,
+                false, "Budget overview for %s".printf (month_label));
+
+            overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.outflow, ICON_OUTFLOW, false, false,
+                "Money spent in %s".printf (month_label));
+
+            overview_inflow_iter = add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.inflow, ICON_INFLOW, false, false,
+                "Money earned in %s".printf (month_label));
+
+            overview_remaining_iter = add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, remaining, ICON_REMAINING, false, true,
+                "Remaining balance for %s".printf (month_label));
+
+            // Add "Accounts" category header
+            account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
+
             try {
 
-                var budget_state = BudgetManager.get_default ().state;
-                var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
+                Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
 
-                var month_label = new DateTime.now_local ().format ("%B %Y");
+                if (account_list != null && !account_list.is_empty) {
 
-                debug ("remaining: %f", remaining);
-
-                overview_iter = add_item (null, _("Your budget"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true,
-                    false, "Budget overview for %s".printf (month_label));
-
-                overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.outflow, ICON_OUTFLOW, false, false,
-                    "Money spent in %s".printf (month_label));
-
-                overview_inflow_iter = add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.inflow, ICON_INFLOW, false, false,
-                    "Money earned in %s".printf (month_label));
-
-                overview_remaining_iter = add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, remaining, ICON_REMAINING, false, true,
-                    "Remaining balance for %s".printf (month_label));
-
-                // Add "Accounts" category header
-                account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
-
-                try {
-
-                    Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
-
-                    if (account_list != null && !account_list.is_empty) {
-
-                        foreach (Account account in accounts) {
-                            debug ("adding account %s".printf (account.number));
-                            add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true,
-                                account.description != null ? "%s - %s".printf (account.number, account.description) : account.number);
-                        }
-                    }
-
-                }
-                catch (ServiceError err) {
-                    error ("could not load accounts (%s)".printf (err.message));
-                }
-
-                // Add "Add account..."
-                add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT, null, ICON_ACTION_ADD);
-
-                // Add "Categories" category header
-                category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
-
-                // Add categories
-                try {
-                    Gee.ArrayList<Category> categories = BudgetManager.get_default ().get_categories ();
-
-                    foreach (Category category in categories) {
-                        debug ("adding category %s".printf (category.name));
-
-                        double cat_inflow;
-                        double cat_outflow;
-                        BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
-
-                        debug ("category inflow: %f, category outflow: %f", cat_inflow, cat_outflow);
-
-                        add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, cat_inflow - cat_outflow, ICON_CATEGORY);
+                    foreach (Account account in accounts) {
+                        debug ("adding account %s".printf (account.number));
+                        add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true,
+                            account.description != null ? "%s - %s".printf (account.number, account.description) : account.number);
                     }
                 }
-                catch (ServiceError err) {
-                    error ("could not load categories (%s)".printf (err.message));
-                }
 
-                // Add "Add category..."
-                add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY, null, ICON_ACTION_ADD);
+            }
+            catch (ServiceError err) {
+                error ("could not load accounts (%s)".printf (err.message));
+            }
+
+            // Add "Add account..."
+            add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT, null, ICON_ACTION_ADD);
+
+            // Add "Categories" category header
+            category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
+
+            // Add categories
+            try {
+                Gee.ArrayList<Category> categories = BudgetManager.get_default ().get_categories ();
+
+                foreach (Category category in categories) {
+                    debug ("adding category %s".printf (category.name));
+
+                    double cat_inflow;
+                    double cat_outflow;
+                    BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
+
+                    debug ("category inflow: %f, category outflow: %f", cat_inflow, cat_outflow);
+
+                    add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, cat_inflow - cat_outflow, ICON_CATEGORY);
+                }
             }
             catch (ServiceError err) {
                 error (err.message);
             }
 
+            // Add "Add category..."
+            add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY, null, ICON_ACTION_ADD);
+            
             treeview.get_selection ().unselect_all ();
             treeview.expand_all ();
         }
@@ -332,17 +326,12 @@ namespace Envelope.View {
 
             debug ("updating budget section");
 
-            try {
-                var budget_state = BudgetManager.get_default ().state;
-                var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
+            var budget_state = BudgetManager.get_default ().state;
+            var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
 
-                store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.inflow), -1);
-                store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.outflow), -1);
-                store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.String.format_currency (remaining), -1);
-            }
-            catch (ServiceError err) {
-                error ("error updating budget section (%s)".printf (err.message));
-            }
+            store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.inflow), -1);
+            store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.outflow), -1);
+            store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.String.format_currency (remaining), -1);
         }
 
         private void update_accounts_section () {
