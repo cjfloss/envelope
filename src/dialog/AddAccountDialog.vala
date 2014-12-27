@@ -92,12 +92,12 @@ namespace Envelope.Dialog {
 
             grid.show_all ();
 
-            var number_label = new Gtk.Label ("Account number:");
+            var number_label = new Gtk.Label ("Label:");
             number_label.xalign = 1f;
             grid.attach(number_label, 0, 1, 1, 1);
 
             number_entry = new Gtk.Entry ();
-            number_entry.placeholder_text = "ID or number";
+            number_entry.placeholder_text = _("Eg.: account number");
             number_entry.expand = true;
             grid.attach(number_entry, 1, 1, 1, 1);
 

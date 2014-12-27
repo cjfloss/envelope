@@ -33,13 +33,13 @@ namespace Envelope.View {
         }
 
         public Welcome () {
-            base (_("Get your budget going"), _("Envelope could not find any account"));
+            base (_("Get your budget going"), _("You have not configured any account yet"));
             build_ui ();
             connect_signals ();
         }
 
         private void build_ui () {
-            append ("add", "Add an account", "Create an account to record your transactions");
+            append ("add", _("Add an account"), _("Set up an account to record your transactions"));
         }
 
         private void connect_signals () {
@@ -58,9 +58,8 @@ namespace Envelope.View {
                     dialog.show_all ();
                     break;
 
-                case 1:
-                    // TODO import task
-                    break;
+                default:
+                    assert_not_reached ();
             }
         }
     }
