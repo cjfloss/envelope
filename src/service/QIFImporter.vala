@@ -105,12 +105,13 @@ namespace Envelope.Service {
 
             ArrayList<Transaction> list = new ArrayList<Transaction> ();
 
-            try {
-                var file = File.new_for_path (path);
+            var file = File.new_for_path (path);
 
-                if (!file.query_exists ()) {
-                    throw new ServiceError.ENOENT ("specified file does not exist");
-                }
+            if (!file.query_exists ()) {
+                throw new ServiceError.ENOENT ("specified file does not exist");
+            }
+
+            try {               
 
                 var input_stream = file.read ();
                 var stream = new DataInputStream (input_stream);
