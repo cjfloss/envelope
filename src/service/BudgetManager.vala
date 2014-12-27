@@ -29,6 +29,8 @@ namespace Envelope.Service {
         double inflow;
         double outflow;
 
+        public double remaining { get { return inflow - outflow; }}
+
         ArrayList<Transaction> transactions;
         ArrayList<Category> categories;
     }
@@ -223,14 +225,9 @@ namespace Envelope.Service {
          * Determine start and end dates for current month
          */
         private void compute_dates (out DateTime from, out DateTime to) {
-
-            var now = new DateTime.now_local ();
-
-            from = new DateTime.local (now.get_year (), now.get_month (), 1, 0, 0, 0);
-            to = new DateTime.local (now.get_year (), now.get_month (), 1, 0, 0, 0);
-
-            // compute last day
-            to = to.add_months (1).add_days (-1);
+            int month, year;
+            Envelope.Util.Date.get_year_month (out year, out month);
+            Envelope.Util.Date.get_month_boundaries (year, month, out from, out to);
         }
 
         /**
