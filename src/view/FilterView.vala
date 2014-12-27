@@ -72,19 +72,6 @@ namespace Envelope.View {
 
             set_spacing (10);
 
-            /*
-            var title_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 12);
-            pack_start (title_box);
-
-            var title_image = new Gtk.Image.from_icon_name ("office-calendar", Gtk.IconSize.DIALOG);
-            title_box.pack_start (title_image, false);
-
-            var title = new Gtk.Label (_("Show transactions from:"));
-            title.xalign = 0.0f;
-            title.valign = Gtk.Align.END;
-            title_box.pack_start (title);
-            */
-
             var inner_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 12);
             pack_start (inner_box);
 
