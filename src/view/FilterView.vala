@@ -183,28 +183,26 @@ namespace Envelope.View {
 
             var now = new DateTime.now_local ();
 
+            int month, year;
+            Envelope.Util.Date.get_year_month (out year, out month);
+
             switch (filter_type) {
                 case FilterType.THIS_MONTH:
-                    from = new DateTime.local (now.get_year (), now.get_month (), 1, 0, 0, 0);
 
-                    var last_day = from.add_months (1).add_days (-1);
-                    to = new DateTime.local (last_day.get_year (), last_day.get_month (), last_day.get_day_of_month (), 0, 0, 0);
-
+                    Envelope.Util.Date.get_month_boundaries (year, month, out from, out to);
                     break;
 
                 case FilterType.LAST_MONTH:
 
-                    var last_month = new DateTime.local (now.get_year (), now.get_month (), 1, 0 ,0, 0);
-                    last_month = last_month.add_months (-1);
+                    int last_month, last_year;
+                    Envelope.Util.Date.months_ago (1, out last_year, out last_month);
 
-                    from = last_month;
-                    to = last_month.add_months (1).add_days (-1);
-
+                    Envelope.Util.Date.get_month_boundaries (last_year, last_month, out from, out to);
                     break;
 
                 case FilterType.FUTURE:
 
-                    from = now.add_days (1);
+                    Envelope.Util.Date.tomorrow (out from);
                     to = null;
 
                     break;
@@ -229,7 +227,7 @@ namespace Envelope.View {
 
             from = d_from;
             to = d_to;
-            
+
             date_filter_changed ();
         }
 
