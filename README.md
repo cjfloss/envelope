@@ -38,13 +38,18 @@ There ain't no binary package distribution yet. To use Envelope now, you'll have
 ```sh
 $ git clone https://github.com/nlaplante/envelope
 $ cd envelope
-$ git submodule init
 $ mkdir build
 $ cd build
 $ cmake -DCMAKE_BUILD_TYPE=Debug ..
 $ make
 ```
-From there you can either use the binary in `build/envelope` or install it:
+From there you can either use the binary in `build/src/envelope` or install it:
 ```sh
 $ sudo make install
+```
+
+You can also run the unit tests:
+```
+$ cd tests
+$ ./envelope-tests
 ```
