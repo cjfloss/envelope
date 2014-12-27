@@ -188,6 +188,65 @@ namespace Envelope.Service {
             }
         }
 
+        public void update_transaction (Transaction transaction) throws ServiceError {
+
+
+            var old_balance = transaction.account.balance;
+
+            try {
+
+                // load transaction as it is before update to correctly recalculate account balance
+                var current_transaction = dbm.get_transaction_by_id (transaction.@id);
+
+                // should not be null, we're updating an existing transaction
+                assert (current_transaction != null);
+
+                var db_transaction = dbm.start_transaction ();
+
+                // update transaction
+                dbm.update_transaction (transaction, ref db_transaction);
+
+                // first replay old transaction
+                switch (current_transaction.direction) {
+                    case Transaction.Direction.INCOMING:
+                        transaction.account.balance -= current_transaction.amount;
+                        break;
+
+                    case Transaction.Direction.OUTGOING:
+                        transaction.account.balance += current_transaction.amount;
+                        break;
+
+                    default:
+                        assert_not_reached ();
+                }
+
+                // update account balance
+                switch (transaction.direction) {
+                    case Transaction.Direction.INCOMING:
+                        transaction.account.balance += transaction.amount;
+                        break;
+
+                    case Transaction.Direction.OUTGOING:
+                        transaction.account.balance -= transaction.amount;
+                        break;
+
+                    default:
+                        assert_not_reached ();
+                }
+
+                dbm.update_account_balance (transaction.account, ref db_transaction);
+
+                db_transaction.commit ();
+
+                transaction_updated (transaction);
+                account_updated (transaction.account);
+            }
+            catch (SQLHeavy.Error err) {
+                transaction.account.balance = old_balance;
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
         public void remove_transaction (ref Transaction transaction) throws ServiceError {
 
             //assert (transaction.account != null);

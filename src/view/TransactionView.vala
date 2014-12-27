@@ -840,7 +840,7 @@ namespace Envelope.View {
                 string description;
                 string in_amount;
                 string out_amount;
-                string category;
+                string category_name;
 
                 transactions_store.@get (iter,
                     Column.DATE, out date,
@@ -849,29 +849,52 @@ namespace Envelope.View {
                     Column.INFLOW, out in_amount,
                     Column.MEMO, out description,
                     Column.TRANSACTION, out transaction,
-                    Column.CATEGORY, out category, -1);
+                    Column.CATEGORY, out category_name, -1);
 
-                if (transaction != null) {
+                if (transaction != null && transaction.@id != null) {
 
                     transaction.label = label;
                     transaction.description = description;
 
-                    double amount = 0d;
-
-                    if (in_amount != "") {
-                        amount = double.parse (in_amount);
-                        transaction.direction = Transaction.Direction.INCOMING;
+                    try {
+                        if (in_amount != "") {
+                            transaction.amount = Envelope.Util.parse_currency (in_amount);
+                            transaction.direction = Transaction.Direction.INCOMING;
+                        }
+                        else if (out_amount != "") {
+                            transaction.amount = Envelope.Util.parse_currency (out_amount);
+                            transaction.direction = Transaction.Direction.OUTGOING;
+                        }
                     }
-                    else if (out_amount != "") {
-                        amount = double.parse (out_amount);
-                        transaction.direction = Transaction.Direction.OUTGOING;
+                    catch (Envelope.Util.ParseError err) {
+                        error ("could not parse transaction amount (%s)".printf (err.message));
                     }
 
-                    transaction.amount = amount;
+                    // date
+                    var parse_date = Date ();
+                    parse_date.set_parse (date);
 
-                    // TODO date
+                    if (!parse_date.valid ()) {
+                        warning ("could not parse date %s", date);
+                        return;
+                    }
 
-                    // TODO save
+                    transaction.date = new DateTime.local (parse_date.get_year (),
+                        parse_date.get_month (),
+                        parse_date.get_day (), 0, 0, 0);
+
+                    debug ("new transaction date: %s", transaction.date.to_string ());
+
+                    // category
+                    transaction.category = CategoryStore.get_default ().get_category_by_name (category_name);
+
+                    // update
+                    try {
+                        AccountManager.get_default ().update_transaction (transaction);
+                    }
+                    catch (ServiceError err) {
+                        error ("could not update transaction (%s)", err.message);
+                    }
                 }
             }
         }

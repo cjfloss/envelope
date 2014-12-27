@@ -77,6 +77,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_delete_account_transactions;
         private SQLHeavy.Query q_insert_account_transaction;
         private SQLHeavy.Query q_delete_transaction;
+        private SQLHeavy.Query q_update_transaction;
 
         private SQLHeavy.Query q_load_current_transactions;
         private SQLHeavy.Query q_load_current_transactions_for_category;
@@ -320,6 +321,64 @@ namespace Envelope.DB {
             stmt.set_int ("id", transaction_id);
 
             stmt.execute ();
+        }
+
+        public void update_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+
+            var stmt = db_transaction.prepare ("""UPDATE `transactions` SET
+                    label = :label,
+                    description = :description,
+                    direction = :direction,
+                    amount = :amount,
+                    account_id = :account_id,
+                    category_id = :category_id,
+                    parent_transaction_id = :parent_transaction_id,
+                    date = :date
+                WHERE id = :transaction_id
+            """);
+
+            // required fields
+            stmt.set_int ("transaction_id", transaction.@id);
+            stmt.set_string ("label", transaction.label);
+            stmt.set_string ("description", transaction.description);
+            stmt.set_int ("direction", (int) transaction.direction);
+            stmt.set_double ("amount", transaction.amount);
+            stmt.set_int ("account_id", transaction.account.@id);
+            stmt.set_int ("date", (int) transaction.date.to_unix ());
+
+            // optional fields
+            if (transaction.category != null) {
+                stmt.set_int ("category_id", transaction.category.@id);
+            }
+            else {
+                stmt.set_null ("category_id");
+            }
+
+            if (transaction.parent != null) {
+                stmt.set_int ("parent_transaction_id", transaction.parent.@id);
+            }
+            else {
+                stmt.set_null ("parent_transaction_id");
+            }
+
+            stmt.execute ();
+        }
+
+        public Transaction? get_transaction_by_id (int id) throws SQLHeavy.Error {
+
+            var stmt = database.prepare ("SELECT * FROM `transactions` WHERE `id` = :id");
+            stmt.set_int ("id", id);
+
+            var results = stmt.execute ();
+
+            if (!results.finished) {
+                Transaction transaction;
+                query_result_to_transaction (results, out transaction);
+
+                return transaction;
+            }
+
+            return null;
         }
 
         public Gee.ArrayList<Category> load_categories () throws SQLHeavy.Error {
