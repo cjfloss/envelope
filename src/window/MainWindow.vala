@@ -159,7 +159,6 @@ namespace Envelope.Window {
             }
 
             sidebar.update_view ();
-            sidebar.reveal ();
 
             sidebar.list_account_selected.connect ((account) => {
                 Gtk.Widget widget;
