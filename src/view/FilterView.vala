@@ -168,8 +168,6 @@ namespace Envelope.View {
 
         private void compute_dates (out DateTime? from, out DateTime? to) {
 
-            var now = new DateTime.now_local ();
-
             int month, year;
             Envelope.Util.Date.get_year_month (out year, out month);
 
