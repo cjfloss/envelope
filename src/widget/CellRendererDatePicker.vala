@@ -38,42 +38,49 @@ namespace Envelope.Widget {
             connect_signals ();
         }
 
-        public override unowned Gtk.CellEditable start_editing (Gdk.Event event,
+        public override unowned bool activate (Gdk.Event event,
                                             Gtk.Widget widget,
                                             string path,
                                             Gdk.Rectangle background_area,
                                             Gdk.Rectangle cell_area,
                                             Gtk.CellRendererState flags) {
 
-            weak Gtk.CellEditable ret = base.start_editing (event, widget, path, background_area, cell_area, flags);
-
             current_path = path;
 
             Cairo.RectangleInt pos;
-            determine_position (cell_area, out pos);
+            bool set_top = determine_position (cell_area, out pos);
 
             popover.pointing_to = pos;
             popover.relative_to = widget;
+            popover.set_position (set_top ? Gtk.PositionType.TOP : Gtk.PositionType.BOTTOM);
+
             popover.show ();
 
-            return ret;
+            return true;
         }
 
-        private void determine_position (Gdk.Rectangle area, out Cairo.RectangleInt position) {
+        private bool determine_position (Gdk.Rectangle area, out Cairo.RectangleInt position) {
             position = Cairo.RectangleInt ();
 
             position.width = area.width;
             position.height = area.height;
             position.y = area.y + area.height + 2;
             position.x = area.x;
+
+            return false;
         }
 
         private void build_ui () {
+
+            mode = Gtk.CellRendererMode.ACTIVATABLE;
+            editable = false;
+            editable_set = true;
+
             calendar = new Gtk.Calendar ();
 
             popover = new Gtk.Popover (relative_to);
-            popover.modal = false;
-            popover.border_width = 10;
+            popover.modal = false; // modal = true causes conflict with treeview
+            popover.border_width = 12;
             popover.set_position (Gtk.PositionType.BOTTOM);
             popover.add (calendar);
 
@@ -81,7 +88,11 @@ namespace Envelope.Widget {
         }
 
         private void connect_signals () {
-            calendar.day_selected_double_click.connect (select_date);
+            calendar.day_selected.connect (select_date);
+
+            popover.closed.connect ( () =>  {
+                debug ("calendar popover closed");
+            });
         }
 
         private void select_date () {

@@ -234,9 +234,6 @@ namespace Envelope.View {
 
             clear ();
 
-            var total = transactions != null ? transactions.size : 0;
-            var count = 0;
-
             if (transactions != null) {
 
                 foreach (Transaction transaction in transactions) {
@@ -500,8 +497,15 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    transactions_store.@set (store_iter,
-                        Column.OUTFLOW, Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text)), -1);
+                    string outflow;
+                    try {
+                        outflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text));
+                    }
+                    catch (Envelope.Util.String.ParseError err) {
+                        outflow = "<error>";
+                    }
+
+                    transactions_store.@set (store_iter, Column.OUTFLOW, outflow, -1);
                 }
             });
 
@@ -519,14 +523,20 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    transactions_store.@set (store_iter,
-                        Column.INFLOW, Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text)), -1);
+                    string inflow;
+                    try {
+                        inflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text));
+                    }
+                    catch (Envelope.Util.String.ParseError err) {
+                        inflow = "<error>";
+                    }
+
+                    transactions_store.@set (store_iter, inflow, -1);
                 }
             });
 
             crdp = new CellRendererDatePicker (treeview);
-            crdp.editable = true;
-            crdp.editable_set = true;
+            crdp.mode = Gtk.CellRendererMode.ACTIVATABLE;
             crdp.xalign = 1.0f;
             crdp.edited.connect ((path, text) => {
 
@@ -874,6 +884,7 @@ namespace Envelope.View {
 
                     // date
                     var parse_date = Date ();
+                    parse_date.clear ();
                     parse_date.set_parse (date);
 
                     if (!parse_date.valid ()) {
