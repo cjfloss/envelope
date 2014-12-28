@@ -25,6 +25,8 @@ namespace Envelope.Window {
 
     public class MainWindow : Gtk.ApplicationWindow {
 
+        private static const uint TRANSITION_DURATION = 100;
+
         // window elements
         public Gtk.HeaderBar                header_bar { get; private set; }
         public Gtk.Button                   import_button { get; private set; }
@@ -40,7 +42,7 @@ namespace Envelope.Window {
         private Gtk.Popover                 menu_popover;
         private Gtk.Overlay                 overlay;
 
-        private DatabaseManager dbm = DatabaseManager.get_default (); // TODO replace this with a call to AccountManager
+        private Gtk.Revealer                content_revealer;
 
         // fired when the content view changes
         public signal void main_view_changed (Gtk.Widget main_view);
@@ -72,6 +74,10 @@ namespace Envelope.Window {
             overlay = new Gtk.Overlay ();
             this.add (overlay);
 
+            content_revealer = new Gtk.Revealer ();
+            content_revealer.set_transition_duration (TRANSITION_DURATION);
+            content_revealer.set_transition_type (Gtk.RevealerTransitionType.CROSSFADE);
+
             // overlay bar for toast notifitcations
             overlay_bar = new Granite.Widgets.OverlayBar (overlay);
 
@@ -91,8 +97,10 @@ namespace Envelope.Window {
             paned = new Granite.Widgets.ThinPaned ();
             paned.position = 250;
             paned.position_set = true;
-            paned.show_all ();
+            //paned.show_all ();
             overlay.add (paned);
+
+            paned.pack2 (content_revealer, true, false);
 
             // header bar
             header_bar = new Gtk.HeaderBar ();
@@ -137,7 +145,7 @@ namespace Envelope.Window {
             header_bar.show_all ();
 
             // sidebar
-            sidebar = new Sidebar ();
+            sidebar = Sidebar.get_default ();
 
             Gee.ArrayList<Account> accounts;
 
@@ -151,37 +159,32 @@ namespace Envelope.Window {
             }
 
             sidebar.update_view ();
-            sidebar.show_all ();
+            sidebar.reveal ();
 
             sidebar.list_account_selected.connect ((account) => {
                 Gtk.Widget widget;
-                determine_content_view (account, out widget);
+                determine_account_content_view (account, out widget);
 
                 Type t = widget.get_type ();
 
                 debug ("view to show: %s".printf (t.name ()));
 
-                if (paned.get_child2 () != widget) {
-                    var current_view = paned.get_child2 ();
+                if (content_revealer.get_child () != widget) {
+                    var current_view = content_revealer.get_child ();
                     current_view.@ref ();
-                    paned.remove (current_view);
                 }
 
-                paned.add2 (widget);
-                //paned.show_all ();
-
-                widget.show ();
+                set_content_view (widget);
 
                 search_entry.placeholder_text = "Search in %s%s".printf (account.number, Envelope.Util.String.ELLIPSIS);
-
-                main_view_changed (widget);
             });
 
             // If we have accounts, show the transaction view
             // otherwise show welcome screen
             Gtk.Widget content_view;
             determine_initial_content_view (accounts, out content_view);
-            paned.pack2 (content_view, true, false);
+            //paned.pack2 (content_view, true, false);
+            set_content_view (content_view);
             main_view_changed (content_view);
 
             configure_window ();
@@ -218,17 +221,13 @@ namespace Envelope.Window {
             AccountWelcomeScreen.get_default ().add_transaction_selected.connect ( (account) => {
 
                 var transaction_view = TransactionView.get_default ();
-                var current_view = paned.get_child2 ();
-                current_view.@ref ();
 
-                paned.remove (current_view);
-                paned.add2 (transaction_view);
+                set_content_view (transaction_view);
                 transaction_view.transactions = account.transactions;
-                transaction_view.show ();
             });
 
             // handle account renames
-            Sidebar.get_default ().list_account_name_updated.connect ( (account, new_name) => {
+            sidebar.list_account_name_updated.connect ( (account, new_name) => {
 
                 Account acct = account as Account;
 
@@ -239,25 +238,21 @@ namespace Envelope.Window {
                     }
                     catch (Error err) {
                         if (err is ServiceError.DATABASE_ERROR) {
-
+                            error ("error renaming account (%s)", err.message);
                         }
                         else if (err is AccountError.ALREADY_EXISTS) {
-
+                            // TODO show error
                         }
-
-                        // TODO reset the label in the sidebar to the original account number
                     }
                 }
             });
 
-            Sidebar.get_default ().overview_selected.connect ( () => {
-                if (paned.get_child2 () != BudgetOverview.get_default ()) {
-                    var current_view = paned.get_child2 ();
-                    current_view.@ref ();
+            sidebar.overview_selected.connect ( () => {
 
-                    paned.remove (current_view);
-                    paned.add2 (BudgetOverview.get_default ());
-                    main_view_changed (BudgetOverview.get_default ());
+                var budget_overview = BudgetOverview.get_default ();
+
+                if (content_revealer.get_child () != budget_overview) {
+                    set_content_view (budget_overview);
                 }
             });
 
@@ -303,13 +298,10 @@ namespace Envelope.Window {
             add_transaction_button.clicked.connect ( () => {
                 TransactionView.get_default ().add_transaction_row ();
 
-                var child2 = paned.get_child2 ();
+                var child = content_revealer.get_child ();
 
-                if (!(child2 is TransactionView)) {
-                    paned.remove (child2);
-                    paned.pack2 (TransactionView.get_default (), true, false);
-                    paned.show_all ();
-                    main_view_changed (TransactionView.get_default ());
+                if (!(child is TransactionView)) {
+                    set_content_view (TransactionView.get_default ());
                 }
             });
 
@@ -328,7 +320,7 @@ namespace Envelope.Window {
 
             if (widget != Welcome.get_default ()) {
                 if (paned.get_child1 () == null) {
-                    paned.pack1 (Sidebar.get_default (), true, false);
+                    paned.pack1 (sidebar, true, false);
                 }
             }
             else {
@@ -338,18 +330,23 @@ namespace Envelope.Window {
             }
         }
 
-        private void determine_content_view (Account account, out Gtk.Widget widget) {
+        private void determine_account_content_view (Account account, out Gtk.Widget widget) {
 
-            var transactions = dbm.load_account_transactions (account);
-            account.transactions = transactions;
+            try {
+                var transactions = AccountManager.get_default ().load_account_transactions (account);
+                account.transactions = transactions;
 
-            if (transactions.size == 0) {
-                widget = AccountWelcomeScreen.get_default ();
-                (widget as AccountWelcomeScreen).account = account;
+                if (transactions.size == 0) {
+                    widget = AccountWelcomeScreen.get_default ();
+                    (widget as AccountWelcomeScreen).account = account;
+                }
+                else {
+                    widget = TransactionView.get_default ();
+                    (widget as TransactionView).transactions = account.transactions;
+                }
             }
-            else {
-                widget = TransactionView.get_default ();
-                (widget as TransactionView).transactions = account.transactions;
+            catch (ServiceError err) {
+                error ("could not load account transactions (%s)", err.message);
             }
         }
 
@@ -380,6 +377,43 @@ namespace Envelope.Window {
 
             // search
             saved_state.search_term = search_entry.text;
+        }
+
+        private void set_content_view (Gtk.Widget widget) {
+
+            if (content_revealer.child_revealed) {
+
+                content_revealer.reveal_child = false;
+
+                Timeout.add (TRANSITION_DURATION, () => {
+                    reveal_view (widget);
+                    return false;
+                });
+            }
+            else {
+                reveal_view (widget);
+            }
+        }
+
+        private void reveal_view (Gtk.Widget widget) {
+            var child = content_revealer.get_child ();
+
+            if (child != null) {
+
+                content_revealer.remove (child);
+
+                if (child != widget) {
+                    child.@ref ();
+                }
+            }
+
+            content_revealer.add (widget);
+
+            widget.show ();
+
+            content_revealer.reveal_child = true;
+
+            main_view_changed (widget);
         }
     }
 }
