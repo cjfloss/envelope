@@ -84,6 +84,9 @@ namespace Envelope.View {
         private Gtk.TreeIter overview_outflow_iter;
         private Gtk.TreeIter overview_remaining_iter;
 
+        private Gtk.Menu right_click_menu;
+        private Gtk.MenuItem right_click_menu_item_remove;
+
         private Granite.Widgets.CellRendererExpander cre;
         private Gtk.CellRendererText crt_balance_total;
 
@@ -99,7 +102,7 @@ namespace Envelope.View {
         public signal void list_account_selected (Account account);
         public signal void list_account_name_updated (Account account, string new_name);
 
-        public Sidebar () {
+        private Sidebar () {
             store = new Gtk.TreeStore(COLUMN_COUNT,
                 typeof (string),
                 typeof (Account),
@@ -118,12 +121,6 @@ namespace Envelope.View {
             connect_signals ();
 
             sidebar_instance = this;
-        }
-
-        public Sidebar.with_accounts (Gee.ArrayList<Account> accounts) {
-            this ();
-            this.accounts = accounts;
-            update_view ();
         }
 
         private void build_ui () {
@@ -199,22 +196,56 @@ namespace Envelope.View {
             add (treeview);
 
             treeview.append_column (col);
-            treeview.show_all ();
 
             treeview.get_selection ().changed.connect (treeview_row_activated);
 
-            //width_request = 150;
+            // right-click menu
+            right_click_menu = new Gtk.Menu ();
+
+            right_click_menu_item_remove = new Gtk.MenuItem.with_label (_("Remove"));
+            right_click_menu.append (right_click_menu_item_remove);
+
+            right_click_menu.show_all ();
         }
 
         private void connect_signals () {
-            var dbm = DatabaseManager.get_default ();
 
-            // add account to list when a new account is added in the database
-            dbm.account_created.connect (add_new_account);
+            var budget_manager = BudgetManager.get_default ();
+            budget_manager.budget_changed.connect (update_budget_section);
+            budget_manager.budget_changed.connect (update_categories_section);
+            budget_manager.category_added.connect (update_categories_section);
 
-            BudgetManager.get_default ().budget_changed.connect (update_view);
-            BudgetManager.get_default ().category_added.connect (update_view);
-            AccountManager.get_default ().account_updated.connect (update_account_item);
+            var account_manager = AccountManager.get_default ();
+            account_manager.account_created.connect (add_new_account);
+            account_manager.account_updated.connect (update_account_item);
+
+            // right-click menu
+            treeview.button_press_event.connect ( (button_event) => {
+
+                if (button_event.button == 3) {
+                    // get targeted line
+                    Gtk.TreePath target_path;
+                    Gtk.TreeViewColumn target_column;
+                    int target_x;
+                    int target_y;
+
+                    if (treeview.get_path_at_pos ((int) button_event.x, (int) button_event.y, out target_path, out target_column, out target_x, out target_y)) {
+
+                        var selection = treeview.get_selection ();
+
+                        selection.unselect_all ();
+                        selection.select_path (target_path);
+
+                        right_click_menu.popup (null, null, null, button_event.button, button_event.get_time ());
+                    }
+
+                    return false;
+                }
+
+                return false;
+            });
+
+            right_click_menu_item_remove.activate.connect (popup_menu_remove_activated);
 
             destroy.connect (on_quit);
         }
@@ -291,9 +322,13 @@ namespace Envelope.View {
                 error (err.message);
             }
 
+            // Add "Uncategorized"
+            add_item (category_iter, _("Uncategorized"), TreeCategory.CATEGORIES,
+                null, null, Action.NONE, (double) BudgetManager.get_default ().state.uncategorized.size, ICON_CATEGORY);
+
             // Add "Add category..."
             add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY, null, ICON_ACTION_ADD);
-            
+
             treeview.get_selection ().unselect_all ();
             treeview.expand_all ();
         }
@@ -322,9 +357,10 @@ namespace Envelope.View {
             }
         }
 
+        // update budget balances
         private void update_budget_section () {
 
-            debug ("updating budget section");
+            debug ("update budget section");
 
             var budget_state = BudgetManager.get_default ().state;
             var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
@@ -334,7 +370,10 @@ namespace Envelope.View {
             store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.String.format_currency (remaining), -1);
         }
 
+        //
         private void update_accounts_section () {
+
+            debug ("update accounts section");
 
             try {
 
@@ -354,9 +393,7 @@ namespace Envelope.View {
 
         }
 
-        /**
-         * Find the item in the tree which corresponds to account and update the account instance in the store
-         */
+        // Find the item in the tree which corresponds to account and update the account instance in the store
         private void update_account_item (Account account) {
 
             Gtk.TreeIter iter;
@@ -366,21 +403,63 @@ namespace Envelope.View {
             }
         }
 
+        // recalculate category remaining balance for each category listed in the sidebar
         private void update_categories_section () {
 
+            debug ("update categories section");
+
+            if (!store.iter_has_child (category_iter)) {
+                return;
+            }
+
+            var budget_manager = BudgetManager.get_default ();
+
+            Gtk.TreeIter iter;
+            store.iter_children (out iter, category_iter);
+
+            do {
+                Category category;
+                store.@get (iter, Column.CATEGORY, out category, -1);
+
+                if (category != null) {
+
+                    double cat_inflow;
+                    double cat_outflow;
+                    budget_manager.compute_current_category_operations (category, out cat_inflow, out cat_outflow);
+
+                    var formatted_state = Envelope.Util.String.format_currency (cat_inflow - cat_outflow);
+                    store.@set (iter, Column.STATE, formatted_state, -1);
+                }
+
+            } while (store.iter_next (ref iter));
         }
 
+        /**
+         * Add a sidebar item
+         *
+         * @param parent the parent element to insert under
+         * @param tree_category the category of the item added
+         * @param account the account to associate with the item
+         * @param category the category to associate with the item
+         * @param action the type of action to do when the item is selected
+         * @param state_amount the amount to show at the right side of the item
+         * @param icon the icon name to use for the item
+         * @param is_header true if this is a category header, false otherwise
+         * @param colorize true to colorize the amount shown at the right, false otherwise
+         * @param tooltip the tooltip for the item
+         * @return the Gtk.TreeIter for the new item
+         */
         private Gtk.TreeIter add_item (Gtk.TreeIter? parent,
-                                        string label,
-                                        TreeCategory tree_category,
-                                        Account? account,
-                                        Category? category,
-                                        Action action = Action.NONE,
-                                        double? state_amount = null,
-                                        string? icon = null,
-                                        bool is_header = false,
-                                        bool colorize = false,
-                                        string tooltip = "") {
+                                       string label,
+                                       TreeCategory tree_category,
+                                       Account? account,
+                                       Category? category,
+                                       Action action = Action.NONE,
+                                       double? state_amount = null,
+                                       string? icon = null,
+                                       bool is_header = false,
+                                       bool colorize = false,
+                                       string tooltip = "") {
 
             Gtk.TreeIter iter;
 
@@ -771,6 +850,52 @@ namespace Envelope.View {
             }
 
             return null;
+        }
+
+        private void popup_menu_remove_activated () {
+            Gtk.TreeIter iter;
+            if (!treeview.get_selection ().get_selected (null, out iter)) {
+                return;
+            }
+
+            TreeCategory tree_category;
+            Category category;
+            bool is_header;
+
+            store.@get (iter,
+                    Column.TREE_CATEGORY, out tree_category,
+                    Column.CATEGORY, out category,
+                    Column.IS_HEADER, out is_header, -1);
+
+            switch (tree_category) {
+                case TreeCategory.OVERVIEW:
+                    break;
+
+                case TreeCategory.ACCOUNTS:
+                    break;
+
+                case TreeCategory.CATEGORIES:
+                    if (!is_header && category != null) {
+                        remove_category (iter, category);
+                    }
+
+                    break;
+
+                default:
+                    assert_not_reached ();
+            }
+        }
+
+        private void remove_category (Gtk.TreeIter iter, Category category) {
+            try {
+                BudgetManager.get_default ().delete_category (category);
+                store.remove (ref iter);
+
+                Envelope.App.toast (_("Category %s removed".printf (category.name)));
+            }
+            catch (ServiceError err) {
+                error ("could not remove category (%s)", err.message);
+            }
         }
 
         private void on_quit () {
