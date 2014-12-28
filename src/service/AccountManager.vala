@@ -133,9 +133,9 @@ namespace Envelope.Service {
             }
         }
 
-        public void load_account_transactions (Account account) throws ServiceError {
+        public Gee.ArrayList<Transaction> load_account_transactions (Account account) throws ServiceError {
             try {
-                Gee.ArrayList<Transaction> transactions = dbm.load_account_transactions (account);
+                return dbm.load_account_transactions (account);
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
