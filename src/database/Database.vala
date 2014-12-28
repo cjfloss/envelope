@@ -18,48 +18,100 @@
 
 namespace Envelope.DB {
 
-    static const string ACCOUNTS = """
-        CREATE TABLE IF NOT EXISTS accounts (
-            `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-            `number` TEXT NOT NULL,
-            `description` TEXT,
-            `balance` DOUBLE,
-            `type` INT)
-        """;
-
-    static const string TRANSACTIONS = """
-        CREATE TABLE IF NOT EXISTS transactions (
-            `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-            `label` TEXT NOT NULL,
-            `description` TEXT,
-            `direction` INT NOT NULL,
-            `amount` DOUBLE NOT NULL,
-            `account_id` INT NOT NULL,
-            `category_id` INT,
-            `parent_transaction_id` INT,
-            `date` TIMESTAMP NOT NULL,
-        FOREIGN KEY (`parent_transaction_id`) REFERENCES `transactions`(`id`),
-        FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`),
-        FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`))
-        """;
-
-    static const string CATEGORIES = """
-        CREATE TABLE IF NOT EXISTS categories (
-            `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-            `name` TEXT NOT NULL,
-            `description` TEXT,
-            `amount_budgeted` DOUBLE,
-            `parent_category_id` INT,
-        FOREIGN KEY (`parent_category_id`) REFERENCES `category`(`id`))
-        """;
-
     class DatabaseManager : Object {
+
+        private static const string DATABASE_FILENAME = "database.db";
+
+        private static const string ACCOUNTS = """
+            CREATE TABLE IF NOT EXISTS accounts (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+                `number` TEXT NOT NULL,
+                `description` TEXT,
+                `balance` DOUBLE,
+                `type` INT)
+            """;
+
+        private static const string TRANSACTIONS = """
+            CREATE TABLE IF NOT EXISTS transactions (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+                `label` TEXT NOT NULL,
+                `description` TEXT,
+                `direction` INT NOT NULL,
+                `amount` DOUBLE NOT NULL,
+                `account_id` INT NOT NULL,
+                `category_id` INT,
+                `parent_transaction_id` INT,
+                `date` TIMESTAMP NOT NULL,
+            FOREIGN KEY (`parent_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
+            FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE RESTRICT)
+            """;
+
+        private static const string CATEGORIES = """
+            CREATE TABLE IF NOT EXISTS categories (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+                `name` TEXT NOT NULL,
+                `description` TEXT,
+                `amount_budgeted` DOUBLE,
+                `parent_category_id` INT,
+            FOREIGN KEY (`parent_category_id`) REFERENCES `category`(`id`) ON UPDATE CASCADE ON DELETE SET NULL)
+            """;
+
+        private static const string SQL_CATEGORY_COUNT = "SELECT COUNT(*) AS category_count from categories";
+        private static const string SQL_INSERT_CATEGORY_FOR_NAME = "INSERT INTO `categories` (`name`) VALUES (:name);";
+        private static const string SQL_DELETE_TRANSACTION = "DELETE FROM `transactions` WHERE `id` = :id";
+        private static const string SQL_GET_TRANSACTION_BY_ID = "SELECT * FROM `transactions` WHERE `id` = :id";
+        private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `category_id` IS NULL";
+        private static const string SQL_RENAME_ACCOUNT = "UPDATE `accounts` SET `number` = :number WHERE `id` = :account_id";
+        private static const string SQL_UPDATE_ACCOUNT_BALANCE = "UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id";
+        private static const string SQL_LOAD_ACCOUNT_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `account_id` = :account_id ORDER BY `date` DESC";
+        private static const string SQL_DELETE_ACCOUNT_TRANSACTIONS = "DELETE FROM `transactions` WHERE `account_id` = :account_id";
+        private static const string SQL_GET_UNIQUE_MERCHANTS = "SELECT `label`, COUNT(`label`) as `number` FROM `transactions` GROUP BY `label` ORDER BY `number` DESC, `label` ASC";
+        private static const string SQL_LOAD_CATEGORIES = "SELECT * FROM `categories` ORDER BY `name` ASC";
+        private static const string SQL_LOAD_CHILD_CATEGORIES = "SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC";
+        private static const string SQL_DELETE_CATEOGRY = "DELETE FROM `categories` WHERE `id` = :category_id";
+        private static const string SQL_LOAD_CURRENT_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days')";
+        private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id";
+
+        private static const string SQL_INSERT_CATEGORY = """INSERT INTO `categories`
+            (`name`, `description`, `amount_budgeted`, `parent_category_id`)
+            VALUES
+            (:name, :description, :amount_budgeted, :parent_category_id)
+        """;
+
+        private static const string SQL_UPDATE_TRANSACTION = """UPDATE `transactions` SET
+            label = :label,
+            description = :description,
+            direction = :direction,
+            amount = :amount,
+            account_id = :account_id,
+            category_id = :category_id,
+            parent_transaction_id = :parent_transaction_id,
+            date = :date
+            WHERE id = :transaction_id
+        """;
+
+        private static const string SQL_INSERT_TRANSACTION = """
+            INSERT INTO `transactions`
+            (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`, `category_id`)
+            VALUES
+            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date, :category_id)
+        """;
+
+        private static const string SQL_LOAD_ACCOUNT_BY_ID = "SELECT * FROM `accounts` WHERE `id` = :accountid;";
+        private static const string SQL_LOAD_ALL_ACCOUNTS = "SELECT * FROM `accounts` ORDER BY `number`;";
+        private static const string SQL_INSERT_ACCOUNT = """
+            INSERT INTO `accounts`
+            (`number`, `description`, `balance`, `type`)
+            VALUES
+            (:number, :description, :balance, :type);
+            """;
 
         public signal void account_created (Account account);
         public signal void account_deleted (Account account);
         public signal void accout_updated (Account account);
-
         public signal void category_created (Category category);
+        public signal void transaction_created (Transaction transaction);
 
         private static DatabaseManager database_manager_instance = null;
 
@@ -78,6 +130,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_insert_account_transaction;
         private SQLHeavy.Query q_delete_transaction;
         private SQLHeavy.Query q_update_transaction;
+        private SQLHeavy.Query q_load_uncategorized_transactions;
 
         private SQLHeavy.Query q_load_current_transactions;
         private SQLHeavy.Query q_load_current_transactions_for_category;
@@ -101,55 +154,40 @@ namespace Envelope.DB {
             return database.begin_transaction ();
         }
 
-        public Gee.ArrayList<Merchant> get_merchants () {
+        public Gee.ArrayList<Merchant> get_merchants () throws SQLHeavy.Error {
+
             var merchants = new Gee.ArrayList<Merchant> ();
 
-            try {
-                SQLHeavy.QueryResult results = q_get_unique_merchants.execute ();
+            SQLHeavy.QueryResult results = q_get_unique_merchants.execute ();
 
-                while (!results.finished) {
-                    Merchant merchant;
-                    query_result_to_merchant (results, out merchant);
+            while (!results.finished) {
+                Merchant merchant;
+                query_result_to_merchant (results, out merchant);
 
-                    merchants.add (merchant);
-
-                    results.next ();
-                }
-            }
-            catch (SQLHeavy.Error err) {
-                error ("error occured while loading merchants (%s)".printf (err.message));
+                merchants.add (merchant);
+                results.next ();
             }
 
             debug ("loaded %d unique merchants".printf (merchants.size));
 
-            foreach (Merchant m in merchants) {
-                debug ("merchant: %s (%d)".printf (m.label, m.occurences));
-            }
-
             return merchants;
         }
 
-        public Account? load_account (int account_id) {
+        public Account? load_account (int account_id) throws SQLHeavy.Error {
 
-            try {
-                q_load_account.clear ();
-                q_load_account.set_int ("accountid", account_id);
+            q_load_account.clear ();
+            q_load_account.set_int ("accountid", account_id);
 
-                SQLHeavy.QueryResult results = q_load_account.execute ();
+            SQLHeavy.QueryResult results = q_load_account.execute ();
 
-                if (!results.finished) {
-                    Account account;
+            if (!results.finished) {
+                Account account;
+                query_result_to_account (results, out account);
 
-                    query_result_to_account (results, out account);
-
-                    return account;
-                }
-
-                error ("query returned no results for account %d".printf (account_id));
+                return account;
             }
-            catch (SQLHeavy.Error err) {
-                error ("could not load account %d (%s)".printf (account_id, err.message));
-            }
+
+            return null;
         }
 
         public Gee.ArrayList<Account> load_all_accounts () throws SQLHeavy.Error {
@@ -170,14 +208,12 @@ namespace Envelope.DB {
                 results.next ();
             }
 
-            debug ("loaded %d account(s)".printf (list.size));
+            debug ("loaded %d account(s)", list.size);
 
             return list;
         }
 
         public void create_category (Category category) throws SQLHeavy.Error {
-
-            debug ("inserting category '%s' in database".printf (category.name));
 
             var id = q_insert_category.execute_insert (
                 "name", typeof (string), category.name,
@@ -195,9 +231,6 @@ namespace Envelope.DB {
 
         public void create_account (Account account) throws SQLHeavy.Error {
 
-            debug ("inserting the following account: number: %s, description: %s, balance: %s, type: %s".printf
-                (account.number, account.description, account.balance.to_string (), account.account_type.to_string ()));
-
             var id = q_insert_account.execute_insert (
                 "number", typeof (string), account.number,
                 "description", typeof (string), account.description,
@@ -209,22 +242,19 @@ namespace Envelope.DB {
 
             account.@id = (int) id;
 
-            // notify account created
             account_created (account);
         }
 
         public void rename_account (Account account, string new_name) throws SQLHeavy.Error {
-
             q_rename_account.set_int ("account_id", account.@id);
             q_rename_account.set_string ("number", new_name);
-
             q_rename_account.execute ();
-
             q_rename_account.clear ();
         }
 
         public void update_account_balance (Account account, ref SQLHeavy.Transaction transaction)  throws SQLHeavy.Error {
-            transaction.prepare ("UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id")
+            transaction
+                .prepare (SQL_UPDATE_ACCOUNT_BALANCE)
                 .execute ("balance", typeof (double), account.balance, "account_id", typeof (int), account.@id);
         }
 
@@ -252,16 +282,29 @@ namespace Envelope.DB {
             return list;
         }
 
+        public Gee.ArrayList<Transaction> load_uncategorized_transactions () throws SQLHeavy.Error {
+            debug ("loading uncategorized transactions");
+
+            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
+
+            SQLHeavy.QueryResult results = q_load_uncategorized_transactions.execute ();
+
+            while (!results.finished) {
+                Transaction transaction;
+                query_result_to_transaction (results, out transaction);
+
+                // TODO account
+                list.add (transaction);
+
+                results.next ();
+            }
+
+            return list;
+        }
+
         public void insert_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction, SQLHeavy.Query? statement = null) throws SQLHeavy.Error {
 
-            debug ("inserting new transaction in account %d".printf (transaction.account.@id));
-
-            var q = statement != null ? statement : db_transaction.prepare("""
-                INSERT INTO `transactions`
-                (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`, `category_id`)
-                VALUES
-                (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date, :category_id)
-                """);
+            var q = statement != null ? statement : db_transaction.prepare(SQL_INSERT_TRANSACTION);
 
             // optional category id
             if (transaction.category != null) {
@@ -291,46 +334,36 @@ namespace Envelope.DB {
             debug ("transaction created with id %d".printf ((int) id));
 
             transaction.@id = (int) id;
+
+            transaction_created (transaction);
         }
 
         /**
          * Insert multiple transactions
          */
-        public void insert_transactions (Gee.ArrayList<Transaction> transactions, ref SQLHeavy.Transaction transaction) throws SQLHeavy.Error {
+        public void insert_transactions (Gee.ArrayList<Transaction> transactions, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
-            var stmt = transaction.prepare ("""
-            INSERT INTO `transactions`
-            (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`, 'category_id')
-            VALUES
-            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date, :category_id)
-            """);
+            var stmt = db_transaction.prepare (SQL_INSERT_TRANSACTION);
 
             foreach (Transaction t in transactions) {
-                insert_transaction (t, ref transaction, stmt);
+                insert_transaction (t, ref db_transaction, stmt);
             }
         }
 
+
+
         public void delete_transaction (int transaction_id, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
-            var stmt = db_transaction.prepare ("DELETE FROM `transactions` WHERE `id` = :id");
+            var stmt = db_transaction.prepare (SQL_DELETE_TRANSACTION);
             stmt.set_int ("id", transaction_id);
 
             stmt.execute ();
         }
 
+
         public void update_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
-            var stmt = db_transaction.prepare ("""UPDATE `transactions` SET
-                    label = :label,
-                    description = :description,
-                    direction = :direction,
-                    amount = :amount,
-                    account_id = :account_id,
-                    category_id = :category_id,
-                    parent_transaction_id = :parent_transaction_id,
-                    date = :date
-                WHERE id = :transaction_id
-            """);
+            var stmt = db_transaction.prepare (SQL_UPDATE_TRANSACTION);
 
             // required fields
             stmt.set_int ("transaction_id", transaction.@id);
@@ -361,7 +394,7 @@ namespace Envelope.DB {
 
         public Transaction? get_transaction_by_id (int id) throws SQLHeavy.Error {
 
-            var stmt = database.prepare ("SELECT * FROM `transactions` WHERE `id` = :id");
+            var stmt = database.prepare (SQL_GET_TRANSACTION_BY_ID);
             stmt.set_int ("id", id);
 
             var results = stmt.execute ();
@@ -439,7 +472,15 @@ namespace Envelope.DB {
             return list;
         }
 
+        public void delete_category (Category category) throws SQLHeavy.Error {
+            // no need to update transactions; ON DELETE SET NULL
+            q_delete_category.clear ();
+            q_delete_category.set_int ("category_id", category.@id);
+            q_delete_category.execute ();
+        }
+
         private DatabaseManager () {
+            Object ();
             init_database ();
         }
 
@@ -463,6 +504,7 @@ namespace Envelope.DB {
         }
 
         private void query_result_to_transaction (SQLHeavy.QueryResult results, out Transaction transaction, Category? category = null) throws SQLHeavy.Error {
+
             assert (!results.finished);
 
             var id = results.get_int ("id");
@@ -470,8 +512,6 @@ namespace Envelope.DB {
             var description = results.get_string ("description");
             var direction = results.get_int ("direction");
             var amount = results.get_double ("amount");
-            var account_id = results.get_int ("account_id");
-            var parent_id = results.get_int ("parent_transaction_id");
             var timestamp = results.get_int64 ("date");
             int? category_id = results.get_int ("category_id");
 
@@ -535,11 +575,11 @@ namespace Envelope.DB {
             }
             catch (GLib.Error err) {
                 if (!(err is IOError.EXISTS)) {
-                    // TODO error could not create database path
+                    error ("could not create database (%s)", err.message);
                 }
             }
 
-            string db_path = Path.build_filename (app_path.get_path (), "database.db");
+            string db_path = Path.build_filename (app_path.get_path (), DATABASE_FILENAME);
             var db_file = File.new_for_path (db_path);
 
             try {
@@ -557,9 +597,9 @@ namespace Envelope.DB {
             }
 
             try {
-                load_table (TRANSACTIONS);
-                load_table (ACCOUNTS);
-                load_table (CATEGORIES);
+                database.execute (TRANSACTIONS);
+                database.execute (ACCOUNTS);
+                database.execute (CATEGORIES);
 
                 init_statements ();
             }
@@ -567,34 +607,9 @@ namespace Envelope.DB {
                 error ("error occured during database setup (%s)".printf (err.message));
             }
 
-            // TODO check if there are categories. If not, then create the default ones
+            // check if there are categories. If not, then create the default ones
             try {
-                var result = database.execute ("SELECT COUNT(*) AS category_count from categories");
-
-                assert (!result.finished);
-                var category_count = result.get_int ("category_count");
-
-                if (category_count == 0) {
-
-                    var db_transaction = start_transaction ();
-
-                    // create default categories
-                    var default_categories = new string[] { _("Groceries"),
-                                                            _("Fuel"),
-                                                            _("Public transit"),
-                                                            _("Restaurants"),
-                                                            _("Entertainment"),
-                                                            _("Savings"),
-                                                            _("Personal care"),
-                                                            _("Alcohol &amp; Bars"),
-                                                            _("Emergency fund")};
-
-                    foreach (string name in default_categories) {
-                        db_transaction.execute_insert ("INSERT INTO `categories` (`name`) VALUES (:name);", "name", typeof (string), name);
-                    }
-
-                    db_transaction.commit ();
-                }
+                check_create_categories ();
             }
             catch (SQLHeavy.Error err) {
                 error ("could not initialize default categories (%s)".printf (err.message));
@@ -605,95 +620,58 @@ namespace Envelope.DB {
         }
 
         private void init_statements () throws SQLHeavy.Error {
-
-            debug ("creating prepared statements");
-
-            q_load_account = database.prepare ("""
-            SELECT * FROM `accounts` WHERE `id` = :accountid;
-            """);
-
-            q_load_all_accounts = database.prepare ("""
-            SELECT * FROM `accounts` ORDER BY `number`;
-            """);
-
-            q_insert_account = database.prepare ("""
-            INSERT INTO `accounts`
-            (`number`, `description`, `balance`, `type`)
-            VALUES
-            (:number, :description, :balance, :type);
-            """);
-
-            q_rename_account = database.prepare ("""
-            UPDATE `accounts` SET `number` = :number WHERE `id` = :account_id
-            """);
-
-            q_update_account_balance = database.prepare ("""
-            UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id
-            """);
-
-            q_load_account_transactions = database.prepare("""
-            SELECT * FROM `transactions` WHERE `account_id` = :account_id ORDER BY `date` DESC
-            """);
-
-            q_delete_account_transactions = database.prepare("""
-            DELETE FROM `transactions` WHERE `account_id` = :account_id
-            """);
-
-            q_delete_transaction = database.prepare ("""
-            DELETE FROM `transactions` WHERE `id` = :id
-            """);
-
-            q_insert_account_transaction = database.prepare("""
-            INSERT INTO `transactions`
-            (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`)
-            VALUES
-            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date)
-            """);
-
-            q_get_unique_merchants = database.prepare("""
-            SELECT `label`, COUNT(`label`) as `number` FROM `transactions` GROUP BY `label` ORDER BY `number` DESC, `label` ASC
-            """);
-
-            q_load_categories = database.prepare("""
-            SELECT * FROM `categories` ORDER BY `name` ASC
-            """);
-
-            q_load_child_categories = database.prepare ("""
-            SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC
-            """);
-
-            q_insert_category = database.prepare ("""
-            INSERT INTO `categories`
-            (`name`, `description`, `amount_budgeted`, `parent_category_id`)
-            VALUES
-            (:name, :description, :amount_budgeted, :parent_category_id)
-            """);
-
-            q_delete_category = database.prepare ("""
-            DELETE FROM `categories` WHERE `id` = :category_id
-            """);
-
-            q_load_current_transactions = database.prepare("""
-            SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days')
-            """);
-
-            q_load_current_transactions_for_category = database.prepare("""
-            SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id
-            """);
+            q_load_account                              = database.prepare (SQL_LOAD_ACCOUNT_BY_ID);
+            q_load_all_accounts                         = database.prepare (SQL_LOAD_ALL_ACCOUNTS);
+            q_insert_account                            = database.prepare (SQL_INSERT_ACCOUNT);
+            q_rename_account                            = database.prepare (SQL_RENAME_ACCOUNT);
+            q_update_account_balance                    = database.prepare (SQL_UPDATE_ACCOUNT_BALANCE);
+            q_load_account_transactions                 = database.prepare (SQL_LOAD_ACCOUNT_TRANSACTIONS);
+            q_delete_account_transactions               = database.prepare (SQL_DELETE_ACCOUNT_TRANSACTIONS);
+            q_delete_transaction                        = database.prepare (SQL_DELETE_TRANSACTION);
+            q_insert_account_transaction                = database.prepare (SQL_INSERT_TRANSACTION);
+            q_get_unique_merchants                      = database.prepare (SQL_GET_UNIQUE_MERCHANTS);
+            q_load_categories                           = database.prepare (SQL_LOAD_CATEGORIES);
+            q_load_child_categories                     = database.prepare (SQL_LOAD_CHILD_CATEGORIES);
+            q_insert_category                           = database.prepare (SQL_INSERT_CATEGORY);
+            q_delete_category                           = database.prepare (SQL_DELETE_CATEOGRY);
+            q_load_current_transactions                 = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS);
+            q_load_current_transactions_for_category    = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY);
+            q_load_uncategorized_transactions           = database.prepare (SQL_GET_UNCATEGORIZED_TRANSACTIONS);
         }
 
-        private void load_table (string table) {
-            try {
-                database.execute (table);
-            }
-            catch (SQLHeavy.Error err) {
-                // TODO could not create table
-                debug ("could not load table (%s)".printf (err.message));
+        private void check_create_categories () throws SQLHeavy.Error {
+            // check if there are categories. If not, then create the default ones
+            var result = database.execute (SQL_CATEGORY_COUNT);
+
+            assert (!result.finished);
+
+            var category_count = result.get_int ("category_count");
+
+            if (category_count == 0) {
+
+                var db_transaction = start_transaction ();
+
+                // create default categories
+                var default_categories = new string[] { _("Groceries"),
+                    _("Fuel"),
+                    _("Public transit"),
+                    _("Restaurants"),
+                    _("Entertainment"),
+                    _("Savings"),
+                    _("Personal care"),
+                    _("Alcohol &amp; Bars"),
+                    _("Emergency fund")};
+
+                foreach (string name in default_categories) {
+                    db_transaction.execute_insert (SQL_INSERT_CATEGORY_FOR_NAME, "name", typeof (string), name);
+                }
+
+                db_transaction.commit ();
             }
         }
 
         private void debug_sql (string sql) {
-            debug (sql.strip());
+            debug ("executing query: %s", sql.strip());
         }
     }
 }
