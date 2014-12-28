@@ -33,6 +33,11 @@ namespace Envelope.Service {
 
         ArrayList<Transaction> transactions;
         ArrayList<Category> categories;
+
+        ArrayList<Transaction> uncategorized;
+
+        double uncategorized_inflow;
+        double uncategorized_outflow;
     }
 
     private static BudgetManager budget_manager_instance = null;
@@ -111,6 +116,16 @@ namespace Envelope.Service {
             }
         }
 
+        public void delete_category (Category category) throws ServiceError {
+            try {
+                dbm.delete_category (category);
+                category_deleted (category);
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
         /**
          * Get the transactions for the current month
          */
@@ -118,6 +133,23 @@ namespace Envelope.Service {
 
             try {
                 return dbm.get_current_transactions ();
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
+        /**
+         * Get all transactions not associated with any category
+         */
+        public ArrayList<Transaction> get_uncategorized_transactions () throws ServiceError {
+
+            try {
+                var transactions = dbm.load_uncategorized_transactions ();
+
+                debug ("there are %d uncategorized transactions", transactions.size);
+
+                return transactions;
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -217,6 +249,8 @@ namespace Envelope.Service {
             budget_state.to = to;
             budget_state.inflow = inflow;
             budget_state.outflow = outflow;
+
+            budget_state.uncategorized = get_uncategorized_transactions ();
 
             state = budget_state;
         }
