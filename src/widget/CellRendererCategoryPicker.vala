@@ -49,39 +49,38 @@ namespace Envelope.Widget {
                                        Gdk.Rectangle background_area,
                                        Gdk.Rectangle cell_area,
                                        Gtk.CellRendererState flags) {
+            current_path = path;
 
-                current_path = path;
+            Cairo.RectangleInt pos;
+            bool set_top = determine_position (cell_area, out pos);
 
-                Cairo.RectangleInt pos;
-                bool set_top = determine_position (cell_area, out pos);
+            popover.pointing_to = pos;
+            popover.relative_to = widget;
+            popover.set_position (set_top ? Gtk.PositionType.TOP : Gtk.PositionType.BOTTOM);
 
-                popover.pointing_to = pos;
-                popover.relative_to = widget;
-                popover.set_position (set_top ? Gtk.PositionType.TOP : Gtk.PositionType.BOTTOM);
+            check_button.label = _("Apply to all %s").printf (merchant_name);
 
-                check_button.label = _("Apply to all %s").printf (merchant_name);
+            completion = new Gtk.EntryCompletion ();
+            completion.set_model (store);
+            completion.set_text_column (text_column);
+            completion.inline_completion = true;
+            completion.inline_selection = true;
+            completion.minimum_key_length = 0;
+            completion.popup_completion = true;
+            completion.popup_single_match = true;
 
-                completion = new Gtk.EntryCompletion ();
-                completion.set_model (store);
-                completion.set_text_column (text_column);
-                completion.inline_completion = true;
-                completion.inline_selection = true;
-                completion.minimum_key_length = 0;
-                completion.popup_completion = true;
-                completion.popup_single_match = true;
+            category_entry.completion = completion;
+            category_entry.text = category_name;
 
-                category_entry.completion = completion;
-                category_entry.text = category_name;
-
-                category_entry.focus.connect ( () => {
-                    completion.complete ();
-                    return true;
-                });
-
-                popover.show ();
-
+            category_entry.focus.connect ( () => {
+                completion.complete ();
                 return true;
-            }
+            });
+
+            popover.show ();
+
+            return true;
+        }
 
         private void build_ui () {
 
@@ -123,10 +122,6 @@ namespace Envelope.Widget {
         }
 
         private void connect_signals () {
-
-            popover.closed.connect ( () =>  {
-                debug ("category popover closed");
-            });
 
             cancel_button.clicked.connect ( () => {
                 popover.hide ();
