@@ -170,7 +170,7 @@ namespace Envelope.DB {
                 results.next ();
             }
 
-            debug ("loaded %d unique merchants".printf (merchants.size));
+            info ("%d unique merchants", merchants.size);
 
             return merchants;
         }
@@ -203,14 +203,12 @@ namespace Envelope.DB {
                 Account account;
                 query_result_to_account (results, out account);
 
-                //account.transactions = get_mocked_transactions ();
-
                 list.add (account);
 
                 results.next ();
             }
 
-            debug ("loaded %d account(s)", list.size);
+            info ("%d account(s)", list.size);
 
             return list;
         }
@@ -224,10 +222,9 @@ namespace Envelope.DB {
                 "parent_category_id", typeof (int), null
             );
 
-            debug ("category created with id %d".printf ((int) id));
+            debug ("category %s created with id %d", category.name, (int) id);
 
             category.@id = (int) id;
-
             category_created (category);
         }
 
@@ -235,7 +232,6 @@ namespace Envelope.DB {
             q_categorize_for_merchant.clear ();
             q_categorize_for_merchant.set_string ("merchant", merchant);
             q_categorize_for_merchant.set_int ("category_id", category.@id);
-
             q_categorize_for_merchant.execute ();
         }
 
@@ -248,10 +244,9 @@ namespace Envelope.DB {
                 "type", typeof (int), (int) account.account_type
                 );
 
-            debug ("account created with id %d".printf ((int) id));
+            debug ("account %s created with id %d", account.number, (int) id);
 
             account.@id = (int) id;
-
             account_created (account);
         }
 
@@ -542,7 +537,6 @@ namespace Envelope.DB {
 
                 if (cat != null) {
                     transaction.category = cat;
-                    debug ("transaction category: %s", transaction.category.name);
                 }
             }
         }
