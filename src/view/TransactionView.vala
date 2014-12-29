@@ -62,6 +62,7 @@ namespace Envelope.View {
         private Gtk.Box scroll_box;
 
         private CellRendererDatePicker crdp;
+        private CellRendererCategoryPicker crcp;
         private Gtk.CellRendererText renderer_memo;
 
         // filter widgets
@@ -443,10 +444,10 @@ namespace Envelope.View {
             });
 
             // category cell renderer
-            var renderer_category = new CellRendererTextCompletion ();
+            var renderer_category = new CellRendererCategoryPicker (treeview);
             renderer_category.store = CategoryStore.get_default ();
             renderer_category.text_column = CategoryStore.Column.LABEL;
-            renderer_category.editable = true;
+            renderer_category.mode = Gtk.CellRendererMode.ACTIVATABLE;
             renderer_category.edited.connect ((path, text) => {
 
                 if (text.strip () == "") {
@@ -471,15 +472,32 @@ namespace Envelope.View {
                         }
                     }
 
+
+
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    // update transaction object
-                    Transaction transaction;
-                    transactions_store.@get (store_iter, Column.TRANSACTION, out transaction, -1);
-                    transaction.category = category;
+                    string merchant;
+                    transactions_store.@get (store_iter, Column.MERCHANT, out merchant, -1);
 
-                    transactions_store.@set (store_iter, Column.CATEGORY, category != null ? category.name : "", -1);
+                    if (renderer_category.apply_to_all) {
+                        try {
+                            BudgetManager.get_default ().categorize_all_for_merchant (merchant, category);
+                            transactions = AccountManager.get_default ().load_account_transactions (Sidebar.get_default ().selected_account);
+                            add_transactions ();
+                        }
+                        catch (ServiceError err) {
+                            error ("could not categorize all transactions (%s)", err.message);
+                        }
+                    }
+                    else {
+                        // update transaction object
+                        Transaction transaction;
+                        transactions_store.@get (store_iter, Column.TRANSACTION, out transaction, -1);
+                        transaction.category = category;
+
+                        transactions_store.@set (store_iter, Column.CATEGORY, category != null ? category.name : "", -1);
+                    }
                 }
             });
 
@@ -595,6 +613,7 @@ namespace Envelope.View {
             category_column.reorderable = true;
             //category_column.sort_column_id
             //category_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
+            category_column.set_cell_data_func (renderer_category, cell_renderer_category_func);
             category_column.set_attributes (renderer_category, "text", Column.CATEGORY);
             treeview.append_column (category_column);
 
@@ -658,6 +677,18 @@ namespace Envelope.View {
             view_store.@get (iter, Column.TRANSACTION, out transaction, -1);
 
             cr.visible = transaction != null && transaction.date.compare (now) == 1;
+        }
+
+        private void cell_renderer_category_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+
+            CellRendererCategoryPicker cp = renderer as CellRendererCategoryPicker;
+
+            string merchant;
+            string category_name;
+            view_store.@get (iter, Column.MERCHANT, out merchant, Column.CATEGORY, out category_name, -1);
+
+            cp.merchant_name = merchant;
+            cp.category_name = category_name;
         }
 
         private Gtk.TreeIter add_empty_row (Gtk.TreeIter? parent = null) {
