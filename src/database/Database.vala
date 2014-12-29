@@ -70,6 +70,7 @@ namespace Envelope.DB {
         private static const string SQL_LOAD_CATEGORIES = "SELECT * FROM `categories` ORDER BY `name` ASC";
         private static const string SQL_LOAD_CHILD_CATEGORIES = "SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC";
         private static const string SQL_DELETE_CATEOGRY = "DELETE FROM `categories` WHERE `id` = :category_id";
+        private static const string SQL_CATEGORIZE_ALL_FOR_MERCHANT = "UPDATE `transactions` SET `category_id` = :category_id WHERE `label` = :merchant";
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days')";
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id";
 
@@ -131,6 +132,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_delete_transaction;
         private SQLHeavy.Query q_update_transaction;
         private SQLHeavy.Query q_load_uncategorized_transactions;
+        private SQLHeavy.Query q_categorize_for_merchant;
 
         private SQLHeavy.Query q_load_current_transactions;
         private SQLHeavy.Query q_load_current_transactions_for_category;
@@ -227,6 +229,14 @@ namespace Envelope.DB {
             category.@id = (int) id;
 
             category_created (category);
+        }
+
+        public void categorize_for_merchant (string merchant, Category category) throws SQLHeavy.Error {
+            q_categorize_for_merchant.clear ();
+            q_categorize_for_merchant.set_string ("merchant", merchant);
+            q_categorize_for_merchant.set_int ("category_id", category.@id);
+
+            q_categorize_for_merchant.execute ();
         }
 
         public void create_account (Account account) throws SQLHeavy.Error {
@@ -637,6 +647,7 @@ namespace Envelope.DB {
             q_load_current_transactions                 = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS);
             q_load_current_transactions_for_category    = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY);
             q_load_uncategorized_transactions           = database.prepare (SQL_GET_UNCATEGORIZED_TRANSACTIONS);
+            q_categorize_for_merchant                   = database.prepare (SQL_CATEGORIZE_ALL_FOR_MERCHANT);
         }
 
         private void check_create_categories () throws SQLHeavy.Error {

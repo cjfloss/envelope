@@ -126,6 +126,15 @@ namespace Envelope.Service {
             }
         }
 
+        public void categorize_all_for_merchant (string merchant_name, Category category) throws ServiceError {
+            try {
+                dbm.categorize_for_merchant (merchant_name, category);
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
         /**
          * Get the transactions for the current month
          */
