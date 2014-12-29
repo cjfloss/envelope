@@ -97,7 +97,6 @@ namespace Envelope.Window {
             paned = new Granite.Widgets.ThinPaned ();
             paned.position = 250;
             paned.position_set = true;
-            //paned.show_all ();
             overlay.add (paned);
 
             paned.pack2 (content_revealer, true, false);
@@ -139,7 +138,6 @@ namespace Envelope.Window {
             });
 
             search_entry.completion = search_entry_completion;
-
             header_bar.pack_end (search_entry);
 
             header_bar.show_all ();
@@ -182,9 +180,8 @@ namespace Envelope.Window {
             // otherwise show welcome screen
             Gtk.Widget content_view;
             determine_initial_content_view (accounts, out content_view);
-            //paned.pack2 (content_view, true, false);
+
             set_content_view (content_view);
-            main_view_changed (content_view);
 
             configure_window ();
 
