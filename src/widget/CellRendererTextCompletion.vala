@@ -53,7 +53,7 @@ namespace Envelope.Widget {
 
             assert (editable);
 
-            base.start_editing (event, widget, path, background_area, cell_area, flags);
+            weak Gtk.CellEditable ret = base.start_editing (event, widget, path, background_area, cell_area, flags);
 
             // create new completion every time, since the backing store might
             // have changed since last time
@@ -67,7 +67,7 @@ namespace Envelope.Widget {
             text_entry.show ();
             text_entry.grab_focus ();
 
-            return text_entry;
+            return ret;
         }
     }
 }
