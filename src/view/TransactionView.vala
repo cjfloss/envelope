@@ -472,8 +472,6 @@ namespace Envelope.View {
                         }
                     }
 
-
-
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
@@ -515,12 +513,18 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    string outflow;
-                    try {
-                        outflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text));
+                    string? outflow;
+
+                    if (text.strip () != "") {
+                        try {
+                            outflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text));
+                        }
+                        catch (Envelope.Util.String.ParseError err) {
+                            outflow = "<error>";
+                        }
                     }
-                    catch (Envelope.Util.String.ParseError err) {
-                        outflow = "<error>";
+                    else {
+                        outflow = null;
                     }
 
                     transactions_store.@set (store_iter, Column.OUTFLOW, outflow, -1);
@@ -541,15 +545,21 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     view_store.convert_iter_to_child_iter (out store_iter, iter);
 
-                    string inflow;
-                    try {
-                        inflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text));
+                    string? inflow;
+
+                    if (text.strip () != "") {
+                        try {
+                            inflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text));
+                        }
+                        catch (Envelope.Util.String.ParseError err) {
+                            inflow = "<error>";
+                        }
                     }
-                    catch (Envelope.Util.String.ParseError err) {
-                        inflow = "<error>";
+                    else {
+                        inflow = null;
                     }
 
-                    transactions_store.@set (store_iter, inflow, -1);
+                    transactions_store.@set (store_iter, Column.INFLOW, inflow, -1);
                 }
             });
 
