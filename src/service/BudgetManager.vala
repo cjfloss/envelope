@@ -173,7 +173,7 @@ namespace Envelope.Service {
          * @param {double} inflow
          * @param {double} outflow
          */
-        public void compute_current_category_operations (Category category, out double inflow, out double outflow) {
+        public ArrayList<Transaction>  compute_current_category_operations (Category category, out double inflow, out double outflow) throws ServiceError {
             try {
                 ArrayList<Transaction> transactions = dbm.get_current_transactions_for_category (category);
 
@@ -194,9 +194,11 @@ namespace Envelope.Service {
                             assert_not_reached ();
                     }
                 }
+
+                return transactions;
             }
             catch (SQLHeavy.Error err) {
-
+                throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
 
