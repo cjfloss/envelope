@@ -61,6 +61,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
 
   widget/CellRendererDatePicker.vala
   widget/CellRendererTextCompletion.vala
+  widget/CellRendererCategoryPicker.vala
 
   Envelope.vala
 
