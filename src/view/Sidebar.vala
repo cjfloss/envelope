@@ -683,7 +683,14 @@ namespace Envelope.View {
                 case TreeCategory.CATEGORIES:
 
                     if (state != "") {
-                        crt.text = state;
+
+                        if (category == null) {
+                            crt.text = ((int) Envelope.Util.String.parse_currency (state)).to_string ();
+                        }
+                        else {
+                            crt.text = state;
+                        }
+
                         crt.visible = true;
                     }
                     else {
