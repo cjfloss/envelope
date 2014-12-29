@@ -588,7 +588,7 @@ namespace Envelope.View {
             crb.size_set = true;
             crb.weight = 900;
             crb.weight_set = true;
-            crb.foreground = "#8AADD4"; // from elementary gtk theme's @question_bg_color
+            crb.foreground = "#aaa"; // from elementary gtk theme's @question_bg_color
             crb.variant = Pango.Variant.SMALL_CAPS;
             crb.variant_set = true;
 
@@ -596,11 +596,13 @@ namespace Envelope.View {
             var date_column = new Gtk.TreeViewColumn ();
             date_column.set_title (_("Date"));
             date_column.max_width = -1;
+            date_column.pack_start (crb, false);
             date_column.pack_start (crdp, true);
             date_column.resizable = true;
             date_column.reorderable = true;
             date_column.sort_column_id = Column.DATE;
             //date_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
+            date_column.set_cell_data_func (crb, cell_renderer_badge_func);
             date_column.set_attributes (crdp, "text", Column.DATE);
             treeview.append_column (date_column);
 
@@ -635,6 +637,7 @@ namespace Envelope.View {
             out_column.reorderable = true;
             out_column.sort_column_id = Column.OUTFLOW;
             //out_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
+            //out_column.set_cell_data_func (renderer_out, cell_renderer_category_func);
             out_column.set_attributes (renderer_out, "text", Column.OUTFLOW);
             treeview.append_column (out_column);
 
@@ -646,6 +649,7 @@ namespace Envelope.View {
             in_column.reorderable = true;
             in_column.sort_column_id = Column.INFLOW;
             //in_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
+            //in_column.set_cell_data_func (renderer_in, cell_renderer_category_func);
             in_column.set_attributes (renderer_in, "text", Column.INFLOW);
             treeview.append_column (in_column);
 
@@ -653,13 +657,11 @@ namespace Envelope.View {
             memo_column.set_title (_("Memo"));
             memo_column.max_width = -1;
             memo_column.pack_start (renderer_memo, true);
-            memo_column.pack_end (crb, false);
             memo_column.resizable = true;
             memo_column.reorderable = true;
             memo_column.sort_column_id = Column.MEMO;
             //memo_column.sizing = Gtk.TreeViewColumnSizing.FIXED;
             memo_column.spacing = 10;
-            memo_column.set_cell_data_func (crb, cell_renderer_badge_func);
             memo_column.set_attributes (renderer_memo, "text", Column.MEMO);
             treeview.append_column (memo_column);
 
@@ -690,6 +692,8 @@ namespace Envelope.View {
         }
 
         private void cell_renderer_category_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+
+            //cell_renderer_date_color_func (layout, renderer, model, iter);
 
             CellRendererCategoryPicker cp = renderer as CellRendererCategoryPicker;
 
