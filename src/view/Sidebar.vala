@@ -84,6 +84,7 @@ namespace Envelope.View {
         private Gtk.TreeIter overview_inflow_iter;
         private Gtk.TreeIter overview_outflow_iter;
         private Gtk.TreeIter overview_remaining_iter;
+        private Gtk.TreeIter uncategorized_iter;
 
         private Gtk.Menu right_click_menu;
         private Gtk.MenuItem right_click_menu_item_remove;
@@ -102,6 +103,7 @@ namespace Envelope.View {
         public signal void overview_selected ();
         public signal void list_account_selected (Account account);
         public signal void list_account_name_updated (Account account, string new_name);
+        public signal void list_category_name_updated (Category category, string new_name);
 
         private Sidebar () {
             store = new Gtk.TreeStore(COLUMN_COUNT,
@@ -123,8 +125,6 @@ namespace Envelope.View {
             connect_signals ();
 
             sidebar_instance = this;
-
-            treeview.get_selection ().unselect_all ();
         }
 
         private void build_ui () {
@@ -174,7 +174,7 @@ namespace Envelope.View {
             crt.editable_set = true;
             crt.ellipsize = Pango.EllipsizeMode.END;
             crt.ellipsize_set = true;
-            crt.edited.connect (account_renamed);
+            crt.edited.connect (item_renamed);
 
             col.set_attributes (crt, "markup", Column.LABEL);
             col.set_cell_data_func (crt, treeview_text_renderer_function);
@@ -287,22 +287,10 @@ namespace Envelope.View {
             // Add "Accounts" category header
             account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
 
-            try {
-
-                Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
-
-                if (account_list != null && !account_list.is_empty) {
-
-                    foreach (Account account in accounts) {
-                        debug ("adding account %s".printf (account.number));
-                        add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true,
-                            account.description != null ? "%s - %s".printf (account.number, account.description) : account.number);
-                    }
-                }
-
-            }
-            catch (ServiceError err) {
-                error ("could not load accounts (%s)".printf (err.message));
+            foreach (Account account in accounts) {
+                debug ("adding account %s".printf (account.number));
+                add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true,
+                    account.description != null ? "%s - %s".printf (account.number, account.description) : account.number);
             }
 
             // Add "Add account..."
@@ -332,11 +320,8 @@ namespace Envelope.View {
             }
 
             // Add "Uncategorized"
-            add_item (category_iter, _("Uncategorized"), TreeCategory.CATEGORIES,
+            uncategorized_iter = add_item (category_iter, _("Uncategorized"), TreeCategory.CATEGORIES,
                 null, null, Action.NONE, (double) BudgetManager.get_default ().state.uncategorized.size, ICON_CATEGORY);
-
-            // Add "Add category..."
-            //add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY, null, ICON_ACTION_ADD);
 
             treeview.get_selection ().unselect_all ();
             treeview.expand_all ();
@@ -385,7 +370,7 @@ namespace Envelope.View {
             debug ("update accounts section");
 
             try {
-                Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
+                //Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
 
                 foreach (Account account in accounts) {
                     update_account_item (account);
@@ -434,6 +419,13 @@ namespace Envelope.View {
                 }
 
             } while (store.iter_next (ref iter));
+
+            // uncategorized
+            assert (budget_manager.state != null);
+            assert (budget_manager.state.uncategorized != null);
+
+            store.@set (uncategorized_iter, Column.STATE,
+                Envelope.Util.String.format_currency((double) budget_manager.state.uncategorized.size), -1);
         }
 
         /**
@@ -473,7 +465,6 @@ namespace Envelope.View {
             var state_currency = "";
             if (state_amount != null) {
                 state_currency = Envelope.Util.String.format_currency (state_amount);
-                debug ("state_currency: %s", state_currency);
             }
 
             store.@set (iter, Column.LABEL, label,
@@ -515,7 +506,7 @@ namespace Envelope.View {
                             percentage = (int) (budget_state.outflow * 100 / budget_state.inflow);
                         }
 
-                        crp.value = percentage;
+                        crp.value = (int) Math.fmin (percentage, 100);
                         crp.visible = true;
                     }
                     else {
@@ -526,7 +517,7 @@ namespace Envelope.View {
 
                 default:
                     crp.visible = false;
-                    return;
+                    break;
             }
         }
 
@@ -636,8 +627,10 @@ namespace Envelope.View {
             TreeCategory tree_category;
             bool is_header;
             bool colorize;
+            string label;
 
             model.@get (iter,
+                Column.LABEL, out label,
                 Column.ACCOUNT, out account,
                 Column.ACTION, out action,
                 Column.CATEGORY, out category,
@@ -653,8 +646,6 @@ namespace Envelope.View {
 
                     if (is_header) {
                         crt.visible = false;
-                        //crt.text = new DateTime.now_local ().format ("%B %Y");
-                        //crt.foreground_set = false;
                     }
                     else {
                         crt.text = state;
@@ -663,12 +654,18 @@ namespace Envelope.View {
 
                             double parsed_state = Envelope.Util.String.parse_currency (state);
 
-                            if (colorize && parsed_state < 0) {
-                                crt.foreground = COLOR_SUBZERO;
-                                crt.foreground_set = true;
+                            if (parsed_state == 0) {
+                                //crt.visible = false;
+                                crt.text = _("None yet");
                             }
                             else {
-                                crt.foreground_set = false;
+                                if (colorize && parsed_state < 0) {
+                                    crt.foreground = COLOR_SUBZERO;
+                                    crt.foreground_set = true;
+                                }
+                                else {
+                                    crt.foreground_set = false;
+                                }
                             }
                         }
                         catch (Envelope.Util.String.ParseError err) {
@@ -691,10 +688,14 @@ namespace Envelope.View {
 
                             crt.weight_set = false;
                             crt.text = Envelope.Util.String.format_currency (balance);
+                            crt.visible = true;
 
                             if (balance < 0) {
                                 crt.foreground = COLOR_SUBZERO;
                                 crt.foreground_set = true;
+                            }
+                            else if (balance == 0) {
+                                crt.visible = false;
                             }
                             else {
                                 crt.foreground_set = false;
@@ -710,10 +711,14 @@ namespace Envelope.View {
                         crt.text = Envelope.Util.String.format_currency (account.balance);
                         crt.editable = true;
                         crt.editable_set = true;
+                        crt.visible = true;
 
                         if (account.balance < 0) {
                             crt.foreground = COLOR_SUBZERO;
                             crt.foreground_set = true;
+                        }
+                        else if (account.balance == 0) {
+                            crt.visible = false;
                         }
                         else {
                             crt.foreground_set = false;
@@ -729,14 +734,22 @@ namespace Envelope.View {
 
                     if (state != "") {
 
+                        crt.visible = true;
+
                         if (category == null) {
                             crt.text = ((int) Envelope.Util.String.parse_currency (state)).to_string ();
+                            debug ("uncategorized: %s", crt.text);
                         }
                         else {
+                            double parsed_state = Envelope.Util.String.parse_currency (state);
+
+                            if (parsed_state == 0) {
+                                crt.visible = false;
+                                return;
+                            }
+
                             crt.text = state;
                         }
-
-                        crt.visible = true;
                     }
                     else {
                         crt.visible = false;
@@ -881,21 +894,48 @@ namespace Envelope.View {
             }
         }
 
-        private void account_renamed (string path, string text) {
+        private void item_renamed (string path, string text) {
 
             Gtk.TreeIter iter;
 
             if (store.get_iter_from_string (out iter, path)) {
 
                 Account account;
-                store.@get (iter, Column.ACCOUNT, out account, -1);
+                Category category;
+                TreeCategory tree_category;
 
-                store.@set (iter,
-                    Column.LABEL, text,
-                    Column.TOOLTIP, account.description != null ? "%s - %s".printf (text, account.description) : text, -1);
+                store.@get (iter,
+                    Column.TREE_CATEGORY, out tree_category,
+                    Column.ACCOUNT, out account,
+                    Column.CATEGORY, out category, -1);
 
-                // fire signal list_account_name_updated
-                list_account_name_updated (account, text);
+                switch (tree_category) {
+                    case TreeCategory.ACCOUNTS:
+
+                        store.@set (iter,
+                            Column.LABEL, text,
+                            Column.TOOLTIP, account.description != null ? "%s - %s".printf (text, account.description) : text, -1);
+
+                        // fire signal list_account_name_updated
+                        list_account_name_updated (account, text);
+
+                        break;
+
+                    case TreeCategory.CATEGORIES:
+
+                        store.@set (iter,
+                            Column.LABEL, text,
+                            Column.TOOLTIP, text, -1);
+
+                        list_category_name_updated (category, text);
+
+                        break;
+
+                    default:
+                        assert_not_reached ();
+                }
+
+
             }
         }
 
@@ -920,11 +960,13 @@ namespace Envelope.View {
 
             TreeCategory tree_category;
             Category category;
+            Account account;
             bool is_header;
 
             store.@get (iter,
                     Column.TREE_CATEGORY, out tree_category,
                     Column.CATEGORY, out category,
+                    Column.ACCOUNT, out account,
                     Column.IS_HEADER, out is_header, -1);
 
             switch (tree_category) {
@@ -932,6 +974,10 @@ namespace Envelope.View {
                     break;
 
                 case TreeCategory.ACCOUNTS:
+                    if (!is_header && account != null) {
+                        remove_account (iter, account);
+                    }
+
                     break;
 
                 case TreeCategory.CATEGORIES:
@@ -956,6 +1002,18 @@ namespace Envelope.View {
             }
             catch (ServiceError err) {
                 error ("could not remove category (%s)", err.message);
+            }
+        }
+
+        private void remove_account (Gtk.TreeIter iter, Account account) {
+            try {
+                AccountManager.get_default ().delete_account (account);
+                store.remove (ref iter);
+
+                Envelope.App.toast (_("Account %s removed".printf (account.number)));
+            }
+            catch (ServiceError err) {
+                error ("could not remove account (%s)", err.message);
             }
         }
 
