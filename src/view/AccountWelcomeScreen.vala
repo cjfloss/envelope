@@ -63,17 +63,17 @@ namespace Envelope.View {
             switch (index) {
 
                 case Action.ADD_TRANSACTION:
-                add_transaction_selected (account);
-                break;
+                    add_transaction_selected (account);
+                    break;
 
                 case Action.IMPORT_TRANSACTIONS:
-                var view = TransactionView.get_default();
-                view.transactions = account.transactions;
-                view.show_import_dialog ();
-                break;
+                    var view = TransactionView.get_default();
+                    view.transactions = account.transactions;
+                    view.show_import_dialog ();
+                    break;
 
                 default:
-                assert_not_reached ();
+                    assert_not_reached ();
             }
         }
     }
