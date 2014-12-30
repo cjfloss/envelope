@@ -26,9 +26,6 @@ public class Envelope.App : Granite.Application {
     public const int TOAST_TIMEOUT = 3000;
 
     construct {
-        // This allows opening files. See the open() method below.
-        flags |= ApplicationFlags.HANDLES_OPEN;
-
         // App info
         build_data_dir = Build.DATADIR;
         build_pkg_data_dir = Build.PKGDATADIR;
