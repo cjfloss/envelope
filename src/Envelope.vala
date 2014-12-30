@@ -45,10 +45,10 @@ public class Envelope.App : Granite.Application {
         app_launcher = "envelope.desktop";
         app_years = "2014";
 
-        main_url = "https://launchpad.net/envelope";
-        bug_url = "https://bugs.launchpad.net/envelope";
-        help_url = "http://answers.launchpad.net/envelope";
-        translate_url = "https://translations.launchpad.net/envelope";
+        main_url = "https://nlaplante.github.io/envelope";
+        bug_url = "https://github.com/nlaplante/envelope/issues";
+        help_url = "https://github.com/nlaplante/envelope/wiki";
+        translate_url = "https://github.com/nlaplante/envelope";
 
         about_authors = {"Nicolas Laplante <nicolas.laplante@gmail.com>"};
         about_comments = "";
