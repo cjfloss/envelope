@@ -223,6 +223,8 @@ namespace Envelope.View {
             budget_manager.budget_changed.connect (update_budget_section);
             budget_manager.budget_changed.connect (update_categories_section);
             budget_manager.category_added.connect (update_categories_section);
+            budget_manager.category_deleted.connect (update_categories_section);
+            budget_manager.category_renamed.connect (update_categories_section);
 
             var account_manager = AccountManager.get_default ();
             account_manager.account_created.connect (add_new_account);
