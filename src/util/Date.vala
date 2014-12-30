@@ -49,6 +49,7 @@ namespace Envelope.Util.Date {
      * @param tomorrow the output date for tomorrow
      */
     public void tomorrow (out DateTime tomorrow) {
-        tomorrow = new DateTime.now_local ().add_days (1);
+        var dt = new DateTime.now_local ().add_days (1);
+        tomorrow = new DateTime.local (dt.get_year (), dt.get_month (), dt.get_day_of_month (), 0, 0, 0);
     }
 }
