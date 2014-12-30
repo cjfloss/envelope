@@ -13,7 +13,6 @@ configure_file (${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/src/confi
 
 add_definitions(${DEPS_CFLAGS})
 add_definitions ("-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"")
-add_definitions ("-DDEBUG=${DEBUG}")
 add_definitions (${CC_OPTS})
 
 link_libraries(${DEPS_LIBRARIES} "m")
@@ -75,9 +74,6 @@ vala_precompile(VALA_C ${EXEC_NAME}
 
   GENERATE_VAPI
     ${EXEC_NAME}
-
-  OPTIONS
-    -D DEBUG=${DEBUG}
 )
 
 add_executable("${EXEC_NAME}" ${VALA_C})
