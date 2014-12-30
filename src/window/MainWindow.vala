@@ -25,11 +25,12 @@ namespace Envelope.Window {
 
     public class MainWindow : Gtk.ApplicationWindow {
 
-        private static const uint TRANSITION_DURATION = 100;
+        private static const uint TRANSITION_DURATION = 0;
 
         // window elements
         public Gtk.HeaderBar                header_bar { get; private set; }
         public Gtk.Button                   import_button { get; private set; }
+        public Gtk.Button                   export_button { get; private set; }
         public Gtk.Button                   add_transaction_button { get; private set; }
         public Gtk.SearchEntry              search_entry { get; private set; }
         public Sidebar                      sidebar { get; private set; }
@@ -43,6 +44,9 @@ namespace Envelope.Window {
         private Gtk.Overlay                 overlay;
 
         private Gtk.Revealer                content_revealer;
+
+        private AccountManager              account_manager = AccountManager.get_default ();
+        private BudgetManager               budget_manager = BudgetManager.get_default ();
 
         // fired when the content view changes
         public signal void main_view_changed (Gtk.Widget main_view);
@@ -105,12 +109,17 @@ namespace Envelope.Window {
             header_bar = new Gtk.HeaderBar ();
             header_bar.show_close_button = true;
             set_titlebar (header_bar);
-            header_bar.pack_end (app_menu);
+            //header_bar.pack_end (app_menu);
 
             // import button
             import_button = new Gtk.Button.from_icon_name ("document-import", Gtk.IconSize.LARGE_TOOLBAR);
             import_button.tooltip_text = _("Import transactions");
             header_bar.pack_start (import_button);
+
+            // export button
+            export_button = new Gtk.Button.from_icon_name ("document-export", Gtk.IconSize.LARGE_TOOLBAR);
+            export_button.tooltip_text = _("Backup budget");
+            header_bar.pack_end (export_button);
 
             // add transaction button
             add_transaction_button = new Gtk.Button.from_icon_name ("document-new", Gtk.IconSize.LARGE_TOOLBAR);
@@ -160,7 +169,8 @@ namespace Envelope.Window {
 
             sidebar.list_account_selected.connect ((account) => {
                 Gtk.Widget widget;
-                determine_account_content_view (account, out widget);
+                string window_title;
+                determine_account_content_view (account, out widget, out window_title);
 
                 Type t = widget.get_type ();
 
@@ -174,6 +184,8 @@ namespace Envelope.Window {
                 set_content_view (widget);
 
                 search_entry.placeholder_text = "Search in %s%s".printf (account.number, Envelope.Util.String.ELLIPSIS);
+
+                header_bar.title = window_title;
             });
 
             // If we have accounts, show the transaction view
@@ -243,6 +255,26 @@ namespace Envelope.Window {
                 }
             });
 
+            // handle category renames
+            sidebar.list_category_name_updated.connect ( (category, new_name)  => {
+
+                Category cat = category as Category;
+                string old_name = cat.name;
+
+                if (cat.name != new_name) {
+                    try {
+                        cat.name = new_name;
+                        BudgetManager.get_default ().update_category (category);
+                    }
+                    catch (ServiceError err) {
+                        cat.name = old_name;
+                        if (err is ServiceError.DATABASE_ERROR) {
+                            error ("could not update category (%s)", err.message);
+                        }
+                    }
+                }
+            });
+
             sidebar.overview_selected.connect ( () => {
 
                 var budget_overview = BudgetOverview.get_default ();
@@ -267,12 +299,16 @@ namespace Envelope.Window {
                     }
                 }
                 else if (widget is AccountWelcomeScreen) {
+                    header_bar.title = null;
                     import_button.show ();
                     add_transaction_button.show ();
 
                     if (paned.get_child1 () == null) {
                         paned.pack1 (Sidebar.get_default (), true, false);
                     }
+                }
+                else if (widget is BudgetOverview) {
+                    header_bar.title = null;
                 }
                 else {
                     import_button.hide();
@@ -301,8 +337,19 @@ namespace Envelope.Window {
                 }
             });
 
-            AccountManager.get_default ().transaction_recorded.connect ( () => {
+            account_manager.transaction_recorded.connect ( () => {
                 Envelope.App.toast (_("Transaction recorded"));
+            });
+
+            account_manager.account_created.connect ( () => {
+                if (paned.get_child1 () == null) {
+                    paned.pack1 (sidebar, true, false);
+                    sidebar.show_all ();
+                }
+            });
+
+            account_manager.transactions_imported.connect ( (transactions, account) => {
+                sidebar.select_account (account);
             });
         }
 
@@ -326,7 +373,7 @@ namespace Envelope.Window {
             }
         }
 
-        private void determine_account_content_view (Account account, out Gtk.Widget widget) {
+        private void determine_account_content_view (Account account, out Gtk.Widget widget, out string window_title) {
 
             try {
                 var transactions = AccountManager.get_default ().load_account_transactions (account);
@@ -335,10 +382,12 @@ namespace Envelope.Window {
                 if (transactions.size == 0) {
                     widget = AccountWelcomeScreen.get_default ();
                     (widget as AccountWelcomeScreen).account = account;
+                    window_title = null;
                 }
                 else {
                     widget = TransactionView.get_default ();
                     (widget as TransactionView).transactions = account.transactions;
+                    window_title = _("Transactions in %s").printf (account.number);
                 }
             }
             catch (ServiceError err) {
