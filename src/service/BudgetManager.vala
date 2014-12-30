@@ -67,8 +67,12 @@ namespace Envelope.Service {
 
         public signal void category_added (Category category);
         public signal void category_deleted (Category category);
+        public signal void category_renamed (Category category, string old_name);
 
         private DatabaseManager dbm = DatabaseManager.get_default ();
+
+        // cached category list
+        private ArrayList<Category> categories;
 
         /**
          * Get all categories
@@ -77,8 +81,12 @@ namespace Envelope.Service {
          */
         public ArrayList<Category> get_categories () throws ServiceError {
 
+            if (categories != null && !categories.is_empty) {
+                return categories;
+            }
+
             try {
-                var categories = dbm.load_categories ();
+                categories = dbm.load_categories ();
 
                 if (!categories.is_empty) {
                     categories.sort ();
@@ -106,7 +114,7 @@ namespace Envelope.Service {
                 category.name = name;
 
                 dbm.create_category (category);
-
+                categories = null;
                 category_added (category);
 
                 return category;
@@ -119,7 +127,19 @@ namespace Envelope.Service {
         public void delete_category (Category category) throws ServiceError {
             try {
                 dbm.delete_category (category);
+                categories = null;
                 category_deleted (category);
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
+        public void update_category (Category category) throws ServiceError {
+            try {
+                dbm.update_category (category);
+                categories = null;
+                compute_state_and_fire_changed_event ();
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -223,6 +243,10 @@ namespace Envelope.Service {
             });
 
             am.transaction_deleted.connect ( () =>  {
+                compute_state_and_fire_changed_event ();
+            });
+
+            am.account_deleted.connect ( () => {
                 compute_state_and_fire_changed_event ();
             });
         }
