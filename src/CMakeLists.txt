@@ -9,18 +9,14 @@ pkg_check_modules(DEPS REQUIRED
   gio-2.0
 )
 
-#find_package(Vala REQUIRED)
-
-include(ValaVersion)
-ensure_vala_version("0.23.2" MINIMUM)
-
 configure_file (${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/src/config.h)
 
 add_definitions(${DEPS_CFLAGS})
 add_definitions ("-DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"")
+add_definitions ("-DDEBUG=${DEBUG}")
 add_definitions (${CC_OPTS})
 
-link_libraries(${DEPS_LIBRARIES})
+link_libraries(${DEPS_LIBRARIES} "m")
 link_directories(${DEPS_LIBRARY_DIRS})
 
 include(ValaPrecompile)
@@ -79,9 +75,11 @@ vala_precompile(VALA_C ${EXEC_NAME}
 
   GENERATE_VAPI
     ${EXEC_NAME}
+
+  OPTIONS
+    -D DEBUG=${DEBUG}
 )
 
 add_executable("${EXEC_NAME}" ${VALA_C})
 
 install (TARGETS "${EXEC_NAME}" RUNTIME DESTINATION bin)
-install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/data/envelope.desktop DESTINATION ${DATADIR}/applications/)
