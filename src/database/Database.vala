@@ -44,7 +44,7 @@ namespace Envelope.DB {
                 `date` TIMESTAMP NOT NULL,
             FOREIGN KEY (`parent_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE CASCADE ON DELETE CASCADE,
             FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE CASCADE ON DELETE SET NULL,
-            FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE RESTRICT)
+            FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`) ON UPDATE CASCADE ON DELETE CASCADE)
             """;
 
         private static const string CATEGORIES = """
@@ -54,7 +54,7 @@ namespace Envelope.DB {
                 `description` TEXT,
                 `amount_budgeted` DOUBLE,
                 `parent_category_id` INT,
-            FOREIGN KEY (`parent_category_id`) REFERENCES `category`(`id`) ON UPDATE CASCADE ON DELETE SET NULL)
+            FOREIGN KEY (`parent_category_id`) REFERENCES `category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE)
             """;
 
         private static const string SQL_CATEGORY_COUNT = "SELECT COUNT(*) AS category_count from categories";
@@ -63,6 +63,7 @@ namespace Envelope.DB {
         private static const string SQL_GET_TRANSACTION_BY_ID = "SELECT * FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `category_id` IS NULL";
         private static const string SQL_RENAME_ACCOUNT = "UPDATE `accounts` SET `number` = :number WHERE `id` = :account_id";
+        private static const string SQL_DELETE_ACCOUNT = "DELETE FROM `accounts` WHERE `id` = :account_id";
         private static const string SQL_UPDATE_ACCOUNT_BALANCE = "UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id";
         private static const string SQL_LOAD_ACCOUNT_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `account_id` = :account_id ORDER BY `date` DESC";
         private static const string SQL_DELETE_ACCOUNT_TRANSACTIONS = "DELETE FROM `transactions` WHERE `account_id` = :account_id";
@@ -70,6 +71,7 @@ namespace Envelope.DB {
         private static const string SQL_LOAD_CATEGORIES = "SELECT * FROM `categories` ORDER BY `name` ASC";
         private static const string SQL_LOAD_CHILD_CATEGORIES = "SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC";
         private static const string SQL_DELETE_CATEOGRY = "DELETE FROM `categories` WHERE `id` = :category_id";
+        private static const string SQL_UPDATE_CATEGORY = "UPDATE `categories` SET `name` = :name, `description` = :description, `amount_budgeted` = :amount_budgeted, `parent_category_id` = :parent_category_id WHERE `id` = :category_id";
         private static const string SQL_CATEGORIZE_ALL_FOR_MERCHANT = "UPDATE `transactions` SET `category_id` = :category_id WHERE `label` = :merchant";
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days')";
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id";
@@ -124,6 +126,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_load_all_accounts;
         private SQLHeavy.Query q_insert_account;
         private SQLHeavy.Query q_rename_account;
+        private SQLHeavy.Query q_delete_account;
         private SQLHeavy.Query q_update_account_balance;
 
         private SQLHeavy.Query q_load_account_transactions;
@@ -143,6 +146,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_load_child_categories;
         private SQLHeavy.Query q_insert_category;
         private SQLHeavy.Query q_delete_category;
+        private SQLHeavy.Query q_update_category;
 
         public static new DatabaseManager get_default () {
             if (database_manager_instance == null) {
@@ -192,6 +196,14 @@ namespace Envelope.DB {
             return null;
         }
 
+        public void delete_account (Account account) throws SQLHeavy.Error {
+            q_delete_account.clear ();
+            q_delete_account.set_int ("account_id", account.@id);
+
+            q_delete_account.execute ();
+            q_delete_account.clear ();
+        }
+
         public Gee.ArrayList<Account> load_all_accounts () throws SQLHeavy.Error {
             var list = new Gee.ArrayList<Account> ();
 
@@ -226,6 +238,26 @@ namespace Envelope.DB {
 
             category.@id = (int) id;
             category_created (category);
+        }
+
+        public void update_category (Category category) throws SQLHeavy.Error {
+
+            q_update_category.clear ();
+
+            q_update_category.set_int ("category_id", category.@id);
+            q_update_category.set_string ("name", category.name);
+            q_update_category.set_string ("description", category.description);
+            q_update_category.set_double ("amount_budgeted", category.amount_budgeted);
+
+            if (category.parent != null) {
+                q_update_category.set_int ("parent_category_id", category.parent.@id);
+            }
+            else {
+                q_update_category.set_null ("parent_category_id");
+            }
+
+            q_update_category.execute ();
+            q_update_category.clear ();
         }
 
         public void categorize_for_merchant (string merchant, Category category) throws SQLHeavy.Error {
@@ -594,6 +626,7 @@ namespace Envelope.DB {
                 debug ("database path: " + db_file.get_path ());
 
                 database = new SQLHeavy.Database (db_file.get_path (), flags);
+                database.synchronous = SQLHeavy.SynchronousMode.OFF;
                 database.sql_executed.connect (debug_sql);
             }
             catch (SQLHeavy.Error err) {
@@ -618,9 +651,6 @@ namespace Envelope.DB {
             catch (SQLHeavy.Error err) {
                 error ("could not initialize default categories (%s)".printf (err.message));
             }
-
-            // TODO check if this is necessary
-            database.synchronous = SQLHeavy.SynchronousMode.OFF;
         }
 
         private void init_statements () throws SQLHeavy.Error {
@@ -642,6 +672,8 @@ namespace Envelope.DB {
             q_load_current_transactions_for_category    = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY);
             q_load_uncategorized_transactions           = database.prepare (SQL_GET_UNCATEGORIZED_TRANSACTIONS);
             q_categorize_for_merchant                   = database.prepare (SQL_CATEGORIZE_ALL_FOR_MERCHANT);
+            q_update_category                           = database.prepare (SQL_UPDATE_CATEGORY);
+            q_delete_account                            = database.prepare (SQL_DELETE_ACCOUNT);
         }
 
         private void check_create_categories () throws SQLHeavy.Error {
