@@ -49,14 +49,21 @@ namespace Envelope.Service {
         public signal void account_deleted (Account account);
 
         public signal void transaction_recorded     (Transaction transaction);
-        public signal void transactions_imported    (ArrayList<Transaction> transactions);
+        public signal void transactions_imported    (ArrayList<Transaction> transactions, Account account);
         public signal void transaction_updated      (Transaction transaction);
         public signal void transaction_deleted      (Transaction transaction);
 
+        private ArrayList<Account> accounts;
+
         public ArrayList<Account> get_accounts () throws ServiceError {
 
+            if (accounts != null && !accounts.is_empty) {
+                return accounts;
+            }
+
             try {
-                return dbm.load_all_accounts ();
+                accounts = dbm.load_all_accounts ();
+                return accounts;
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -93,6 +100,17 @@ namespace Envelope.Service {
                     throw new AccountError.ALREADY_EXISTS ("account number already exists");
                 }
 
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
+        public void delete_account (Account account) throws ServiceError {
+
+            try {
+                dbm.delete_account (account);
+                account_deleted (account);
+            }
+            catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -318,7 +336,7 @@ namespace Envelope.Service {
                     account.transactions.sort ();
 
                     // fire signals
-                    transactions_imported (transactions);
+                    transactions_imported (transactions, account);
                     account_updated (account);
 
                     return transactions.size;
