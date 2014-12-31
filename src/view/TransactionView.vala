@@ -331,28 +331,10 @@ namespace Envelope.View {
 
             add (grid_scroll);
 
-            scroll_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-            Granite.Widgets.Utils.set_theming (scroll_box, "* { background-color: @base_color; }", null, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-            grid_scroll.add (scroll_box);
-
-            scroll_box.show_all ();
-
-            var tree_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-            scroll_box.pack_start (tree_box, false, false);
-
             treeview = new Gtk.TreeView ();
 
-            /*
-             According to gtktreeview.c:4801, treeview line color is based on the border-top-color
-             CSS property for the GtkTreeView. Black is ugly, and elementary gtk theme doesn't provide
-             a custom value, so let's specify a value here. Might propose this in elementary-gtk-theme.
-             */
-            Granite.Widgets.Utils.set_theming (treeview, "GtkTreeView { border-top-color: @border_color; }",
-                null,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-            tree_box.pack_start (treeview, false, false);
-            tree_box.show_all ();
+            grid_scroll.add (treeview);
+            grid_scroll.show_all ();
 
             btn_add_transaction = new Gtk.Button.with_label (_("Add transaction"));
             btn_add_transaction.show_all ();
@@ -390,13 +372,6 @@ namespace Envelope.View {
                         assert_not_reached ();
                 }
             });
-
-            add_transaction_button_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
-            add_transaction_button_box.set_layout (Gtk.ButtonBoxStyle.START);
-            add_transaction_button_box.add (btn_add_transaction);
-            add_transaction_button_box.set_spacing (10);
-            add_transaction_button_box.border_width = 12;
-            scroll_box.add (add_transaction_button_box);
 
             treeview.activate_on_single_click = false;
             treeview.reorderable = true;
@@ -663,7 +638,6 @@ namespace Envelope.View {
 
             grid_scroll.show_all ();
             treeview.show_all ();
-            tree_box.show_all ();
         }
 
         private void cell_renderer_badge_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
@@ -729,10 +703,6 @@ namespace Envelope.View {
                 filter_to = filter_view.to;
 
                 add_transactions ();
-            });
-
-            treeview.row_activated.connect ( (path, column) => {
-//                treeview.scroll_to_cell (path, column, false, 1.0f, 1.0f);
             });
 
             // right-click menu
