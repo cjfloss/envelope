@@ -144,6 +144,7 @@ namespace Envelope.View {
             treeview.vexpand_set = true;
             treeview.fixed_height_mode = true;
             treeview.tooltip_column = Column.TOOLTIP;
+            treeview.add_events (Gdk.EventMask.FOCUS_CHANGE_MASK);
 
             // style
             var style_context = treeview.get_style_context ();
@@ -153,6 +154,7 @@ namespace Envelope.View {
             // selection
             var selection = treeview.get_selection ();
             selection.set_mode (Gtk.SelectionMode.SINGLE);
+            selection.set_select_function (tree_selection_func);
 
             var col = new Gtk.TreeViewColumn ();
             col.max_width = -1;
@@ -230,31 +232,7 @@ namespace Envelope.View {
             account_manager.account_created.connect (add_new_account);
             account_manager.account_updated.connect (update_account_item);
 
-            // right-click menu
-            treeview.button_press_event.connect ( (button_event) => {
-
-                if (button_event.button == 3) {
-                    // get targeted line
-                    Gtk.TreePath target_path;
-                    Gtk.TreeViewColumn target_column;
-                    int target_x;
-                    int target_y;
-
-                    if (treeview.get_path_at_pos ((int) button_event.x, (int) button_event.y, out target_path, out target_column, out target_x, out target_y)) {
-
-                        var selection = treeview.get_selection ();
-
-                        selection.unselect_all ();
-                        selection.select_path (target_path);
-
-                        right_click_menu.popup (null, null, null, button_event.button, button_event.get_time ());
-                    }
-
-                    return false;
-                }
-
-                return false;
-            });
+            treeview.button_press_event.connect (tree_button_press_event_func);
 
             right_click_menu_item_remove.activate.connect (popup_menu_remove_activated);
 
@@ -263,18 +241,14 @@ namespace Envelope.View {
 
         public void update_view () {
 
-            debug ("update view");
-
             store.clear ();
 
-            var budget_state = BudgetManager.get_default ().state;
+            var budget_manager = BudgetManager.get_default ();
+            var budget_state = budget_manager.state;
             var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
-
             var month_label = new DateTime.now_local ().format ("%B %Y");
 
-            debug ("remaining: %f", remaining);
-
-            overview_iter = add_item (null, new DateTime.now_local ().format ("%B %Y"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true,
+            overview_iter = add_item (null, month_label, TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true,
                 false, "Budget overview for %s".printf (month_label), budget_state);
 
             overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.outflow, ICON_OUTFLOW, false, false,
@@ -290,7 +264,6 @@ namespace Envelope.View {
             account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
 
             foreach (Account account in accounts) {
-                debug ("adding account %s".printf (account.number));
                 add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true,
                     account.description != null ? "%s - %s".printf (account.number, account.description) : account.number);
             }
@@ -301,32 +274,60 @@ namespace Envelope.View {
             // Add "Categories" category header
             category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
 
+            // Add "Uncategorized"
+            uncategorized_iter = add_item (category_iter, _("Uncategorized"), TreeCategory.CATEGORIES,
+                null, null, Action.NONE, (double) budget_manager.state.uncategorized.size, ICON_CATEGORY);
+
             // Add categories
             try {
-                Gee.ArrayList<Category> categories = BudgetManager.get_default ().get_categories ();
 
-                foreach (Category category in categories) {
-                    debug ("adding category %s".printf (category.name));
+                foreach (Category category in budget_manager.get_categories ()) {
 
                     double cat_inflow;
                     double cat_outflow;
                     BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
 
-                    debug ("category inflow: %f, category outflow: %f", cat_inflow, cat_outflow);
+                    var current_category_iter = add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, cat_inflow - cat_outflow, ICON_CATEGORY);
 
-                    add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, cat_inflow - cat_outflow, ICON_CATEGORY);
+                    // add subitems
+                    add_item (current_category_iter, _("Budgeted amount"),
+                        TreeCategory.CATEGORIES,
+                        null,
+                        category,
+                        Action.NONE,
+                        cat_outflow, null);
+
+                    add_item (current_category_iter, _("Spending"),
+                        TreeCategory.CATEGORIES,
+                        null,
+                        category,
+                        Action.NONE,
+                        cat_outflow, null);
+
+                    add_item (current_category_iter, _("Earnings"),
+                        TreeCategory.CATEGORIES,
+                        null,
+                        category,
+                        Action.NONE,
+                        cat_inflow, null);
+
+                    add_item (current_category_iter, _("Total"),
+                        TreeCategory.CATEGORIES,
+                        null,
+                        category,
+                        Action.NONE,
+                        cat_inflow - cat_outflow, null);
                 }
             }
             catch (ServiceError err) {
                 error (err.message);
             }
 
-            // Add "Uncategorized"
-            uncategorized_iter = add_item (category_iter, _("Uncategorized"), TreeCategory.CATEGORIES,
-                null, null, Action.NONE, (double) BudgetManager.get_default ().state.uncategorized.size, ICON_CATEGORY);
-
             treeview.get_selection ().unselect_all ();
-            treeview.expand_all ();
+
+            foreach (string path_str in new string[] {"0", "1", "2", "3", "4", "5"}) {
+                treeview.expand_row (new Gtk.TreePath.from_string (path_str), false);
+            }
         }
 
         public void s_account_created (Account account) {
@@ -606,13 +607,15 @@ namespace Envelope.View {
         private void treeview_expander_renderer_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
 
             bool is_header;
-            TreeCategory category;
+            TreeCategory tree_category;
+            Category category;
 
             model.@get (iter,
                 Column.IS_HEADER, out is_header,
-                Column.TREE_CATEGORY, out category, -1);
+                Column.TREE_CATEGORY, out tree_category,
+                Column.CATEGORY, out category, -1);
 
-            renderer.visible = is_header && category != TreeCategory.OVERVIEW;
+            renderer.visible = (is_header && tree_category != TreeCategory.OVERVIEW) || (category != null && store.iter_has_child (iter));
         }
 
         private void treeview_text_renderer_balance_total_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
@@ -740,7 +743,6 @@ namespace Envelope.View {
 
                         if (category == null) {
                             crt.text = ((int) Envelope.Util.String.parse_currency (state)).to_string ();
-                            debug ("uncategorized: %s", crt.text);
                         }
                         else {
                             double parsed_state = Envelope.Util.String.parse_currency (state);
@@ -809,17 +811,19 @@ namespace Envelope.View {
                 Account account;
                 Action action;
                 TreeCategory tree_category;
+                bool is_header;
 
                 model.@get (iter,
                     Column.ACCOUNT, out account,
                     Column.ACTION, out action,
-                    Column.TREE_CATEGORY, out tree_category, -1);
+                    Column.TREE_CATEGORY, out tree_category,
+                    Column.IS_HEADER, out is_header, -1);
 
-                if (account != null) {
-                    account_selected (account);
-                }
-                else if (action == Action.NONE) {
+                if (is_header) {
                     toggle_selected_row_expansion ();
+                }
+                else if (account != null) {
+                    account_selected (account);
                 }
 
                 switch (action) {
@@ -941,6 +945,7 @@ namespace Envelope.View {
             }
         }
 
+        // get the path to the currently selected row
         private Gtk.TreePath? get_selected_path () {
 
             Gtk.TreeModel model;
@@ -1022,6 +1027,134 @@ namespace Envelope.View {
         private void on_quit () {
             var saved_state = SavedState.get_default ();
             saved_state.selected_account_id = current_account_id;
+        }
+
+        private bool tree_button_press_event_func (Gtk.Widget widget, Gdk.EventButton event) {
+            if (event.type != Gdk.EventType.BUTTON_PRESS) {
+                return true;
+            }
+
+            var tree_view = widget as Gtk.TreeView;
+            if (event.window != tree_view.get_bin_window ()) {
+                return true;
+            }
+
+            int tree_x, tree_y;
+            tree_view.convert_bin_window_to_tree_coords ((int) event.x, (int) event.y, out tree_x, out tree_y);
+
+            Gtk.TreePath? path = null;
+            tree_view.get_path_at_pos (tree_x, tree_y, out path, null, null, null);
+
+            if (path == null) {
+                return false;
+            }
+
+            switch (event.button) {
+
+                case Gdk.BUTTON_PRIMARY:
+
+                    bool toggle = false;
+
+                    if (is_header_at_path (path)) {
+                        toggle = true;
+                    }
+
+                    if (is_category_at_path (path)) {
+                        toggle = true;
+                        tree_view.get_selection ().select_path (path);
+                    }
+
+                    if (toggle) {
+                        if (tree_view.is_row_expanded (path)) {
+                            tree_view.collapse_row (path);
+                        }
+                        else {
+                            tree_view.expand_row (path, false);
+                        }
+
+                        return true;
+                    }
+
+                    break;
+
+                case Gdk.BUTTON_SECONDARY:
+
+                    if (!is_header_at_path (path)) {
+
+                        var selection = treeview.get_selection ();
+
+                        selection.unselect_all ();
+                        selection.select_path (path);
+
+                        right_click_menu.popup (null, null, null, event.button, event.get_time ());
+
+                        return true;
+                    }
+
+                    break;
+            }
+
+            return false;
+        }
+
+        // determine if selection is allowed on a tree row
+        private bool tree_selection_func (Gtk.TreeSelection selection, Gtk.TreeModel model, Gtk.TreePath path, bool currently_selected) {
+            if (is_header_at_path (path) || is_overview_at_path (path)) {
+                return false;
+            }
+
+            if (is_category_at_path (path)) {
+                return path.get_depth () < 3;
+            }
+
+            return true;
+        }
+
+        // check if path points to an overview item row
+        private bool is_overview_at_path (Gtk.TreePath path) {
+            Gtk.TreeIter iter;
+
+            if (store.get_iter (out iter, path)) {
+                TreeCategory tree_category;
+                store.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
+
+                return tree_category == TreeCategory.OVERVIEW;
+            }
+
+            return false;
+        }
+
+        // check if path points to a category header row
+        private bool is_header_at_path (Gtk.TreePath path) {
+            Gtk.TreeIter iter;
+
+            if (store.get_iter (out iter, path)) {
+                bool is_header;
+                store.@get (iter, Column.IS_HEADER, out is_header, -1);
+
+                return is_header;
+            }
+
+            return false;
+        }
+
+        // check if path points to a category item
+        private bool is_category_at_path (Gtk.TreePath path) {
+            Gtk.TreeIter iter;
+
+            if (store.get_iter (out iter, path)) {
+
+                Category category;
+                TreeCategory tree_category;
+
+                store.@get (iter,
+                    Column.TREE_CATEGORY, out tree_category,
+                    Column.CATEGORY, out category, -1);
+
+                return tree_category == TreeCategory.CATEGORIES && category != null;
+            }
+
+            return false;
         }
 
     }
