@@ -626,8 +626,9 @@ namespace Envelope.DB {
                 debug ("database path: " + db_file.get_path ());
 
                 database = new SQLHeavy.Database (db_file.get_path (), flags);
-                database.synchronous = SQLHeavy.SynchronousMode.OFF;
+
                 database.sql_executed.connect (debug_sql);
+                database.synchronous = SQLHeavy.SynchronousMode.OFF;
             }
             catch (SQLHeavy.Error err) {
                 error ("Failure creating database instance (%s)", err.message);
@@ -651,6 +652,8 @@ namespace Envelope.DB {
             catch (SQLHeavy.Error err) {
                 error ("could not initialize default categories (%s)".printf (err.message));
             }
+
+            database.foreign_keys = true;
         }
 
         private void init_statements () throws SQLHeavy.Error {
