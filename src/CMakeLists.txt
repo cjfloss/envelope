@@ -52,6 +52,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
   window/MainWindow.vala
 
   dialog/AddAccountDialog.vala
+  dialog/AddCategoryDialog.vala
   dialog/ImportTransactionsDialog.vala
 
   widget/CellRendererDatePicker.vala
