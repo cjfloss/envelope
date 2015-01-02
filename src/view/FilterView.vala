@@ -70,40 +70,40 @@ namespace Envelope.View {
 
             debug ("build filter ui");
 
-            set_spacing (10);
+            set_spacing (5);
 
             var inner_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 12);
             pack_start (inner_box);
 
             var title_image = new Gtk.Image.from_icon_name ("office-calendar", Gtk.IconSize.LARGE_TOOLBAR);
-            inner_box.pack_start (title_image, false);
+            inner_box.pack_start (title_image, false, false);
 
             // this month
             btn_this_month = new Gtk.RadioButton (null);
             btn_this_month.label = _("This month");
-            inner_box.pack_start (btn_this_month);
+            inner_box.pack_start (btn_this_month, false, false);
 
             // last month
             btn_last_month = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Last month"));
-            inner_box.pack_start (btn_last_month);
+            inner_box.pack_start (btn_last_month, false, false);
 
             // future
             btn_future = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Future"));
-            inner_box.pack_start (btn_future);
+            inner_box.pack_start (btn_future, false, false);
 
             // manual dates
             btn_manual = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Pick dates:"));
-            inner_box.pack_start (btn_manual);
+            inner_box.pack_start (btn_manual, false, false);
 
             from_date = new Granite.Widgets.DatePicker ();
             from_date.sensitive = false;
             from_date.date = new DateTime.now_local ().add_months (-1);
-            inner_box.pack_start (from_date);
+            inner_box.pack_start (from_date, false, false);
 
             to_date = new Granite.Widgets.DatePicker ();
             to_date.sensitive = false;
             to_date.date = new DateTime.now_local ();
-            inner_box.pack_start (to_date);
+            inner_box.pack_start (to_date, false, false);
         }
 
         private void connect_signals () {
