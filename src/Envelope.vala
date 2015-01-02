@@ -33,14 +33,14 @@ public class Envelope.App : Granite.Application {
         build_version = Build.VERSION;
         build_version_info = Build.VERSION_INFO;
 
-        program_name = PROGRAM_NAME;
+        program_name = _(PROGRAM_NAME);
         exec_name = "envelope";
 
         app_copyright = "2014";
         application_id = "org.envelope.envelope";
         app_icon = "accessories-calculator";
         app_launcher = "envelope.desktop";
-        app_years = "2014";
+        app_years = "2014-2015";
 
         main_url = "https://nlaplante.github.io/envelope";
         bug_url = "https://github.com/nlaplante/envelope/issues";
@@ -75,14 +75,14 @@ public class Envelope.App : Granite.Application {
 
         Granite.Services.Paths.initialize (Build.PROGRAM_NAME, Build.PKGDATADIR);
 
-        info ("Report any issues/bugs you might find to %s".printf (bug_url));
+        info ("Report any issues/bugs you might find to %s", bug_url);
 
         if (main_window == null) {
             main_window = new MainWindow ();
             main_window.set_application (this);
         }
 
-        main_window.show ();
+        main_window.present ();
     }
 
     public string get_id () {
