@@ -107,11 +107,12 @@ namespace Envelope.Service {
          * @param {string} name - the name of the category
          * @return {Category} the new category
          */
-        public Category create_category (string name) throws ServiceError {
+        public Category create_category (string name, double budgeted_amount = 0d) throws ServiceError {
 
             try {
                 Category category = new Category ();
                 category.name = name;
+                category.amount_budgeted = budgeted_amount;
 
                 dbm.create_category (category);
                 categories = null;
