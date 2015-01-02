@@ -21,7 +21,7 @@ namespace Envelope {
     public class Category : Object, Gee.Comparable<Category> {
 
         public string name { get; set; }
-        public string description { get; set; }
+        public string? description { get; set; }
         public int @id { get; set; }
         public Category? parent { get; set; default = null; }
         public double amount_budgeted { get; set; default = 0d; }
