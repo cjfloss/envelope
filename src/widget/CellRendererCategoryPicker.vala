@@ -124,11 +124,13 @@ namespace Envelope.Widget {
         private void connect_signals () {
 
             cancel_button.clicked.connect ( () => {
+                check_button.active = false;
                 popover.hide ();
             });
 
             ok_button.clicked.connect ( () => {
                 edited (current_path, category_entry.text);
+                check_button.active = false;
                 popover.hide ();
             });
 
