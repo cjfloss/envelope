@@ -183,6 +183,12 @@ namespace Envelope.Window {
 
                 set_content_view (widget);
 
+                if (widget is TransactionView) {
+                    TransactionView transaction_view = widget as TransactionView;
+                    transaction_view.with_filter_view = true;
+                    transaction_view.with_add_transaction_view = true;
+                }
+
                 search_entry.placeholder_text = "Search in %s%s".printf (account.number, Envelope.Util.String.ELLIPSIS);
 
                 header_bar.title = window_title;
@@ -281,6 +287,30 @@ namespace Envelope.Window {
 
                 if (content_revealer.get_child () != budget_overview) {
                     set_content_view (budget_overview);
+                }
+            });
+
+            sidebar.category_selected.connect ( (category) => {
+
+                var transaction_view = TransactionView.get_default ();
+
+                try {
+                    double inflow, outflow;
+                    Gee.ArrayList<Transaction> transactions = BudgetManager.get_default ()
+                        .compute_current_category_operations (category, out inflow, out outflow);
+
+                    transaction_view.transactions = transactions;
+                    transaction_view.with_filter_view = false;
+                    transaction_view.with_add_transaction_view = false;
+
+                    if (content_revealer.get_child () != transaction_view) {
+                        set_content_view (transaction_view);
+                    }
+
+                    header_bar.title = _("%s - %s").printf (new DateTime.now_local ().format ("%B %Y"), category.name);
+                }
+                catch (ServiceError err) {
+                    error ("could not load transactions for category %s (%s)", category.name, err.message);
                 }
             });
 
