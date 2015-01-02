@@ -22,7 +22,7 @@ private Envelope.App application_instance = null;
 
 public class Envelope.App : Granite.Application {
 
-    public const string PROGRAM_NAME = "Envelope";
+    public const string PROGRAM_NAME = "Budget";
     public const int TOAST_TIMEOUT = 3000;
 
     construct {
@@ -38,7 +38,7 @@ public class Envelope.App : Granite.Application {
 
         app_copyright = "2014";
         application_id = "org.envelope.envelope";
-        app_icon = "multimedia-audio-player";
+        app_icon = "accessories-calculator";
         app_launcher = "envelope.desktop";
         app_years = "2014";
 
