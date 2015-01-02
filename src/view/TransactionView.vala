@@ -29,6 +29,7 @@ namespace Envelope.View {
 
         public static new TransactionView get_default () {
             if (transaction_view_instance == null) {
+                debug ("returning new instance of TransactionView");
                 transaction_view_instance = new TransactionView ();
             }
 
@@ -65,9 +66,9 @@ namespace Envelope.View {
         private CellRendererCategoryPicker crcp;
         private Gtk.CellRendererText renderer_memo;
 
-        // filter widgets
         private Gtk.Button btn_add_transaction;
-        private Gtk.ButtonBox add_transaction_button_box;
+        private Gtk.Button btn_add_transaction_cancel;
+        private Gtk.ButtonBox button_box;
         private Gtk.InfoBar infobar;
 
         private Gtk.TreeStore transactions_store;
@@ -89,6 +90,9 @@ namespace Envelope.View {
         public string search_term { get; set; }
 
         public Gee.ArrayList<Transaction> transactions { get; set; }
+
+        public bool with_filter_view { get; set; default = true; }
+        public bool with_add_transaction_view { get; set; default = true; }
 
         private TransactionView () {
 
@@ -350,12 +354,18 @@ namespace Envelope.View {
                         // convert to child model iter
                         Gtk.TreeIter child_iter;
                         view_store.convert_child_iter_to_iter (out child_iter, current_editing_iter);
-                        treeview.get_selection ().select_iter (child_iter);
+                        //treeview.get_selection ().select_iter (child_iter);
+
+                        Gtk.TreePath path = view_store.get_path (child_iter);
+                        treeview.scroll_to_cell (path, treeview.get_column (0), false, 0, 0);
+                        //treeview.set_cursor (path, treeview.get_column (0), true);
 
                         btn_add_transaction.get_style_context ().add_class("suggested-action");
                         btn_add_transaction.label = _("Apply");
 
                         current_add_transaction_action = AddTransactionAction.EDITING;
+
+                        btn_add_transaction_cancel.show ();
 
                         break;
 
@@ -366,12 +376,49 @@ namespace Envelope.View {
                         current_add_transaction_action = AddTransactionAction.NONE;
                         btn_add_transaction.get_style_context ().remove_class("suggested-action");
                         btn_add_transaction.label = _("Add transaction");
+
+                        btn_add_transaction_cancel.hide ();
+
                         break;
 
                     default:
                         assert_not_reached ();
                 }
             });
+
+            btn_add_transaction_cancel = new Gtk.Button.with_label (_("Cancel"));
+            btn_add_transaction_cancel.expand = false;
+            btn_add_transaction_cancel.visible = false;
+
+            btn_add_transaction_cancel.clicked.connect ( () => {
+                switch (current_add_transaction_action) {
+                    case AddTransactionAction.EDITING:
+                        current_add_transaction_action = AddTransactionAction.NONE;
+
+                        transactions_store.remove (ref current_editing_iter);
+
+                        btn_add_transaction.get_style_context ().remove_class("suggested-action");
+                        btn_add_transaction.label = _("Add transaction");
+
+                        btn_add_transaction_cancel.hide ();
+
+                        break;
+
+                    default:
+                        assert_not_reached ();
+                }
+            });
+
+            button_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
+            button_box.layout_style = Gtk.ButtonBoxStyle.START;
+            button_box.border_width = 5;
+            button_box.spacing = 5;
+            button_box.add (btn_add_transaction);
+            button_box.add (btn_add_transaction_cancel);
+
+            pack_end (button_box, false, false);
+
+            button_box.show ();
 
             treeview.activate_on_single_click = false;
             treeview.reorderable = true;
@@ -753,6 +800,32 @@ namespace Envelope.View {
                 }
                 else {
                     clear ();
+                }
+            });
+
+            debug ("notify signals");
+
+            notify["with-filter-view"].connect ( () => {
+
+                debug ("with_filter_view changed (%s)", with_filter_view ? "true" : "false");
+
+                if (!with_filter_view) {
+                    filter_box.hide ();
+                }
+                else {
+                    filter_box.show ();
+                }
+            });
+
+            notify["with-add-transaction-view"].connect ( () => {
+
+                debug ("with_add_transaction_view changed (%s)", with_add_transaction_view ? "true" : "false");
+
+                if (!with_add_transaction_view) {
+                    button_box.hide ();
+                }
+                else {
+                    button_box.show ();
                 }
             });
         }
