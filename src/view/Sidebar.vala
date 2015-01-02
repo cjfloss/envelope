@@ -49,6 +49,7 @@ namespace Envelope.View {
             NONE,
             ADD_ACCOUNT,
             ADD_CATEGORY,
+            SHOW_CATEGORY,
             SHOW_OVERVIEW
         }
 
@@ -101,6 +102,7 @@ namespace Envelope.View {
         private int current_account_id;
 
         public signal void overview_selected ();
+        public signal void category_selected (Category category);
         public signal void list_account_selected (Account account);
         public signal void list_account_name_updated (Account account, string new_name);
         public signal void list_category_name_updated (Category category, string new_name);
@@ -269,7 +271,8 @@ namespace Envelope.View {
             }
 
             // Add "Add account..."
-            add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT, null, ICON_ACTION_ADD);
+            add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT, null, ICON_ACTION_ADD, false, false,
+                _("Add a new account"));
 
             // Add "Categories" category header
             category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
@@ -279,49 +282,9 @@ namespace Envelope.View {
                 null, null, Action.NONE, (double) budget_manager.state.uncategorized.size, ICON_CATEGORY);
 
             // Add categories
-            try {
+            update_categories_section ();
 
-                foreach (Category category in budget_manager.get_categories ()) {
 
-                    double cat_inflow;
-                    double cat_outflow;
-                    BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
-
-                    var current_category_iter = add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, cat_inflow - cat_outflow, ICON_CATEGORY);
-
-                    // add subitems
-                    add_item (current_category_iter, _("Budgeted amount"),
-                        TreeCategory.CATEGORIES,
-                        null,
-                        category,
-                        Action.NONE,
-                        cat_outflow, null);
-
-                    add_item (current_category_iter, _("Spending"),
-                        TreeCategory.CATEGORIES,
-                        null,
-                        category,
-                        Action.NONE,
-                        cat_outflow, null);
-
-                    add_item (current_category_iter, _("Earnings"),
-                        TreeCategory.CATEGORIES,
-                        null,
-                        category,
-                        Action.NONE,
-                        cat_inflow, null);
-
-                    add_item (current_category_iter, _("Total"),
-                        TreeCategory.CATEGORIES,
-                        null,
-                        category,
-                        Action.NONE,
-                        cat_inflow - cat_outflow, null);
-                }
-            }
-            catch (ServiceError err) {
-                error (err.message);
-            }
 
             treeview.get_selection ().unselect_all ();
 
@@ -396,39 +359,70 @@ namespace Envelope.View {
         // recalculate category remaining balance for each category listed in the sidebar
         private void update_categories_section () {
 
-            debug ("update categories section");
-
-            if (!store.iter_has_child (category_iter)) {
-                return;
-            }
-
             var budget_manager = BudgetManager.get_default ();
 
-            Gtk.TreeIter iter;
-            store.iter_children (out iter, category_iter);
+            try {
 
-            do {
-                Category category;
-                store.@get (iter, Column.CATEGORY, out category, -1);
+                Gtk.TreeIter first_child;
+                if (store.iter_children (out first_child, category_iter)) {
+                    bool valid = true;
 
-                if (category != null) {
+                    while (valid) {
+                        valid = store.remove (ref first_child);
+                    }
+                }
+
+                foreach (Category category in budget_manager.get_categories ()) {
 
                     double cat_inflow;
                     double cat_outflow;
-                    budget_manager.compute_current_category_operations (category, out cat_inflow, out cat_outflow);
+                    BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
 
-                    var formatted_state = Envelope.Util.String.format_currency (cat_inflow - cat_outflow);
-                    store.@set (iter, Column.STATE, formatted_state, -1);
+                    var current_category_iter = add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, cat_inflow - cat_outflow, ICON_CATEGORY);
+
+                    // add subitems
+                    add_item (current_category_iter, _("Budgeted amount"),
+                        TreeCategory.CATEGORIES,
+                        null,
+                        category,
+                        Action.NONE,
+                        null, null);
+
+                    add_item (current_category_iter, _("Spending"),
+                        TreeCategory.CATEGORIES,
+                        null,
+                        category,
+                        Action.NONE,
+                        cat_outflow, null);
+
+                    add_item (current_category_iter, _("Earnings"),
+                        TreeCategory.CATEGORIES,
+                        null,
+                        category,
+                        Action.NONE,
+                        cat_inflow, null);
+
+                    add_item (current_category_iter, _("Total"),
+                        TreeCategory.CATEGORIES,
+                        null,
+                        category,
+                        Action.NONE,
+                        cat_inflow - cat_outflow, null);
                 }
+            }
+            catch (ServiceError err) {
+                error (err.message);
+            }
 
-            } while (store.iter_next (ref iter));
+            // Add category...
+            add_item (category_iter, _("Add category\u2026"), TreeCategory.CATEGORIES, null, null, Action.ADD_CATEGORY, null, ICON_ACTION_ADD, false, false,
+                _("Add a new spending category"));
 
-            // uncategorized
-            assert (budget_manager.state != null);
-            assert (budget_manager.state.uncategorized != null);
-
-            store.@set (uncategorized_iter, Column.STATE,
-                Envelope.Util.String.format_currency((double) budget_manager.state.uncategorized.size), -1);
+            // expand all
+            Gtk.TreePath? path = store.get_path (category_iter);
+            if (path != null) {
+                treeview.expand_row (path, false);
+            }
         }
 
         /**
@@ -745,14 +739,26 @@ namespace Envelope.View {
                             crt.text = ((int) Envelope.Util.String.parse_currency (state)).to_string ();
                         }
                         else {
+
                             double parsed_state = Envelope.Util.String.parse_currency (state);
 
-                            if (parsed_state == 0) {
-                                crt.visible = false;
-                                return;
-                            }
+                            // check if we're a category name or a subitem
+                            if (store.iter_has_child (iter)) {
+                                // category name
+                                if (parsed_state == 0) {
+                                    crt.visible = false;
+                                    return;
+                                }
 
-                            crt.text = state;
+                                crt.text = state;
+                            }
+                            else {
+                                // subitem
+                                if (parsed_state == 0) {
+                                    crt.visible = true;
+                                    crt.text = _("Not set");
+                                }
+                            }
                         }
                     }
                     else {
@@ -801,32 +807,29 @@ namespace Envelope.View {
 
         private void treeview_row_activated () {
 
-            debug ("tree row activated");
-
             Gtk.TreeIter iter;
             Gtk.TreeModel model;
-
             if (treeview.get_selection ().get_selected (out model, out iter)) {
 
                 Account account;
                 Action action;
+                Category category;
                 TreeCategory tree_category;
                 bool is_header;
 
                 model.@get (iter,
                     Column.ACCOUNT, out account,
+                    Column.CATEGORY, out category,
                     Column.ACTION, out action,
                     Column.TREE_CATEGORY, out tree_category,
                     Column.IS_HEADER, out is_header, -1);
 
-                if (is_header) {
-                    toggle_selected_row_expansion ();
-                }
-                else if (account != null) {
+                if (account != null) {
                     account_selected (account);
                 }
 
                 switch (action) {
+
                     case Action.ADD_ACCOUNT:
                         var dialog = new AddAccountDialog ();
                         dialog.account_created.connect (s_account_created);
@@ -835,6 +838,16 @@ namespace Envelope.View {
 
                     case Action.SHOW_OVERVIEW:
                         overview_selected ();
+                        break;
+
+                    case Action.SHOW_CATEGORY:
+                        category_selected (category);
+                        break;
+
+                    case Action.ADD_CATEGORY:
+                        // TODO add new category
+                        var dialog = new AddCategoryDialog ();
+                        dialog.show_all ();
                         break;
 
                     case Action.NONE:
@@ -847,18 +860,12 @@ namespace Envelope.View {
         }
 
         private void account_selected (Account account) {
-
-            debug ("account selected : %s".printf (account.number));
-
             current_account_id = account.@id;
             selected_account = account;
-
             list_account_selected (account);
         }
 
         private bool get_account_iter (Account account, out Gtk.TreeIter iter) {
-
-            debug ("looking for tree iterator matching account %d".printf (account.@id));
 
             Gtk.TreeIter? found_iter = null;
             int id = account.@id;
@@ -866,7 +873,6 @@ namespace Envelope.View {
             store.@foreach ((model, path, fe_iter) => {
 
                 Account val;
-
                 model.@get (fe_iter, Column.ACCOUNT, out val, -1);
 
                 if (val != null && val.@id == id) {
@@ -882,28 +888,32 @@ namespace Envelope.View {
             return found_iter != null;
         }
 
-        private void toggle_selected_row_expansion () {
+        private bool get_category_iter (Category category, out Gtk.TreeIter iter) {
 
-            if (cre.visible) {
+            Gtk.TreeIter? found_iter = null;
+            int id = category.@id;
 
-                var path = get_selected_path ();
+            store.@foreach ( (model, path, fe_iter) => {
 
-                if (path != null) {
+                Category val;
+                model.@get (fe_iter, Column.CATEGORY, out val, -1);
 
-                    if (treeview.is_row_expanded (path)) {
-                        treeview.collapse_row (path);
-                    }
-                    else {
-                        treeview.expand_row (path, false);
-                    }
+                if (val != null && val.@id == id) {
+                    found_iter = fe_iter;
+                    return true;
                 }
-            }
+
+                return false;
+            });
+
+            iter = found_iter;
+
+            return found_iter != null;
         }
 
         private void item_renamed (string path, string text) {
 
             Gtk.TreeIter iter;
-
             if (store.get_iter_from_string (out iter, path)) {
 
                 Account account;
@@ -922,9 +932,7 @@ namespace Envelope.View {
                             Column.LABEL, text,
                             Column.TOOLTIP, account.description != null ? "%s - %s".printf (text, account.description) : text, -1);
 
-                        // fire signal list_account_name_updated
                         list_account_name_updated (account, text);
-
                         break;
 
                     case TreeCategory.CATEGORIES:
@@ -934,14 +942,11 @@ namespace Envelope.View {
                             Column.TOOLTIP, text, -1);
 
                         list_category_name_updated (category, text);
-
                         break;
 
                     default:
                         assert_not_reached ();
                 }
-
-
             }
         }
 
@@ -1050,48 +1055,53 @@ namespace Envelope.View {
             }
 
             switch (event.button) {
-
                 case Gdk.BUTTON_PRIMARY:
-
-                    bool toggle = false;
-
-                    if (is_header_at_path (path)) {
-                        toggle = true;
-                    }
-
-                    if (is_category_at_path (path)) {
-                        toggle = true;
-                        tree_view.get_selection ().select_path (path);
-                    }
-
-                    if (toggle) {
-                        if (tree_view.is_row_expanded (path)) {
-                            tree_view.collapse_row (path);
-                        }
-                        else {
-                            tree_view.expand_row (path, false);
-                        }
-
-                        return true;
-                    }
-
-                    break;
+                    return tree_button_primary_pressed (path, tree_view);
 
                 case Gdk.BUTTON_SECONDARY:
+                    return tree_button_secondary_pressed (path, tree_view, event);
+            }
 
-                    if (!is_header_at_path (path)) {
+            return false;
+        }
 
-                        var selection = treeview.get_selection ();
+        private bool tree_button_primary_pressed (Gtk.TreePath path, Gtk.TreeView tree_view) {
+            bool toggle = false;
 
-                        selection.unselect_all ();
-                        selection.select_path (path);
+            if (is_header_at_path (path)) {
+                toggle = true;
+            }
 
-                        right_click_menu.popup (null, null, null, event.button, event.get_time ());
+            if (is_category_at_path (path)) {
+                toggle = true;
+                tree_view.get_selection ().select_path (path);
+            }
 
-                        return true;
-                    }
+            if (toggle) {
+                if (tree_view.is_row_expanded (path)) {
+                    tree_view.collapse_row (path);
+                }
+                else {
+                    tree_view.expand_row (path, false);
+                }
 
-                    break;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool tree_button_secondary_pressed (Gtk.TreePath path, Gtk.TreeView tree_view, Gdk.EventButton event) {
+            if (!is_header_at_path (path)) {
+
+                var selection = tree_view.get_selection ();
+
+                selection.unselect_all ();
+                selection.select_path (path);
+
+                right_click_menu.popup (null, null, null, event.button, event.get_time ());
+
+                return true;
             }
 
             return false;
@@ -1103,6 +1113,7 @@ namespace Envelope.View {
                 return false;
             }
 
+            // we don't want to allow selection on category subitems (like budgeted amount, spending, income, etc)
             if (is_category_at_path (path)) {
                 return path.get_depth () < 3;
             }
