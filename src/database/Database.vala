@@ -54,7 +54,7 @@ namespace Envelope.DB {
                 `description` TEXT,
                 `amount_budgeted` DOUBLE,
                 `parent_category_id` INT,
-            FOREIGN KEY (`parent_category_id`) REFERENCES `category`(`id`) ON UPDATE CASCADE ON DELETE CASCADE)
+            FOREIGN KEY (`parent_category_id`) REFERENCES `categories`(`id`) ON UPDATE CASCADE ON DELETE CASCADE)
             """;
 
         private static const string SQL_CATEGORY_COUNT = "SELECT COUNT(*) AS category_count from categories";
@@ -227,12 +227,26 @@ namespace Envelope.DB {
 
         public void create_category (Category category) throws SQLHeavy.Error {
 
-            var id = q_insert_category.execute_insert (
-                "name", typeof (string), category.name,
-                "description", typeof (string), category.description,
-                "amount_budgeted", typeof (double), category.amount_budgeted,
-                "parent_category_id", typeof (int), null
-            );
+            q_insert_category.clear ();
+
+            q_insert_category.set_string ("name", category.name);
+            q_insert_category.set_double ("amount_budgeted", category.amount_budgeted);
+
+            if (category.description != null) {
+                q_insert_category.set_string ("description", category.description);
+            }
+            else {
+                q_insert_category.set_null ("description");
+            }
+
+            if (category.parent != null) {
+                q_insert_category.set_int ("parent_category_id", category.parent.@id);
+            }
+            else {
+                q_insert_category.set_null ("parent_category_id");
+            }
+
+            var id = q_insert_category.execute_insert ();
 
             debug ("category %s created with id %d", category.name, (int) id);
 
@@ -626,8 +640,8 @@ namespace Envelope.DB {
                 debug ("database path: " + db_file.get_path ());
 
                 database = new SQLHeavy.Database (db_file.get_path (), flags);
-
                 database.sql_executed.connect (debug_sql);
+
                 database.synchronous = SQLHeavy.SynchronousMode.OFF;
             }
             catch (SQLHeavy.Error err) {
