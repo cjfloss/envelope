@@ -17,40 +17,26 @@
 */
 
 using Envelope.Service;
+using Envelope.Util.String;
 
 namespace Envelope.Dialog {
 
-    public class AddCategoryDialog : Gtk.Dialog {
+    public class AddCategoryDialog : AbstractOkCancelDialog {
 
         private Gtk.Entry name_entry;
         private Gtk.Entry amount_entry;
-        private Gtk.Button ok_button;
 
         public AddCategoryDialog () {
-            Object ();
-
-            build_ui ();
-            connect_signals ();
+            base ();
         }
 
-        private void build_ui () {
+        protected override Gtk.Widget build_content () {
 
-            title = _("Add a category");
-            border_width = 20;
-
-            // Add buttons
-            add_button (_("Cancel"), Gtk.ResponseType.CLOSE);
-            ok_button = add_button (_("Ok"), Gtk.ResponseType.APPLY) as Gtk.Button;
-            ok_button.get_style_context ().add_class("suggested-action");;
             ok_button.sensitive = false;
-
-            Gtk.Box content = get_content_area () as Gtk.Box;
-            content.spacing = 20;
 
             var grid = new Gtk.Grid ();
             grid.row_spacing = 10;
             grid.column_spacing = 20;
-            content.add (grid);
 
             grid.show_all ();
 
@@ -70,36 +56,32 @@ namespace Envelope.Dialog {
             amount_entry.placeholder_text = _("Eg: 200");
             grid.attach_next_to (amount_entry, amount_label, Gtk.PositionType.RIGHT, 1, 1);
 
+            return grid;
         }
 
-        private void connect_signals () {
-            response.connect (on_response);
-            
-            name_entry.changed.connect ( () => {
-                ok_button.sensitive = name_entry.text.length > 0;
-            });
+        protected override void connect_signals () {
+            base.connect_signals ();
+            name_entry.changed.connect (validate_input);
+            amount_entry.changed.connect (validate_input);
         }
 
-        private void on_response (Gtk.Dialog source, int response_id) {
-            switch (response_id) {
-                case Gtk.ResponseType.APPLY:
-                    create_category ();
-                    destroy ();
-                    break;
-
-                case Gtk.ResponseType.CLOSE:
-                    destroy ();
-                    break;
-            }
+        private void validate_input () {
+            ok_button.sensitive = name_entry.text.length > 0;
         }
 
-        private void create_category () {
+        protected override void apply_cb () {
             try {
-                BudgetManager.get_default ().create_category (name_entry.text.strip ());
+                BudgetManager.get_default ()
+                    .create_category (name_entry.text.strip (), parse_currency (amount_entry.text.strip ()));
+            }
+            catch (ParseError err) {
+                error ("could not create category %s (%s)", name_entry.text, err.message);
             }
             catch (ServiceError err) {
                 error ("could not create category %s (%s)", name_entry.text, err.message);
             }
         }
+
+        protected override void cancel_cb () { }
     }
 }
