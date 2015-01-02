@@ -378,7 +378,7 @@ namespace Envelope.View {
                     double cat_outflow;
                     BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
 
-                    var current_category_iter = add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.NONE, cat_inflow - cat_outflow, ICON_CATEGORY);
+                    var current_category_iter = add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.SHOW_CATEGORY, cat_inflow - cat_outflow, ICON_CATEGORY);
 
                     // add subitems
                     add_item (current_category_iter, _("Budgeted amount"),
