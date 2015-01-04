@@ -278,10 +278,6 @@ namespace Envelope.View {
             // Add "Categories" category header
             category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
 
-            // Add "Uncategorized"
-            uncategorized_iter = add_item (category_iter, _("Uncategorized"), TreeCategory.CATEGORIES,
-                null, null, Action.NONE, (double) budget_manager.state.uncategorized.size, ICON_CATEGORY);
-
             // Add categories
             update_categories_section ();
 
@@ -370,6 +366,10 @@ namespace Envelope.View {
                         valid = store.remove (ref first_child);
                     }
                 }
+
+                // Add "Uncategorized"
+                uncategorized_iter = add_item (category_iter, _("Uncategorized"), TreeCategory.CATEGORIES,
+                    null, null, Action.NONE, (double) budget_manager.state.uncategorized.size, ICON_CATEGORY);
 
                 foreach (MonthlyCategory category in budget_manager.get_categories ()) {
 
@@ -1211,7 +1211,7 @@ namespace Envelope.View {
         /**
          * Determine foreground color for amount
          */
-        private string color_for_amount (double amount) {            
+        private string color_for_amount (double amount) {
             return amount < 0 ? COLOR_SUBZERO : COLOR_ZERO;
         }
 
