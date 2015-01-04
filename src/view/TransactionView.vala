@@ -247,6 +247,16 @@ namespace Envelope.View {
             }
 
             populating_from_list = false;
+            
+            // check if we need to display the infobar
+            Gtk.TreeIter iter_first;
+            if (!view_store.get_iter_first (out iter_first)) {
+                // we don't have children; display infobar
+                infobar.show_all ();
+            }
+            else {
+                infobar.hide ();
+            }
         }
 
         private void get_transaction_iter (Transaction transaction, out Gtk.TreeIter? iter) {
@@ -328,7 +338,7 @@ namespace Envelope.View {
             infobar.hide ();
             add (infobar);
         }
-
+        
         private void build_transaction_grid_ui () {
 
             debug ("building transaction grid ui");
@@ -348,71 +358,10 @@ namespace Envelope.View {
             btn_add_transaction = new Gtk.Button.with_label (_("Add transaction"));
             btn_add_transaction.show_all ();
             btn_add_transaction.expand = false;
-            btn_add_transaction.clicked.connect (() => {
-
-                switch (current_add_transaction_action) {
-
-                    case AddTransactionAction.NONE:
-                        // add a row
-                        current_editing_iter = add_empty_row ();
-
-                        // convert to child model iter
-                        Gtk.TreeIter child_iter;
-                        view_store.convert_child_iter_to_iter (out child_iter, current_editing_iter);
-                        //treeview.get_selection ().select_iter (child_iter);
-
-                        Gtk.TreePath path = view_store.get_path (child_iter);
-                        treeview.scroll_to_cell (path, treeview.get_column (0), false, 0, 0);
-                        //treeview.set_cursor (path, treeview.get_column (0), true);
-
-                        btn_add_transaction.get_style_context ().add_class("suggested-action");
-                        btn_add_transaction.label = _("Apply");
-
-                        current_add_transaction_action = AddTransactionAction.EDITING;
-
-                        btn_add_transaction_cancel.show ();
-
-                        break;
-
-                    case AddTransactionAction.EDITING:
-                        save_transaction ();
-
-                        // restore previous state
-                        current_add_transaction_action = AddTransactionAction.NONE;
-                        btn_add_transaction.get_style_context ().remove_class("suggested-action");
-                        btn_add_transaction.label = _("Add transaction");
-
-                        btn_add_transaction_cancel.hide ();
-
-                        break;
-
-                    default:
-                        assert_not_reached ();
-                }
-            });
 
             btn_add_transaction_cancel = new Gtk.Button.with_label (_("Cancel"));
             btn_add_transaction_cancel.expand = false;
             btn_add_transaction_cancel.visible = false;
-
-            btn_add_transaction_cancel.clicked.connect ( () => {
-                switch (current_add_transaction_action) {
-                    case AddTransactionAction.EDITING:
-                        current_add_transaction_action = AddTransactionAction.NONE;
-
-                        transactions_store.remove (ref current_editing_iter);
-
-                        btn_add_transaction.get_style_context ().remove_class("suggested-action");
-                        btn_add_transaction.label = _("Add transaction");
-
-                        btn_add_transaction_cancel.hide ();
-
-                        break;
-
-                    default:
-                        assert_not_reached ();
-                }
-            });
 
             button_box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
             button_box.layout_style = Gtk.ButtonBoxStyle.START;
@@ -741,6 +690,9 @@ namespace Envelope.View {
         }
 
         private void connect_signals () {
+        
+            btn_add_transaction_cancel.clicked.connect (btn_add_transactions_cancel_clicked);
+            btn_add_transaction.clicked.connect (btn_add_transactions_clicked);        
 
             // notify when a transaction changed
             transactions_store.row_changed.connect ((path, iter) => {
@@ -835,6 +787,66 @@ namespace Envelope.View {
                 }
             });
         }
+        
+        private void btn_add_transactions_clicked () {
+            switch (current_add_transaction_action) {
+                case AddTransactionAction.NONE:
+                    // add a row
+                    current_editing_iter = add_empty_row ();
+
+                    // convert to child model iter
+                    Gtk.TreeIter child_iter;
+                    view_store.convert_child_iter_to_iter (out child_iter, current_editing_iter);
+                    //treeview.get_selection ().select_iter (child_iter);
+
+                    Gtk.TreePath path = view_store.get_path (child_iter);
+                    treeview.scroll_to_cell (path, treeview.get_column (0), false, 0, 0);
+                    //treeview.set_cursor (path, treeview.get_column (0), true);
+
+                    btn_add_transaction.get_style_context ().add_class("suggested-action");
+                    btn_add_transaction.label = _("Apply");
+
+                    current_add_transaction_action = AddTransactionAction.EDITING;
+
+                    btn_add_transaction_cancel.show ();
+
+                    break;
+
+                case AddTransactionAction.EDITING:
+                    save_transaction ();
+
+                    // restore previous state
+                    current_add_transaction_action = AddTransactionAction.NONE;
+                    btn_add_transaction.get_style_context ().remove_class("suggested-action");
+                    btn_add_transaction.label = _("Add transaction");
+
+                    btn_add_transaction_cancel.hide ();
+
+                    break;
+
+                default:
+                    assert_not_reached ();
+            }
+        }
+        
+        private void btn_add_transactions_cancel_clicked () {
+            switch (current_add_transaction_action) {
+                case AddTransactionAction.EDITING:
+                    current_add_transaction_action = AddTransactionAction.NONE;
+
+                    transactions_store.remove (ref current_editing_iter);
+
+                    btn_add_transaction.get_style_context ().remove_class("suggested-action");
+                    btn_add_transaction.label = _("Add transaction");
+
+                    btn_add_transaction_cancel.hide ();
+
+                    break;
+
+                default:
+                    assert_not_reached ();
+            }
+        }        
 
         private void popup_menu_remove_activated () {
 
