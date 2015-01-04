@@ -1084,11 +1084,8 @@ namespace Envelope.View {
                 return true;
             }
 
-            int tree_x, tree_y;
-            tree_view.convert_bin_window_to_tree_coords ((int) event.x, (int) event.y, out tree_x, out tree_y);
-
             Gtk.TreePath? path = null;
-            tree_view.get_path_at_pos (tree_x, tree_y, out path, null, null, null);
+            tree_view.get_path_at_pos ((int) event.x, (int) event.y, out path, null, null, null);
 
             if (path == null) {
                 return false;
