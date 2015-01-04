@@ -22,7 +22,7 @@ namespace Envelope.View {
 
         private static FilterView filter_view_instance = null;
 
-        public static new unowned FilterView get_default () {
+        public static new FilterView get_default () {
             if (filter_view_instance == null) {
                 filter_view_instance = new FilterView ();
             }
@@ -64,6 +64,8 @@ namespace Envelope.View {
 
             build_ui ();
             connect_signals ();
+            
+            filter_view_instance = this;
         }
 
         private void build_ui () {
@@ -110,8 +112,27 @@ namespace Envelope.View {
 
             debug ("connect filter view signals");
 
-            notify["filter_type"].connect ( () => {
-
+            notify["filter-type"].connect ( (s, p) => {
+                switch (filter_type) {
+                    case FilterType.THIS_MONTH:
+                        btn_this_month.active = true;
+                        break;
+                        
+                    case FilterType.LAST_MONTH:
+                        btn_last_month.active = true;
+                        break;
+                    
+                    case FilterType.FUTURE:
+                        btn_future.active = true;
+                        break ;
+                        
+                    case FilterType.MANUAL:
+                        btn_manual.active = true;
+                        break;
+                        
+                    default:
+                        assert_not_reached ();
+                }
             });
 
             btn_last_month.toggled.connect ( () => {
