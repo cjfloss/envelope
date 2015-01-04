@@ -101,8 +101,6 @@ namespace Envelope.Service {
          */
         public ArrayList<Transaction> import (string path) throws ServiceError, ImporterError {
 
-            info ("importing transactions from %s".printf (path));
-
             ArrayList<Transaction> list = new ArrayList<Transaction> ();
 
             var file = File.new_for_path (path);
@@ -111,7 +109,7 @@ namespace Envelope.Service {
                 throw new ServiceError.ENOENT ("specified file does not exist");
             }
 
-            try {               
+            try {
 
                 var input_stream = file.read ();
                 var stream = new DataInputStream (input_stream);
