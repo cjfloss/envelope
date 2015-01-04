@@ -52,13 +52,25 @@ namespace Envelope.DB {
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT,
                 `name` TEXT NOT NULL,
                 `description` TEXT,
-                `amount_budgeted` DOUBLE,
                 `parent_category_id` INT,
             FOREIGN KEY (`parent_category_id`) REFERENCES `categories`(`id`) ON UPDATE CASCADE ON DELETE CASCADE)
             """;
 
+        private static const string MONTHLY_CATEGORIES = """
+            CREATE TABLE IF NOT EXISTS categories_budgets (
+                `category_id` INTEGER NOT NULL,
+                `year` INTEGER NOT NULL,
+                `month` INTEGER NOT NULL,
+                `amount_budgeted` DOUBLE,
+            PRIMARY KEY (`category_id`, `year`, `month`),
+            FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE CASCADE ON DELETE CASCADE
+            ) WITHOUT ROWID
+        """;
+
         private static const string SQL_CATEGORY_COUNT = "SELECT COUNT(*) AS category_count from categories";
         private static const string SQL_INSERT_CATEGORY_FOR_NAME = "INSERT INTO `categories` (`name`) VALUES (:name);";
+        private static const string SQL_SET_CATEGORY_BUDGET = "INSERT INTO `categories_budgets` (`category_id`, `year`, `month`, `amount_budgeted`) VALUES (:category_id, :year, :month, :amount_budgeted)";
+        private static const string SQL_UPDATE_CATEGORY_BUDGET = "UPDATE `categories_budgets` SET `amount_budgeted` = :amount_budgeted WHERE `category_id` = :category_id AND `year` = :year AND `month` = :month";
         private static const string SQL_DELETE_TRANSACTION = "DELETE FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_TRANSACTION_BY_ID = "SELECT * FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `category_id` IS NULL";
@@ -68,7 +80,7 @@ namespace Envelope.DB {
         private static const string SQL_LOAD_ACCOUNT_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `account_id` = :account_id ORDER BY `date` DESC";
         private static const string SQL_DELETE_ACCOUNT_TRANSACTIONS = "DELETE FROM `transactions` WHERE `account_id` = :account_id";
         private static const string SQL_GET_UNIQUE_MERCHANTS = "SELECT `label`, COUNT(`label`) as `number` FROM `transactions` GROUP BY `label` ORDER BY `number` DESC, `label` ASC";
-        private static const string SQL_LOAD_CATEGORIES = "SELECT * FROM `categories` ORDER BY `name` ASC";
+        private static const string SQL_LOAD_CATEGORIES = "SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted` FROM `categories` `c` LEFT JOIN `categories_budgets` `cb` ON `cb`.`category_id` = `c`.`id` AND `cb`.`year` = strftime('%Y', 'now') AND `cb`.`month` = strftime('%m', 'now') ORDER BY `c`.`name` ASC";
         private static const string SQL_LOAD_CHILD_CATEGORIES = "SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC";
         private static const string SQL_DELETE_CATEOGRY = "DELETE FROM `categories` WHERE `id` = :category_id";
         private static const string SQL_UPDATE_CATEGORY = "UPDATE `categories` SET `name` = :name, `description` = :description, `amount_budgeted` = :amount_budgeted, `parent_category_id` = :parent_category_id WHERE `id` = :category_id";
@@ -230,7 +242,7 @@ namespace Envelope.DB {
             q_insert_category.clear ();
 
             q_insert_category.set_string ("name", category.name);
-            q_insert_category.set_double ("amount_budgeted", category.amount_budgeted);
+            //q_insert_category.set_double ("amount_budgeted", category.amount_budgeted);
 
             if (category.description != null) {
                 q_insert_category.set_string ("description", category.description);
@@ -261,7 +273,7 @@ namespace Envelope.DB {
             q_update_category.set_int ("category_id", category.@id);
             q_update_category.set_string ("name", category.name);
             q_update_category.set_string ("description", category.description);
-            q_update_category.set_double ("amount_budgeted", category.amount_budgeted);
+            //q_update_category.set_double ("amount_budgeted", category.amount_budgeted);
 
             if (category.parent != null) {
                 q_update_category.set_int ("parent_category_id", category.parent.@id);
@@ -460,16 +472,16 @@ namespace Envelope.DB {
             return null;
         }
 
-        public Gee.ArrayList<Category> load_categories () throws SQLHeavy.Error {
+        public Gee.ArrayList<MonthlyCategory> load_categories () throws SQLHeavy.Error {
 
             debug ("loading categories");
 
-            Gee.ArrayList<Category> list = new Gee.ArrayList<Category> ();
+            Gee.ArrayList<MonthlyCategory> list = new Gee.ArrayList<MonthlyCategory> ();
 
             SQLHeavy.QueryResult results = q_load_categories.execute ();
 
             while (!results.finished) {
-                Category category;
+                MonthlyCategory category;
                 int parent_id;
 
                 query_result_to_category (results, out category, out parent_id);
@@ -596,23 +608,27 @@ namespace Envelope.DB {
             merchant = new Merchant (label, count);
         }
 
-        private void query_result_to_category (SQLHeavy.QueryResult results, out Category category, out int parent_id) throws SQLHeavy.Error {
+        private void query_result_to_category (SQLHeavy.QueryResult results, out MonthlyCategory category, out int parent_id) throws SQLHeavy.Error {
             assert (!results.finished);
 
             var id = results.get_int ("id");
             var name = results.get_string ("name");
             var description = results.get_string ("description");
             var amount_budgeted = results.get_double ("amount_budgeted");
+            var year = results.get_int ("year");
+            var month = results.get_int ("month");
 
             // parent_id is sent to caller to select parent if needed
             parent_id = results.get_int ("parent_category_id");
 
-            category = new Category ();
+            category = new MonthlyCategory ();
 
             category.@id = id;
             category.name = name;
             category.description = description;
             category.amount_budgeted = amount_budgeted;
+            category.year = year;
+            category.month = month;
         }
 
         private void init_database () {
@@ -648,10 +664,12 @@ namespace Envelope.DB {
                 error ("Failure creating database instance (%s)", err.message);
             }
 
+            // create tables if needed
             try {
                 database.execute (TRANSACTIONS);
                 database.execute (ACCOUNTS);
                 database.execute (CATEGORIES);
+                database.execute (MONTHLY_CATEGORIES);
 
                 init_statements ();
             }
