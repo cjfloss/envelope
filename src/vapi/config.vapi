@@ -25,5 +25,8 @@ namespace Build {
   public const string RELEASE_NAME;
   public const string VERSION;
   public const string VERSION_INFO;
-  public const int     DEBUG;
+  public const string GIT_BRANCH;
+  public const string GIT_COMMIT_HASH;
+  public const string EXEC_NAME;
+  public const string USER_PROGRAM_NAME;
 }

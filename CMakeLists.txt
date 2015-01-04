@@ -23,6 +23,7 @@ execute_process(
 
 set (DATADIR "${CMAKE_INSTALL_PREFIX}/share")
 set (PROGRAM_NAME "envelope")
+set (USER_PROGRAM_NAME "Budget")
 set (CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/config.vala)
 set (PKGDATADIR "${DATADIR}/envelope")
 set (EXEC_NAME "envelope")
