@@ -22,9 +22,8 @@ namespace Envelope {
 
         public string name { get; set; }
         public string? description { get; set; }
-        public int @id { get; set; }
+        public int? @id { get; set; }
         public Category? parent { get; set; default = null; }
-        public double amount_budgeted { get; set; default = 0d; }
         public Gee.ArrayList<Transaction> transactions { get; set; }
 
         public Category () {
@@ -41,10 +40,6 @@ namespace Envelope {
             }
 
             return -1;
-        }
-
-        public double get_amount_spent (DateTime? from = null, DateTime? to = null) {
-            return 0d;
         }
     }
 }
