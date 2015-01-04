@@ -76,6 +76,7 @@ namespace Envelope.View {
 
         private static const string COLOR_SUBZERO = "#A62626";
         private static const string COLOR_ZERO = "#4e9a06";
+        private static const int CELL_FONT_WEIGHT_HEADER = 900;
 
         private Gtk.TreeView treeview;
         private Gtk.TreeStore store;
@@ -284,8 +285,6 @@ namespace Envelope.View {
             // Add categories
             update_categories_section ();
 
-
-
             treeview.get_selection ().unselect_all ();
 
             foreach (string path_str in new string[] {"0", "1", "2", "3", "4", "5"}) {
@@ -372,7 +371,7 @@ namespace Envelope.View {
                     }
                 }
 
-                foreach (Category category in budget_manager.get_categories ()) {
+                foreach (MonthlyCategory category in budget_manager.get_categories ()) {
 
                     double cat_inflow;
                     double cat_outflow;
@@ -381,33 +380,48 @@ namespace Envelope.View {
                     var current_category_iter = add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.SHOW_CATEGORY, cat_inflow - cat_outflow, ICON_CATEGORY);
 
                     // add subitems
-                    add_item (current_category_iter, _("Budgeted amount"),
-                        TreeCategory.CATEGORIES,
-                        null,
-                        category,
-                        Action.NONE,
-                        null, null);
+                    if (cat_outflow != 0) {
 
-                    add_item (current_category_iter, _("Spending"),
-                        TreeCategory.CATEGORIES,
-                        null,
-                        category,
-                        Action.NONE,
-                        cat_outflow, null);
+                        add_item (current_category_iter, _("Budgeted amount"),
+                            TreeCategory.CATEGORIES,
+                            null,
+                            category,
+                            Action.NONE,
+                            category.amount_budgeted, null);
 
-                    add_item (current_category_iter, _("Earnings"),
-                        TreeCategory.CATEGORIES,
-                        null,
-                        category,
-                        Action.NONE,
-                        cat_inflow, null);
+                        add_item (current_category_iter, _("Spending"),
+                            TreeCategory.CATEGORIES,
+                            null,
+                            category,
+                            Action.NONE,
+                            cat_outflow, null);
 
-                    add_item (current_category_iter, _("Total"),
-                        TreeCategory.CATEGORIES,
-                        null,
-                        category,
-                        Action.NONE,
-                        cat_inflow - cat_outflow, null);
+                        if (cat_outflow > category.amount_budgeted) {
+                            add_item (current_category_iter, _("Over"),
+                                TreeCategory.CATEGORIES,
+                                null,
+                                category,
+                                Action.NONE,
+                                cat_outflow - category.amount_budgeted, null);
+                        }
+                        else {
+                            add_item (current_category_iter, _("Remaining"),
+                                TreeCategory.CATEGORIES,
+                                null,
+                                category,
+                                Action.NONE,
+                                category.amount_budgeted - cat_outflow, null);
+                        }
+                    }
+
+                    if (cat_inflow != 0) {
+                        add_item (current_category_iter, _("Earnings"),
+                            TreeCategory.CATEGORIES,
+                            null,
+                            category,
+                            Action.NONE,
+                            cat_inflow, null);
+                    }
                 }
             }
             catch (ServiceError err) {
@@ -480,12 +494,17 @@ namespace Envelope.View {
             return iter;
         }
 
+        /**
+         * cell renderer function for the budget overview progress bar
+         */
         private void treeview_progress_renderer_function (  Gtk.CellLayout layout,
                                                             Gtk.CellRenderer renderer,
                                                             Gtk.TreeModel model,
                                                             Gtk.TreeIter iter) {
 
             Gtk.CellRendererProgress crp = renderer as Gtk.CellRendererProgress;
+
+            crp.visible = false; // hidden by default
 
             TreeCategory tree_category;
             BudgetState? budget_state = null;
@@ -495,92 +514,66 @@ namespace Envelope.View {
                 Column.BUDGET_STATE, out budget_state, -1);
 
             switch (tree_category) {
-                case TreeCategory.OVERVIEW:
-                    if (budget_state != null) {
-                        int percentage = 0;
 
-                        if (budget_state.inflow > 0d) {
-                            percentage = (int) (budget_state.outflow * 100 / budget_state.inflow);
-                        }
+                case TreeCategory.OVERVIEW:
+
+                    if (budget_state != null) {
+                        var percentage = percent ((int) budget_state.outflow, (int) budget_state.inflow);
 
                         crp.value = (int) Math.fmin (percentage, 100);
                         crp.visible = true;
                     }
-                    else {
-                        crp.visible = false;
-                    }
 
-                    break;
-
-                default:
-                    crp.visible = false;
                     break;
             }
         }
 
+        /**
+         * cell renderer function for item labels
+         */
         private void treeview_text_renderer_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
 
             Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
-            Account? account = null;
-            Category? category = null;
-            Action action;
-            double? state = null;
-            TreeCategory tree_category;
-            bool is_header;
 
-            model.@get (iter,
-                Column.ACCOUNT, out account,
-                Column.ACTION, out action,
-                Column.CATEGORY, out category,
-                Column.STATE, out state,
-                Column.TREE_CATEGORY, out tree_category,
-                Column.IS_HEADER, out is_header, -1);
+            TreeCategory tree_category;
+            model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
 
             switch (tree_category) {
                 case TreeCategory.OVERVIEW:
-
-                    crt.editable = false;
-                    crt.editable_set = true;
-
-                    if (is_header) {
-                        crt.weight = 900;
-                        crt.weight_set = true;
-                        crt.height = 20;
-                    }
-                    else {
-                        crt.weight_set = false;
-                    }
-
+                    treeview_text_renderer_function_overview (crt, iter, model);
                     break;
 
                 case TreeCategory.ACCOUNTS:
-                    if (account == null && action == Action.NONE) {
-                        crt.weight = 900;
-                        crt.weight_set = true;
-                        crt.height = 20;
-                        crt.editable = false;
-                        crt.editable_set = true;
-                    }
-                    else {
-                        crt.weight_set = false;
-                        crt.editable = true;
-                        crt.editable_set = true;
-                    }
+                    treeview_text_renderer_function_accounts (crt, iter, model);
                     break;
 
                 case TreeCategory.CATEGORIES:
-                    if (is_header) {
-                        crt.weight = 900;
-                        crt.weight_set = true;
-                        crt.height = 20;
-                        crt.editable = false;
-                        crt.editable_set = true;
-                    }
-                    else {
-                        crt.weight_set = false;
-                        crt.editable = true;
-                        crt.editable_set = true;
-                    }
+                    treeview_text_renderer_function_categories (crt, iter, model);
+                    break;
+
+                default:
+                    assert_not_reached ();
+            }
+        }
+
+        private void treeview_text_renderer_balance_total_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+
+            Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
+
+            TreeCategory tree_category;
+            model.@get (iter, Column.TREE_CATEGORY, out tree_category, -1);
+
+            switch (tree_category) {
+                case TreeCategory.OVERVIEW:
+                    treeview_text_renderer_amount_suffix_function_overview (crt, model, iter);
+                    break;
+
+                case TreeCategory.ACCOUNTS:
+                    treeview_text_renderer_amount_suffix_function_accounts (crt, model, iter);
+                    break;
+
+                case TreeCategory.CATEGORIES:
+                    treeview_text_renderer_amount_suffix_function_categories (crt, model, iter);
                     break;
 
                 default:
@@ -612,164 +605,211 @@ namespace Envelope.View {
             renderer.visible = (is_header && tree_category != TreeCategory.OVERVIEW) || (category != null && store.iter_has_child (iter));
         }
 
-        private void treeview_text_renderer_balance_total_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+        private void treeview_text_renderer_function_overview (Gtk.CellRendererText crt, Gtk.TreeIter iter, Gtk.TreeModel model) {
 
-            Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
+            bool is_header;
+            model.@get (iter, Column.IS_HEADER, out is_header, -1);
 
             crt.editable = false;
             crt.editable_set = true;
 
-            Account? account = null;
-            Category? category = null;
-            Action action;
-            string state;
-            TreeCategory tree_category;
+            if (is_header) {
+                crt.weight = CELL_FONT_WEIGHT_HEADER;
+                crt.weight_set = true;
+                crt.height = 20;
+            }
+            else {
+                crt.weight_set = false;
+            }
+        }
+
+        private void treeview_text_renderer_function_accounts (Gtk.CellRendererText crt, Gtk.TreeIter iter, Gtk.TreeModel model) {
+
+            bool is_header;
+            model.@get (iter, Column.IS_HEADER, out is_header, -1);
+
+            crt.editable = false;
+            crt.editable_set = true;
+
+            if (is_header) {
+                crt.weight = CELL_FONT_WEIGHT_HEADER;
+                crt.weight_set = true;
+            }
+            else {
+                crt.weight_set = false;
+                crt.editable = true;
+                crt.editable_set = true;
+            }
+        }
+
+        private void treeview_text_renderer_function_categories (Gtk.CellRendererText crt, Gtk.TreeIter iter, Gtk.TreeModel model) {
+
+            bool is_header;
+            model.@get (iter, Column.IS_HEADER, out is_header, -1);
+
+            crt.editable = false;
+            crt.editable_set = true;
+
+            if (is_header) {
+                crt.weight = CELL_FONT_WEIGHT_HEADER;
+                crt.weight_set = true;
+            }
+            else {
+                crt.weight_set = false;
+                crt.editable = true;
+                crt.editable_set = true;
+            }
+        }
+
+        private void treeview_text_renderer_amount_suffix_function_overview (Gtk.CellRendererText crt, Gtk.TreeModel model, Gtk.TreeIter iter) {
+
             bool is_header;
             bool colorize;
-            string label;
-
+            string state;
             model.@get (iter,
-                Column.LABEL, out label,
-                Column.ACCOUNT, out account,
-                Column.ACTION, out action,
-                Column.CATEGORY, out category,
-                Column.STATE, out state,
-                Column.TREE_CATEGORY, out tree_category,
                 Column.IS_HEADER, out is_header,
-                Column.COLORIZE, out colorize, -1);
+                Column.COLORIZE, out colorize,
+                Column.STATE, out state, -1);
 
-            switch (tree_category) {
-                case TreeCategory.OVERVIEW:
-                    crt.visible = true;
-                    crt.weight_set = false;
+            crt.visible = true;
+            crt.weight_set = false;
 
-                    if (is_header) {
-                        crt.visible = false;
+            if (is_header) {
+                crt.visible = false;
+            }
+            else {
+
+                crt.text = state;
+
+                try {
+
+                    double parsed_state = Envelope.Util.String.parse_currency (state);
+
+                    if (parsed_state == 0) {
+                        crt.text = _("None yet");
                     }
                     else {
-                        crt.text = state;
-
-                        try {
-
-                            double parsed_state = Envelope.Util.String.parse_currency (state);
-
-                            if (parsed_state == 0) {
-                                //crt.visible = false;
-                                crt.text = _("None yet");
-                            }
-                            else {
-                                if (colorize && parsed_state < 0) {
-                                    crt.foreground = COLOR_SUBZERO;
-                                    crt.foreground_set = true;
-                                }
-                                else {
-                                    crt.foreground_set = false;
-                                }
-                            }
-                        }
-                        catch (Envelope.Util.String.ParseError err) {
-                            assert_not_reached ();
-                        }
-                    }
-
-                    break;
-
-                case TreeCategory.ACCOUNTS:
-                    if (account == null && action == Action.NONE) {
-                        crt.visible = accounts == null || accounts.is_empty;
-
-                        if (crt.visible) {
-                            var balance = 0d;
-
-                            foreach (Account a in accounts) {
-                                balance += a.balance;
-                            }
-
-                            crt.weight_set = false;
-                            crt.text = Envelope.Util.String.format_currency (balance);
-                            crt.visible = true;
-
-                            if (balance < 0) {
-                                crt.foreground = COLOR_SUBZERO;
-                                crt.foreground_set = true;
-                            }
-                            else if (balance == 0) {
-                                crt.visible = false;
-                            }
-                            else {
-                                crt.foreground_set = false;
-                            }
-                        }
-                        else {
-                            crt.weight_set = false;
-                        }
-                    }
-                    else if (account != null) {
-                        crt.visible = true;
-                        crt.weight_set = false;
-                        crt.text = Envelope.Util.String.format_currency (account.balance);
-                        crt.editable = true;
-                        crt.editable_set = true;
-                        crt.visible = true;
-
-                        if (account.balance < 0) {
+                        if (colorize && parsed_state < 0) {
                             crt.foreground = COLOR_SUBZERO;
                             crt.foreground_set = true;
-                        }
-                        else if (account.balance == 0) {
-                            crt.visible = false;
                         }
                         else {
                             crt.foreground_set = false;
                         }
                     }
-                    else {
-                        crt.visible = false;
-                        crt.weight_set = false;
-                    }
-                    break;
-
-                case TreeCategory.CATEGORIES:
-
-                    if (state != "") {
-
-                        crt.visible = true;
-
-                        if (category == null) {
-                            crt.text = ((int) Envelope.Util.String.parse_currency (state)).to_string ();
-                        }
-                        else {
-
-                            double parsed_state = Envelope.Util.String.parse_currency (state);
-
-                            // check if we're a category name or a subitem
-                            if (store.iter_has_child (iter)) {
-                                // category name
-                                if (parsed_state == 0) {
-                                    crt.visible = false;
-                                    return;
-                                }
-
-                                crt.text = state;
-                            }
-                            else {
-                                // subitem
-                                if (parsed_state == 0) {
-                                    crt.visible = true;
-                                    crt.text = _("Not set");
-                                }
-                            }
-                        }
-                    }
-                    else {
-                        crt.visible = false;
-                    }
-                    break;
-
-                default:
+                }
+                catch (Envelope.Util.String.ParseError err) {
                     assert_not_reached ();
+                }
             }
         }
+
+
+
+        private void treeview_text_renderer_amount_suffix_function_accounts (Gtk.CellRendererText crt, Gtk.TreeModel model, Gtk.TreeIter iter) {
+
+            Account account;
+            Action action;
+            bool is_header;
+            model.@get (iter,
+                Column.ACCOUNT, out account,
+                Column.ACTION, out action,
+                Column.IS_HEADER, out is_header, -1);
+
+            crt.foreground_set = false;
+
+            if (is_header) {
+
+                crt.visible = accounts != null && !accounts.is_empty;
+
+                if (crt.visible) {
+
+                    var balance = 0d;
+
+                    foreach (Account a in accounts) {
+                        balance += a.balance;
+                    }
+
+                    crt.text = Envelope.Util.String.format_currency (balance);
+                    crt.foreground = color_for_amount (balance);
+                    crt.foreground_set = true;
+                }
+            }
+            else if (account != null && action == Action.NONE) {
+                crt.visible = true;
+                crt.text = Envelope.Util.String.format_currency (account.balance);
+                crt.editable = true;
+                crt.editable_set = true;
+                crt.foreground = color_for_amount (account.balance);
+                crt.foreground_set = true;
+            }
+            else {
+                crt.visible = false;
+                crt.foreground_set = false;
+            }
+        }
+
+        private void treeview_text_renderer_amount_suffix_function_categories (Gtk.CellRendererText crt, Gtk.TreeModel model, Gtk.TreeIter iter) {
+
+            Action action;
+            bool is_header;
+            string state;
+            Category category;
+            model.@get (iter,
+                Column.ACTION, out action,
+                Column.IS_HEADER, out is_header,
+                Column.STATE, out state,
+                Column.CATEGORY, out category, -1);
+
+            crt.foreground_set = false;
+            crt.editable = false;
+            crt.editable_set = true;
+
+            if (state != "") {
+
+                double parsed_state = Envelope.Util.String.parse_currency (state);
+
+                crt.visible = true;
+
+                if (category == null) { // "uncategorized"
+                    crt.visible = true;
+                    crt.text = ((int) parsed_state).to_string ();
+                }
+                else {
+
+                    // check if we're a category name or a subitem
+                    if (store.iter_has_child (iter)) {
+                        // category name
+                        if (parsed_state == 0) {
+                            crt.visible = false;
+                            return;
+                        }
+                        else {
+                            crt.visible = true;
+                            crt.text = state;
+                            crt.foreground = color_for_amount (parsed_state);
+                            crt.foreground_set = true;
+                        }
+                    }
+                    else {
+                        // subitem
+                        if (parsed_state == 0) {
+                            crt.visible = false;
+                        }
+                        else {
+                            crt.text = state;
+                            crt.foreground = color_for_amount (parsed_state);
+                            crt.foreground_set = true;
+                        }
+                    }
+                }
+            }
+            else {
+                crt.visible = false;
+            }
+        }
+
+
 
         private void balance_edited (string path, string new_text) {
 
@@ -1168,5 +1208,22 @@ namespace Envelope.View {
             return false;
         }
 
+        /**
+         * Determine foreground color for amount
+         */
+        private string color_for_amount (double amount) {            
+            return amount < 0 ? COLOR_SUBZERO : COLOR_ZERO;
+        }
+
+        /**
+         * Calculate the percentage of number from out_of
+         */
+        private int percent (int number, int out_of) {
+            if (out_of == 0) {
+                return 0;
+            }
+
+            return number * 100 / out_of;
+        }
     }
 }
