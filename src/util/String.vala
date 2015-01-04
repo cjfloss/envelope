@@ -50,7 +50,7 @@ namespace Envelope.Util.String {
         try {
             debug ("decimal point: %c", *(locale_info->decimal_point));
 
-            regex_parse_currency = new Regex ("[^0-9\\%c]*".printf (*(locale_info->decimal_point)));
+            regex_parse_currency = new Regex ("[^0-9\\%c\\-]*".printf (*(locale_info->decimal_point)));
         }
         catch (RegexError err) {
             error (err.message);
