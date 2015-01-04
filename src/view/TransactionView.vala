@@ -307,7 +307,12 @@ namespace Envelope.View {
 
             add (filter_box);
 
-            filter_box.pack_start (FilterView.get_default ());
+            var filter_view = FilterView.get_default ();
+            filter_view.filter_type = FilterView.FilterType.THIS_MONTH;
+            filter_from = filter_view.from;
+            filter_to = filter_view.to;
+            
+            filter_box.pack_start (filter_view);
             filter_box.show_all ();
 
             // infobar shown when filters do not return any transaction
@@ -810,6 +815,7 @@ namespace Envelope.View {
                 debug ("with_filter_view changed (%s)", with_filter_view ? "true" : "false");
 
                 if (!with_filter_view) {
+                    FilterView.get_default ().filter_type = FilterView.FilterType.THIS_MONTH;
                     filter_box.hide ();
                 }
                 else {
