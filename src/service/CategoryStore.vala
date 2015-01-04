@@ -25,8 +25,6 @@ namespace Envelope.Service {
 
     public class CategoryStore : Gtk.ListStore {
 
-
-
         public static new unowned CategoryStore get_default () {
             if (category_store_instance == null) {
                 category_store_instance = new CategoryStore ();
@@ -40,23 +38,34 @@ namespace Envelope.Service {
             CATEGORY
         }
 
+        /**
+         * Reload the store
+         */
         public void reload () {
             try {
                 ArrayList<Category> categories = BudgetManager.get_default ().get_categories ();
 
                 foreach (Category category in categories) {
-                    Gtk.TreeIter iter;
 
+                    Gtk.TreeIter iter;
                     append (out iter);
+
                     @set (iter, Column.LABEL, category.name, Column.CATEGORY, category, -1);
                 }
             }
             catch (ServiceError err) {
-                warning ("could not load categories; autocompletion won't work in the transaction view (%s)", err.message);
+                warning ("could not load categories; autocompletion won't work (%s)", err.message);
             }
         }
 
-        public Category get_category_by_name (string name) {
+        /**
+         * Get a category instance from its name
+         *
+         * @param name the name of the category to lookup
+         * @return the category instance, or null if not found
+         */
+        public Category? get_category_by_name (string name) {
+
             Category? category = null;
 
             @foreach ( (model, path, iter) => {
@@ -65,7 +74,6 @@ namespace Envelope.Service {
                 model.@get (iter, Column.CATEGORY, out fe_category, -1);
 
                 if (fe_category != null && fe_category.name.up () == name.strip ().up ()) {
-                    debug ("search (%s) --> %s", name, fe_category.name);
                     category = fe_category;
                 }
 
@@ -75,6 +83,12 @@ namespace Envelope.Service {
             return category;
         }
 
+        /**
+        * Get a category instance from its id
+        *
+        * @param id the id of the category to lookup
+        * @return the category instance, or null if not found
+        */
         public Category get_category_by_id (int id) {
             Category? category = null;
 
@@ -85,7 +99,6 @@ namespace Envelope.Service {
                 model.@get (iter, Column.CATEGORY, out fe_category, -1);
 
                 if (fe_category.@id == id) {
-                    debug ("search (%d) --> %s", id, fe_category.name);
                     category = fe_category;
                 }
 
@@ -97,13 +110,14 @@ namespace Envelope.Service {
 
         private CategoryStore () {
             Object ();
+
             build_store ();
             connect_signals ();
-            reload ();
         }
 
         private void build_store () {
             set_column_types ({typeof (string), typeof (Category)});
+            reload ();
         }
 
         private void connect_signals () {
@@ -111,12 +125,17 @@ namespace Envelope.Service {
             var budget_manager = BudgetManager.get_default ();
 
             budget_manager.category_added.connect ( (category) => {
-                debug ("category added; reloading store");
+                debug ("category added; reloading");
                 reload ();
             });
 
             budget_manager.category_deleted.connect ( (category) => {
-                debug ("category deleted; reloading store");
+                debug ("category deleted; reloading");
+                reload ();
+            });
+
+            budget_manager.category_renamed.connect ( (category) => {
+                debug ("category renamed; reloading");
                 reload ();
             });
         }
