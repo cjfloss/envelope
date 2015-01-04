@@ -374,8 +374,9 @@ namespace Envelope.Window {
             account_manager.account_created.connect ( () => {
                 if (paned.get_child1 () == null) {
                     paned.pack1 (sidebar, true, false);
-                    sidebar.show_all ();
                 }
+                
+                sidebar.show_all ();
             });
 
             account_manager.transactions_imported.connect ( (transactions, account) => {
