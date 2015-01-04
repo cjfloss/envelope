@@ -40,7 +40,7 @@ $ git clone https://github.com/nlaplante/envelope
 $ cd envelope
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_BUILD_TYPE=Debug ..
+$ cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug ..
 $ make
 ```
 From there you can either use the binary in `build/src/envelope` or install it:
@@ -49,7 +49,6 @@ $ sudo make install
 ```
 
 You can also run the unit tests:
-```
-$ cd tests
-$ ./envelope-tests
+```sh
+$ tests/envelope-tests
 ```
