@@ -83,15 +83,15 @@ namespace Envelope.DB {
         private static const string SQL_LOAD_CATEGORIES = "SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted` FROM `categories` `c` LEFT JOIN `categories_budgets` `cb` ON `cb`.`category_id` = `c`.`id` AND `cb`.`year` = strftime('%Y', 'now') AND `cb`.`month` = strftime('%m', 'now') ORDER BY `c`.`name` ASC";
         private static const string SQL_LOAD_CHILD_CATEGORIES = "SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC";
         private static const string SQL_DELETE_CATEOGRY = "DELETE FROM `categories` WHERE `id` = :category_id";
-        private static const string SQL_UPDATE_CATEGORY = "UPDATE `categories` SET `name` = :name, `description` = :description, `amount_budgeted` = :amount_budgeted, `parent_category_id` = :parent_category_id WHERE `id` = :category_id";
+        private static const string SQL_UPDATE_CATEGORY = "UPDATE `categories` SET `name` = :name, `description` = :description, `parent_category_id` = :parent_category_id WHERE `id` = :category_id";
         private static const string SQL_CATEGORIZE_ALL_FOR_MERCHANT = "UPDATE `transactions` SET `category_id` = :category_id WHERE `label` = :merchant";
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days')";
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id";
 
         private static const string SQL_INSERT_CATEGORY = """INSERT INTO `categories`
-            (`name`, `description`, `amount_budgeted`, `parent_category_id`)
+            (`name`, `description`, `parent_category_id`)
             VALUES
-            (:name, :description, :amount_budgeted, :parent_category_id)
+            (:name, :description, :parent_category_id)
         """;
 
         private static const string SQL_UPDATE_TRANSACTION = """UPDATE `transactions` SET
@@ -674,7 +674,7 @@ namespace Envelope.DB {
                 init_statements ();
             }
             catch (SQLHeavy.Error err) {
-                error ("error occured during database setup (%s)".printf (err.message));
+                error ("error occured during database setup (%s)", err.message);
             }
 
             // check if there are categories. If not, then create the default ones
