@@ -28,6 +28,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
   model/Budget.vala
   model/Transaction.vala
   model/Category.vala
+  model/MonthlyCategory.vala
   model/Merchant.vala
 
   database/Database.vala
