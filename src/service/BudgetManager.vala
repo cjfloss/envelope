@@ -21,6 +21,9 @@ using Envelope.DB;
 
 namespace Envelope.Service {
 
+    /**
+     * Data structure representing a budget state
+     */
     public struct BudgetState {
 
         DateTime from;
@@ -32,7 +35,18 @@ namespace Envelope.Service {
         public double remaining { get { return inflow - outflow; }}
 
         ArrayList<Transaction> transactions;
-        ArrayList<Category> categories;
+        ArrayList<MonthlyCategory> categories;
+
+        public double budgeted_outflow { get {
+
+            double amount = 0d;
+
+            foreach (MonthlyCategory category in categories) {
+                amount += category.amount_budgeted;
+            }
+
+            return amount;
+        }}
 
         ArrayList<Transaction> uncategorized;
 
@@ -72,14 +86,14 @@ namespace Envelope.Service {
         private DatabaseManager dbm = DatabaseManager.get_default ();
 
         // cached category list
-        private ArrayList<Category> categories;
+        private ArrayList<MonthlyCategory> categories;
 
         /**
          * Get all categories
          *
          * @return {Gee.ArrayList<Category>} list of categories
          */
-        public ArrayList<Category> get_categories () throws ServiceError {
+        public ArrayList<MonthlyCategory> get_categories () throws ServiceError {
 
             if (categories != null && !categories.is_empty) {
                 return categories;
@@ -112,7 +126,7 @@ namespace Envelope.Service {
             try {
                 Category category = new Category ();
                 category.name = name;
-                category.amount_budgeted = budgeted_amount;
+                //category.amount_budgeted = budgeted_amount;
 
                 dbm.create_category (category);
                 categories = null;
@@ -126,10 +140,13 @@ namespace Envelope.Service {
         }
 
         public void delete_category (Category category) throws ServiceError {
+
+            return_if_fail (category.@id != null);
+
             try {
-                dbm.delete_category (category);
-                categories = null;
-                category_deleted (category);
+                dbm.delete_category (category); // delete from database
+                categories = null;              // invalidate categories cache
+                category_deleted (category);    // fire the category_deleted signal
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -137,10 +154,13 @@ namespace Envelope.Service {
         }
 
         public void update_category (Category category) throws ServiceError {
+
+            return_if_fail (category.@id != null);
+
             try {
-                dbm.update_category (category);
-                categories = null;
-                compute_state_and_fire_changed_event ();
+                dbm.update_category (category);             // update in database
+                categories = null;                          // invalidate categories cache
+                compute_state_and_fire_changed_event ();    // re-compute budget state and fire state_changed
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -148,9 +168,12 @@ namespace Envelope.Service {
         }
 
         public void categorize_all_for_merchant (string merchant_name, Category category) throws ServiceError {
+
+            return_if_fail (category.@id != null);
+
             try {
-                dbm.categorize_for_merchant (merchant_name, category);
-                compute_state_and_fire_changed_event ();
+                dbm.categorize_for_merchant (merchant_name, category);  // set category for all transactions having the same merchant
+                compute_state_and_fire_changed_event ();                // re-compute budget state and fire state_changed
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -176,11 +199,7 @@ namespace Envelope.Service {
         public ArrayList<Transaction> get_uncategorized_transactions () throws ServiceError {
 
             try {
-                var transactions = dbm.load_uncategorized_transactions ();
-
-                debug ("there are %d uncategorized transactions", transactions.size);
-
-                return transactions;
+                return dbm.load_uncategorized_transactions ();
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -195,6 +214,9 @@ namespace Envelope.Service {
          * @param {double} outflow
          */
         public ArrayList<Transaction>  compute_current_category_operations (Category category, out double inflow, out double outflow) throws ServiceError {
+
+            return_val_if_fail (category.@id != null, null);
+
             try {
                 ArrayList<Transaction> transactions = dbm.get_current_transactions_for_category (category);
 
