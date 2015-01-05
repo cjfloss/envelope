@@ -23,9 +23,21 @@ In Elementary OS, Envelope is known as *Budget*.
 
 ## Installation
 
-There ain't no binary package distribution yet. To use Envelope now, you'll have to build it from sources.
+### Elementary OS
 
-### Dependencies
+Envelope is available as a daily build package in **ppa:nicolas-laplante/envelope-daily**. Just add the ppa and install envelope like this:
+
+```sh
+$ sudo add-apt-repository ppa:nicolas-laplante/envelope-daily
+$ sudo apt-get update
+$ sudo apt-get install envelope
+```
+
+### Other systems
+
+There ain't no binary package distribution except for Elementary OS yet. To use Envelope now, you'll have to build it from sources.
+
+#### Dependencies
 * Vala >=0.23.2
 * glib >=2.29.0
 * gio-2.0
@@ -34,7 +46,7 @@ There ain't no binary package distribution yet. To use Envelope now, you'll have
 * granite-0.3
 * sqlheavy-0.1
 
-### Building from sources
+#### Building from sources
 ```sh
 $ git clone https://github.com/nlaplante/envelope
 $ cd envelope
