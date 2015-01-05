@@ -38,7 +38,7 @@ namespace Envelope {
             exec_name = Build.EXEC_NAME;
 
             app_copyright = "2014-2015";
-            application_id = "org.envelope.envelope";
+            application_id = "org.envelope";
             app_icon = "accessories-calculator";
             app_launcher = "envelope.desktop";
             app_years = "2014-2015";
