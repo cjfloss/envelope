@@ -8,7 +8,7 @@
     <value value="3" nick="manual" />
   </enum>
 
-  <schema path="/org/envelope/envelope/settings/" id="org.envelope.envelope.settings" gettext-domain="envelope">
+  <schema path="/org/envelope/settings/" id="org.envelope.settings" gettext-domain="envelope">
 
     <key type="b" name="maximized">
       <default>false</default>
@@ -52,7 +52,7 @@
       <description>Default search term</description>
     </key>
 
-    <key name="date-filter-type" enum="datefilter">
+    <key name="filter-type" enum="datefilter">
         <default>'thismonth'</default>
         <summary>Selected date filter in transaction view</summary>
         <description>Default date filter in transaction view</description>

@@ -1,4 +1,4 @@
 include(GSettings)
-add_schema("org.envelope.envelope.gschema.xml")
+add_schema("org.envelope.settings.gschema.xml")
 
 install (FILES envelope.desktop DESTINATION ${DATADIR}/applications/)
