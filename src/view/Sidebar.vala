@@ -325,24 +325,6 @@ namespace Envelope.View {
             store.@set (overview_iter, Column.BUDGET_STATE, budget_state, -1);
         }
 
-        //
-        private void update_accounts_section () {
-
-            debug ("update accounts section");
-
-            try {
-                //Gee.ArrayList<Account> account_list = AccountManager.get_default ().get_accounts ();
-
-                foreach (Account account in accounts) {
-                    update_account_item (account);
-                }
-            }
-            catch (ServiceError err) {
-                error ("could not load accounts (%s)", err.message);
-            }
-
-        }
-
         // Find the item in the tree which corresponds to account and update the account instance in the store
         private void update_account_item (Account account) {
             Gtk.TreeIter iter;
@@ -767,49 +749,54 @@ namespace Envelope.View {
 
             if (state != "") {
 
-                double parsed_state = Envelope.Util.String.parse_currency (state);
+                try {
+                    double parsed_state = Envelope.Util.String.parse_currency (state);
 
-                crt.visible = true;
 
-                if (category == null) { // "uncategorized"
                     crt.visible = true;
-                    crt.text = ((int) parsed_state).to_string ();
-                }
-                else {
 
-                    // check if we're a category name or a subitem
-                    if (store.iter_has_child (iter)) {
-                        // category name
-                        if (parsed_state == 0) {
-                            crt.visible = false;
-                            return;
-                        }
-                        else {
-                            crt.visible = true;
-                            crt.text = state;
-                            crt.foreground = color_for_amount (parsed_state);
-                            crt.foreground_set = true;
-                        }
+                    if (category == null) { // "uncategorized"
+                        crt.visible = true;
+                        crt.text = ((int) parsed_state).to_string ();
                     }
                     else {
-                        // subitem
-                        if (parsed_state == 0) {
-                            crt.visible = false;
+
+                        // check if we're a category name or a subitem
+                        if (store.iter_has_child (iter)) {
+                            // category name
+                            if (parsed_state == 0) {
+                                crt.visible = false;
+                                return;
+                            }
+                            else {
+                                crt.visible = true;
+                                crt.text = state;
+                                crt.foreground = color_for_amount (parsed_state);
+                                crt.foreground_set = true;
+                            }
                         }
                         else {
-                            crt.text = state;
-                            crt.foreground = color_for_amount (parsed_state);
-                            crt.foreground_set = true;
+                            // subitem
+                            if (parsed_state == 0) {
+                                crt.visible = false;
+                            }
+                            else {
+                                crt.text = state;
+                                crt.foreground = color_for_amount (parsed_state);
+                                crt.foreground_set = true;
+                            }
                         }
                     }
+                }
+                catch (Envelope.Util.String.ParseError err) {
+                    error ("error occured while displaying amount in sidebar (%s)", err.message);
+
                 }
             }
             else {
                 crt.visible = false;
             }
         }
-
-
 
         private void balance_edited (string path, string new_text) {
 
@@ -928,29 +915,6 @@ namespace Envelope.View {
             return found_iter != null;
         }
 
-        private bool get_category_iter (Category category, out Gtk.TreeIter iter) {
-
-            Gtk.TreeIter? found_iter = null;
-            int id = category.@id;
-
-            store.@foreach ( (model, path, fe_iter) => {
-
-                Category val;
-                model.@get (fe_iter, Column.CATEGORY, out val, -1);
-
-                if (val != null && val.@id == id) {
-                    found_iter = fe_iter;
-                    return true;
-                }
-
-                return false;
-            });
-
-            iter = found_iter;
-
-            return found_iter != null;
-        }
-
         private void item_renamed (string path, string text) {
 
             Gtk.TreeIter iter;
@@ -988,19 +952,6 @@ namespace Envelope.View {
                         assert_not_reached ();
                 }
             }
-        }
-
-        // get the path to the currently selected row
-        private Gtk.TreePath? get_selected_path () {
-
-            Gtk.TreeModel model;
-            var paths = treeview.get_selection ().get_selected_rows (out model);
-
-            if (paths.length () == 1) {
-                return paths.nth_data (0);
-            }
-
-            return null;
         }
 
         private void popup_menu_remove_activated () {
