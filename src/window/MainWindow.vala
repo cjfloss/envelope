@@ -216,8 +216,6 @@ namespace Envelope.Window {
             // restore state
             var saved_state = SavedState.get_default ();
 
-            window_position = saved_state.window_position != null ? saved_state.window_position : Gtk.WindowPosition.CENTER;
-
             if (saved_state.maximized) {
                 maximize ();
             }
@@ -375,7 +373,7 @@ namespace Envelope.Window {
                 if (paned.get_child1 () == null) {
                     paned.pack1 (sidebar, true, false);
                 }
-                
+
                 sidebar.show_all ();
             });
 
