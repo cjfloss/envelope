@@ -20,10 +20,9 @@ namespace Envelope.Service.Settings {
 
     private static SavedState saved_state_instance = null;
 
-    public class SavedState : /*Granite.Services.Settings*/ Object {
+    public class SavedState : Granite.Services.Settings {
 
         public bool maximized { get; set; default = false; }
-        public Gtk.WindowPosition? window_position { get; set; }
 
         public int? window_width { get; set; }
         public int? window_height { get; set; }
@@ -35,10 +34,7 @@ namespace Envelope.Service.Settings {
         public int selected_account_id { get; set; }
         public int selected_category_id { get; set; }
 
-        public bool this_month_selected { get; set; }
-        public bool last_month_selected { get; set; }
-        public bool future_selected { get; set; }
-        public bool manual_date_selected { get; set; }
+        public Envelope.View.FilterView.FilterType filter_type { get; set; }        
 
         public DateTime from_date { get; set; }
         public DateTime to_date { get; set; }
@@ -52,8 +48,7 @@ namespace Envelope.Service.Settings {
         }
 
         private SavedState () {
-            Object ();
-            //base ("org.envelope.saved-state");
+            base ("org.envelope.settings");
         }
     }
 }
