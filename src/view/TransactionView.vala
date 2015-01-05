@@ -55,15 +55,13 @@ namespace Envelope.View {
         private static const int COLUMN_COUNT = 8;
         private static const string CELL_COLOR_INCOMING = "#4e9a06";
         private static const string CELL_COLOR_OUTGOING = "#A62626";
-        private static string CELL_DATE_FORMAT = Granite.DateTime.get_default_date_format (false, true, true);
+        private static string CELL_DATE_FORMAT = "%x"; // preferred format according to locale
 
         private Gtk.TreeView treeview;
         private Gtk.Box filter_box;
         private Gtk.ScrolledWindow grid_scroll;
-        private Gtk.Box scroll_box;
 
         private CellRendererDatePicker crdp;
-        private CellRendererCategoryPicker crcp;
         private Gtk.CellRendererText renderer_memo;
 
         private Gtk.Button btn_add_transaction;
@@ -247,7 +245,7 @@ namespace Envelope.View {
             }
 
             populating_from_list = false;
-            
+
             // check if we need to display the infobar
             Gtk.TreeIter iter_first;
             if (!view_store.get_iter_first (out iter_first)) {
@@ -321,7 +319,7 @@ namespace Envelope.View {
             filter_view.filter_type = FilterView.FilterType.THIS_MONTH;
             filter_from = filter_view.from;
             filter_to = filter_view.to;
-            
+
             filter_box.pack_start (filter_view);
             filter_box.show_all ();
 
@@ -338,7 +336,7 @@ namespace Envelope.View {
             infobar.hide ();
             add (infobar);
         }
-        
+
         private void build_transaction_grid_ui () {
 
             debug ("building transaction grid ui");
@@ -690,9 +688,9 @@ namespace Envelope.View {
         }
 
         private void connect_signals () {
-        
+
             btn_add_transaction_cancel.clicked.connect (btn_add_transactions_cancel_clicked);
-            btn_add_transaction.clicked.connect (btn_add_transactions_clicked);        
+            btn_add_transaction.clicked.connect (btn_add_transactions_clicked);
 
             // notify when a transaction changed
             transactions_store.row_changed.connect ((path, iter) => {
@@ -787,7 +785,7 @@ namespace Envelope.View {
                 }
             });
         }
-        
+
         private void btn_add_transactions_clicked () {
             switch (current_add_transaction_action) {
                 case AddTransactionAction.NONE:
@@ -828,7 +826,7 @@ namespace Envelope.View {
                     assert_not_reached ();
             }
         }
-        
+
         private void btn_add_transactions_cancel_clicked () {
             switch (current_add_transaction_action) {
                 case AddTransactionAction.EDITING:
@@ -846,7 +844,7 @@ namespace Envelope.View {
                 default:
                     assert_not_reached ();
             }
-        }        
+        }
 
         private void popup_menu_remove_activated () {
 
