@@ -78,6 +78,7 @@ namespace Envelope.Widget {
             });
 
             popover.show ();
+            category_entry.grab_focus ();
 
             return true;
         }
