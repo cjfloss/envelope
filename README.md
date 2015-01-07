@@ -38,6 +38,7 @@ $ sudo apt-get install envelope
 There ain't no binary package distribution except for Elementary OS yet. To use Envelope now, you'll have to build it from sources.
 
 #### Dependencies
+* cmake
 * Vala >=0.23.2
 * glib >=2.29.0
 * gio-2.0
