@@ -239,7 +239,7 @@ namespace Envelope.View {
 
             right_click_menu_item_remove.activate.connect (popup_menu_remove_activated);
 
-            destroy.connect (on_quit);
+            delete_event.connect (on_quit);
         }
 
         public void update_view () {
@@ -281,7 +281,7 @@ namespace Envelope.View {
             // Add categories
             update_categories_section ();
 
-            treeview.get_selection ().unselect_all ();
+            //treeview.get_selection ().unselect_all ();
 
             foreach (string path_str in new string[] {"0", "1", "2", "3", "4", "5"}) {
                 treeview.expand_row (new Gtk.TreePath.from_string (path_str), false);
@@ -310,6 +310,44 @@ namespace Envelope.View {
                 treeview.get_selection ().select_iter (iter);
                 account_selected (account);
             }
+        }
+
+        public bool select_account_by_id (int account_id) {
+            Gtk.TreeIter? iter;
+            var account = get_account_iter_by_id (account_id, out iter);
+
+            debug ("account by id %d: %s", account_id, account != null ? account.number : "null");
+
+            if (account != null) {
+
+                debug ("selecting account %d", account.@id);
+
+                treeview.get_selection ().select_iter (iter);
+                account_selected (account);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool select_category_by_id (int category_id) {
+            Gtk.TreeIter? iter;
+            var category = get_category_iter_by_id (category_id, out iter);
+
+            debug ("category by id %d: %s", category_id, category != null ? category.name : "null");
+
+            if (category != null) {
+
+                debug ("selecting category %d", category.@id);
+
+                treeview.get_selection ().select_iter (iter);
+                category_selected (category);
+
+                return true;
+            }
+
+            return false;
         }
 
         // update budget balances
@@ -915,6 +953,52 @@ namespace Envelope.View {
             return found_iter != null;
         }
 
+        private Account? get_account_iter_by_id (int account_id, out Gtk.TreeIter iter) {
+            Gtk.TreeIter? found_iter = null;
+            Account? account = null;
+
+            store.@foreach ((model, path, fe_iter) => {
+
+                Account val;
+                model.@get (fe_iter, Column.ACCOUNT, out val, -1);
+
+                if (val != null && val.@id == account_id) {
+                    found_iter = fe_iter;
+                    account = val;
+                    return true;
+                }
+
+                return false;
+            });
+
+            iter = found_iter;
+
+            return account;
+        }
+
+        private Category? get_category_iter_by_id (int category_id, out Gtk.TreeIter iter) {
+            Gtk.TreeIter? found_iter = null;
+            Category? category = null;
+
+            store.@foreach ((model, path, fe_iter) => {
+
+                Category val;
+                model.@get (fe_iter, Column.CATEGORY, out val, -1);
+
+                if (val != null && val.@id == category_id) {
+                    found_iter = fe_iter;
+                    category = val;
+                    return true;
+                }
+
+                return false;
+            });
+
+            iter = found_iter;
+
+            return category;
+        }
+
         private void item_renamed (string path, string text) {
 
             Gtk.TreeIter iter;
@@ -1020,9 +1104,10 @@ namespace Envelope.View {
             }
         }
 
-        private void on_quit () {
-            var saved_state = SavedState.get_default ();
-            saved_state.selected_account_id = current_account_id;
+        private bool on_quit (Gdk.EventAny event) {
+            //var saved_state = SavedState.get_default ();
+            //saved_state.selected_account_id = current_account_id;
+            return false;
         }
 
         private bool tree_button_press_event_func (Gtk.Widget widget, Gdk.EventButton event) {

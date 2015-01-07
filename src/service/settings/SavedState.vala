@@ -24,8 +24,8 @@ namespace Envelope.Service.Settings {
 
         public bool maximized { get; set; default = false; }
 
-        public int? window_width { get; set; }
-        public int? window_height { get; set; }
+        public int window_width { get; set; }
+        public int window_height { get; set; }
 
         public int sidebar_width { get; set; }
 
@@ -34,7 +34,7 @@ namespace Envelope.Service.Settings {
         public int selected_account_id { get; set; }
         public int selected_category_id { get; set; }
 
-        public Envelope.View.FilterView.FilterType filter_type { get; set; }        
+        public Envelope.View.FilterView.FilterType filter_type { get; set; }
 
         public DateTime from_date { get; set; }
         public DateTime to_date { get; set; }

@@ -56,6 +56,7 @@ namespace Envelope.Window {
 
             build_ui ();
             connect_signals ();
+            configure_window ();
         }
 
         /**
@@ -192,6 +193,11 @@ namespace Envelope.Window {
                 search_entry.placeholder_text = "Search in %s%s".printf (account.number, Envelope.Util.String.ELLIPSIS);
 
                 header_bar.title = window_title;
+
+                debug ("saving account in state");
+                var saved_state = SavedState.get_default ();
+                saved_state.selected_category_id = -1;
+                saved_state.selected_account_id = account.@id;
             });
 
             // If we have accounts, show the transaction view
@@ -201,7 +207,7 @@ namespace Envelope.Window {
 
             set_content_view (content_view);
 
-            configure_window ();
+
 
             // done! show all
             overlay.show_all ();
@@ -209,27 +215,38 @@ namespace Envelope.Window {
         }
 
         private void configure_window () {
+
             // configure window
             width_request = 1200;
             height_request = 800;
+
+            debug ("restoring saved application state");
 
             // restore state
             var saved_state = SavedState.get_default ();
 
             if (saved_state.maximized) {
-                maximize ();
+                get_window ().maximize ();
             }
-            else if (saved_state.window_width != null && saved_state.window_height != null) {
-                width_request = saved_state.window_width;
-                height_request = saved_state.window_height;
+            else if (saved_state.window_width != -1 && saved_state.window_height != -1) {
+                set_default_size (saved_state.window_width, saved_state.window_height);
             }
 
             search_entry.text = saved_state.search_term;
+
+            if (saved_state.selected_account_id != -1) {
+                sidebar.select_account_by_id (saved_state.selected_account_id);
+            }
+            else if (saved_state.selected_category_id != -1) {
+                sidebar.select_category_by_id (saved_state.selected_category_id);
+            }
+
+            paned.set_position (saved_state.sidebar_width);
         }
 
         private void connect_signals () {
 
-            destroy.connect (on_quit);
+            delete_event.connect (on_quit);
 
             // connect signals
             AccountWelcomeScreen.get_default ().add_transaction_selected.connect ( (account) => {
@@ -308,6 +325,13 @@ namespace Envelope.Window {
                     }
 
                     header_bar.title = _("%s - %s").printf (new DateTime.now_local ().format ("%B %Y"), category.name);
+
+                    var saved_state = SavedState.get_default ();
+                    saved_state.selected_category_id = category.@id;
+                    saved_state.selected_account_id = -1;
+
+                    debug ("setting account to -1");
+                    assert (saved_state.selected_account_id == -1);
                 }
                 catch (ServiceError err) {
                     error ("could not load transactions for category %s (%s)", category.name, err.message);
@@ -424,8 +448,9 @@ namespace Envelope.Window {
             }
         }
 
-        private void on_quit () {
+        private bool on_quit (Gdk.EventAny event) {
             save_settings ();
+            return false;
         }
 
         private void save_settings () {
@@ -434,7 +459,6 @@ namespace Envelope.Window {
             // get window dimensions
             int height;
             int width;
-
             get_size (out width, out height);
 
             saved_state.window_height = height;
