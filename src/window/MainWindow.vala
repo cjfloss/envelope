@@ -223,6 +223,8 @@ namespace Envelope.Window {
                 width_request = saved_state.window_width;
                 height_request = saved_state.window_height;
             }
+
+            search_entry.text = saved_state.search_term;
         }
 
         private void connect_signals () {
@@ -319,7 +321,6 @@ namespace Envelope.Window {
                     import_button.show ();
                     add_transaction_button.show ();
                     search_entry.show ();
-                    search_entry.text = ""; // TODO don't overwrite search entry from saved state!
 
                     // show sidebar if it was not there yet
                     if (paned.get_child1 () == null) {
@@ -342,7 +343,6 @@ namespace Envelope.Window {
                     import_button.hide();
                     add_transaction_button.hide ();
                     search_entry.hide ();
-                    search_entry.text = "";
                 }
             });
 
@@ -426,11 +426,6 @@ namespace Envelope.Window {
 
         private void on_quit () {
             save_settings ();
-        }
-
-        private void restore_settings () {
-            var saved_state = SavedState.get_default ();
-
         }
 
         private void save_settings () {
