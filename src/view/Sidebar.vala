@@ -251,37 +251,106 @@ namespace Envelope.View {
             var remaining = Math.fabs (budget_state.inflow) - Math.fabs (budget_state.outflow);
             var month_label = new DateTime.now_local ().format ("%B %Y");
 
-            overview_iter = add_item (null, month_label, TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, null, null, true,
-                false, "Budget overview for %s".printf (month_label), budget_state);
+            overview_iter = add_item (null,
+                month_label,
+                TreeCategory.OVERVIEW,
+                null,
+                null,
+                Action.SHOW_OVERVIEW,
+                null,
+                null,
+                true,
+                false,
+                "Budget overview for %s".printf (month_label),
+                budget_state);
 
-            overview_outflow_iter = add_item (null, _("Spending this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.outflow, ICON_OUTFLOW, false, false,
+            overview_outflow_iter = add_item (null,
+                _("Spending this month"),
+                TreeCategory.OVERVIEW,
+                null,
+                null,
+                Action.SHOW_OVERVIEW,
+                budget_state.outflow,
+                ICON_OUTFLOW,
+                false,
+                false,
                 "Money spent in %s".printf (month_label));
 
-            overview_inflow_iter = add_item (null, _("Income this month"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, budget_state.inflow, ICON_INFLOW, false, false,
+            overview_inflow_iter = add_item (null,
+                _("Income this month"),
+                TreeCategory.OVERVIEW,
+                null,
+                null,
+                Action.SHOW_OVERVIEW,
+                budget_state.inflow,
+                ICON_INFLOW,
+                false,
+                false,
                 "Money earned in %s".printf (month_label));
 
-            overview_remaining_iter = add_item (null, _("Remaining"), TreeCategory.OVERVIEW, null, null, Action.SHOW_OVERVIEW, remaining, ICON_REMAINING, false, true,
+            overview_remaining_iter = add_item (null,
+                _("Remaining"),
+                TreeCategory.OVERVIEW,
+                null,
+                null,
+                Action.SHOW_OVERVIEW,
+                remaining,
+                ICON_REMAINING,
+                false,
+                true,
                 "Remaining balance for %s".printf (month_label));
 
             // Add "Accounts" category header
-            account_iter = add_item (null, _("Accounts"), TreeCategory.ACCOUNTS, null, null, Action.NONE, null, null, true);
+            account_iter = add_item (null,
+                _("Accounts"),
+                TreeCategory.ACCOUNTS,
+                null,
+                null,
+                Action.NONE,
+                null,
+                null,
+                true);
 
             foreach (Account account in accounts) {
-                add_item (account_iter, account.number, TreeCategory.ACCOUNTS, account, null, Action.NONE, null, ICON_ACCOUNT, false, true,
+                add_item (account_iter,
+                    account.number,
+                    TreeCategory.ACCOUNTS,
+                    account,
+                    null,
+                    Action.NONE,
+                    null,
+                    ICON_ACCOUNT,
+                    false,
+                    true,
                     account.description != null ? "%s - %s".printf (account.number, account.description) : account.number);
             }
 
             // Add "Add account..."
-            add_item (account_iter, _("Add account\u2026"), TreeCategory.ACCOUNTS, null, null, Action.ADD_ACCOUNT, null, ICON_ACTION_ADD, false, false,
+            add_item (account_iter,
+                _("Add account\u2026"),
+                TreeCategory.ACCOUNTS,
+                null,
+                null,
+                Action.ADD_ACCOUNT,
+                null,
+                ICON_ACTION_ADD,
+                false,
+                false,
                 _("Add a new account"));
 
             // Add "Categories" category header
-            category_iter = add_item (null, _("Spending categories"), TreeCategory.CATEGORIES, null, null, Action.NONE, null, null, true);
+            category_iter = add_item (null,
+                _("Spending categories"),
+                TreeCategory.CATEGORIES,
+                null,
+                null,
+                Action.NONE,
+                null,
+                null,
+                true);
 
             // Add categories
             update_categories_section ();
-
-            //treeview.get_selection ().unselect_all ();
 
             foreach (string path_str in new string[] {"0", "1", "2", "3", "4", "5"}) {
                 treeview.expand_row (new Gtk.TreePath.from_string (path_str), false);
