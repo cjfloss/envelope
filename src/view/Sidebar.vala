@@ -541,6 +541,7 @@ namespace Envelope.View {
          * @param is_header true if this is a category header, false otherwise
          * @param colorize true to colorize the amount shown at the right, false otherwise
          * @param tooltip the tooltip for the item
+         * @param budget_state the budget state to use, or null
          * @return the Gtk.TreeIter for the new item
          */
         private Gtk.TreeIter add_item (Gtk.TreeIter? parent,
