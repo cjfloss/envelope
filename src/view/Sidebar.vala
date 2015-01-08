@@ -971,7 +971,9 @@ namespace Envelope.View {
                 return false;
             });
 
-            iter = found_iter;
+            if (found_iter != null) {
+                iter = found_iter;
+            }
 
             return account;
         }
@@ -994,7 +996,9 @@ namespace Envelope.View {
                 return false;
             });
 
-            iter = found_iter;
+            if (found_iter != null) {
+                iter = found_iter;
+            }
 
             return category;
         }
