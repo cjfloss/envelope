@@ -261,7 +261,7 @@ namespace Envelope.View {
                 null,
                 true,
                 false,
-                "Budget overview for %s".printf (month_label),
+                _("Budget overview for %s").printf (month_label),
                 budget_state);
 
             overview_outflow_iter = add_item (null,
@@ -274,7 +274,7 @@ namespace Envelope.View {
                 ICON_OUTFLOW,
                 false,
                 false,
-                "Money spent in %s".printf (month_label));
+                _("Money spent in %s").printf (month_label));
 
             overview_inflow_iter = add_item (null,
                 _("Income this month"),
@@ -286,7 +286,7 @@ namespace Envelope.View {
                 ICON_INFLOW,
                 false,
                 false,
-                "Money earned in %s".printf (month_label));
+                _("Money earned in %s").printf (month_label));
 
             overview_remaining_iter = add_item (null,
                 _("Remaining"),
@@ -298,7 +298,7 @@ namespace Envelope.View {
                 ICON_REMAINING,
                 false,
                 true,
-                "Remaining balance for %s".printf (month_label));
+                _("Remaining balance for %s").printf (month_label));
 
             // Add "Accounts" category header
             account_iter = add_item (null,
