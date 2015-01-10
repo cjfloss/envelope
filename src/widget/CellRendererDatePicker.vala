@@ -18,24 +18,15 @@
 
 namespace Envelope.Widget {
 
-    public class CellRendererDatePicker : Gtk.CellRendererText {
+    public class CellRendererDatePicker : AbstractPopoverCellRenderer {
 
-        private static string date_format = Granite.DateTime.get_default_date_format (false, true, true);
+        private static string date_format = "%x";
 
         public Gtk.Calendar calendar { get; private set; }
-        public Gtk.Popover popover { get; private set; }
         public bool date_selected { get; private set; }
 
-        private Gtk.Widget relative_to { get; set; }
-        private string? current_path;
-
         public CellRendererDatePicker (Gtk.Widget relative_to) {
-            Object ();
-
-            this.relative_to = relative_to;
-
-            build_ui ();
-            connect_signals ();
+            base (relative_to);
         }
 
         public override unowned bool activate (Gdk.Event event,
@@ -45,54 +36,23 @@ namespace Envelope.Widget {
                                             Gdk.Rectangle cell_area,
                                             Gtk.CellRendererState flags) {
 
-            current_path = path;
-
-            Cairo.RectangleInt pos;
-            bool set_top = determine_position (cell_area, out pos);
-
-            popover.pointing_to = pos;
-            popover.relative_to = widget;
-            popover.set_position (set_top ? Gtk.PositionType.TOP : Gtk.PositionType.BOTTOM);
+            base.activate (event, widget, path, background_area, cell_area, flags);
 
             popover.show ();
 
             return true;
         }
 
-        private bool determine_position (Gdk.Rectangle area, out Cairo.RectangleInt position) {
-            position = Cairo.RectangleInt ();
-
-            position.width = area.width;
-            position.height = area.height;
-            position.y = area.y + area.height + 2;
-            position.x = area.x;
-
-            return false;
-        }
-
-        private void build_ui () {
-
-            mode = Gtk.CellRendererMode.ACTIVATABLE;
-            editable = false;
-            editable_set = true;
+        protected override void build_ui () {
 
             calendar = new Gtk.Calendar ();
-
-            popover = new Gtk.Popover (relative_to);
-            popover.modal = false; // modal = true causes conflict with treeview
-            popover.border_width = 12;
-            popover.set_position (Gtk.PositionType.BOTTOM);
             popover.add (calendar);
 
             calendar.show_all ();
         }
 
-        private void connect_signals () {
+        protected override void connect_signals () {
             calendar.day_selected.connect (select_date);
-
-            popover.closed.connect ( () =>  {
-                debug ("calendar popover closed");
-            });
         }
 
         private void select_date () {
