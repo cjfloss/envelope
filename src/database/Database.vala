@@ -731,7 +731,7 @@ namespace Envelope.DB {
                     _("Entertainment"),
                     _("Savings"),
                     _("Personal care"),
-                    _("Alcohol &amp; Bars"),
+                    _("Alcohol & Bars"),
                     _("Emergency fund")};
 
                 foreach (string name in default_categories) {
