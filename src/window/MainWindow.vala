@@ -193,6 +193,8 @@ namespace Envelope.Window {
                 search_entry.placeholder_text = "Search in %s%s".printf (account.number, Envelope.Util.String.ELLIPSIS);
 
                 header_bar.title = window_title;
+                header_bar.has_subtitle = false;
+                header_bar.subtitle = "";
 
                 debug ("saving account in state");
                 var saved_state = SavedState.get_default ();
@@ -206,8 +208,6 @@ namespace Envelope.Window {
             determine_initial_content_view (accounts, out content_view);
 
             set_content_view (content_view);
-
-
 
             // done! show all
             overlay.show_all ();
@@ -235,9 +235,11 @@ namespace Envelope.Window {
             search_entry.text = saved_state.search_term;
 
             if (saved_state.selected_account_id != -1) {
+                // TODO check if account still exists
                 sidebar.select_account_by_id (saved_state.selected_account_id);
             }
             else if (saved_state.selected_category_id != -1) {
+                // TODO check if category still exists
                 sidebar.select_category_by_id (saved_state.selected_category_id);
             }
 
@@ -324,14 +326,13 @@ namespace Envelope.Window {
                         set_content_view (transaction_view);
                     }
 
-                    header_bar.title = _("%s - %s").printf (new DateTime.now_local ().format ("%B %Y"), category.name);
+                    header_bar.title = category.name;
+                    header_bar.subtitle = new DateTime.now_local ().format ("%B %Y");
+                    header_bar.has_subtitle = true;
 
                     var saved_state = SavedState.get_default ();
                     saved_state.selected_category_id = category.@id;
                     saved_state.selected_account_id = -1;
-
-                    debug ("setting account to -1");
-                    assert (saved_state.selected_account_id == -1);
                 }
                 catch (ServiceError err) {
                     error ("could not load transactions for category %s (%s)", category.name, err.message);
