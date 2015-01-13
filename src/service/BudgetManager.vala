@@ -194,6 +194,20 @@ namespace Envelope.Service {
         }
 
         /**
+         * Get transactions recorded between the specified interval
+         *
+         * @return ArrayList<Transaction> list of transactions in the requested period
+         */
+        public ArrayList<Transaction> get_transactions_for_month (int year, int month) throws ServiceError {
+            try {
+                return dbm.get_transactions_for_month_and_year (month, year);
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
+        /**
          * Get all transactions not associated with any category
          */
         public ArrayList<Transaction> get_uncategorized_transactions () throws ServiceError {
@@ -279,14 +293,36 @@ namespace Envelope.Service {
          */
         private void compute_current_state () throws ServiceError {
 
+            // get current month and year
+            int month, year;
+            Envelope.Util.Date.get_year_month (out month, out year);
+
+            // compute budget state for month and year
+            BudgetState budget_state;
+            compute_state_for_month (month, year, out budget_state);
+
+            // set as global current budget state
+            state = budget_state;
+        }
+
+        /**
+         * Compute the budget state for the specified year and month
+         */
+        private void compute_state_for_month (int month, int year, out BudgetState budget_state) throws ServiceError {
+
             DateTime from;
             DateTime to;
+            Envelope.Util.Date.get_month_boundaries (month, year, out from, out to);
+
             double inflow = 0d;
             double outflow = 0d;
 
-            compute_dates (out from, out to);
+            ArrayList<Transaction> transactions = get_transactions_for_month (year, month);
+            ArrayList<Transaction> uncategorized = new ArrayList<Transaction> ();
 
-            foreach (Transaction t in get_current_transactions ()) {
+            foreach (Transaction t in transactions) {
+
+                debug ("analysizing transaciton");
 
                 switch (t.direction) {
                     case Transaction.Direction.INCOMING:
@@ -300,27 +336,19 @@ namespace Envelope.Service {
                     default:
                         assert_not_reached ();
                 }
+
+                if (t.category == null) {
+                    uncategorized.add (t);
+                }
             }
 
-            var budget_state = state == null ? BudgetState () : state;
-
+            budget_state = BudgetState ();
             budget_state.from = from;
             budget_state.to = to;
             budget_state.inflow = inflow;
             budget_state.outflow = outflow;
-
-            budget_state.uncategorized = get_uncategorized_transactions ();
-
-            state = budget_state;
-        }
-
-        /**
-         * Determine start and end dates for current month
-         */
-        private void compute_dates (out DateTime from, out DateTime to) {
-            int month, year;
-            Envelope.Util.Date.get_year_month (out year, out month);
-            Envelope.Util.Date.get_month_boundaries (year, month, out from, out to);
+            budget_state.uncategorized = uncategorized;
+            budget_state.transactions = transactions;
         }
 
         /**
@@ -337,6 +365,41 @@ namespace Envelope.Service {
             catch (ServiceError err) {
                 error ("could not compute budget state (%s)", err.message);
             }
+        }
+
+        /**
+         * Check if a month transition is needed
+         */
+        private bool should_handle_month_transition () throws ServiceError {
+
+            // get the max() value of month, year from the monthly_budgets table
+
+            // if the max month, year == this month - 1, then we need to do a month transition
+
+            return false;
+        }
+
+        /**
+         * Persist budget state at the end of the month, and
+         * take remaining budget for each caegory, add it to the
+         * budgeted amount for that category and set the new amount
+         * as next month's budgeted amount for that category
+         */
+        private void manage_month_transition () throws ServiceError {
+
+            // first, get transactions from the previous month
+
+            // for each of them, compute in/out flow for its category (if present)
+
+            // persist monthly category's in/out flow for previous month
+
+            // persist overall budget state for previous month
+
+            // compute remaining amounts for each category
+
+            // persist monthly categories for current month with budgeted amount from last month's + remaining
+
+            // compute current budget state
         }
     }
 }

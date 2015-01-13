@@ -20,6 +20,9 @@ namespace Envelope.DB {
 
     class DatabaseManager : Object {
 
+        // get_int for null fields returns 0
+        private static const int NULL = 0;
+
         private static const string DATABASE_FILENAME = "database.db";
 
         private static const string ACCOUNTS = """
@@ -67,9 +70,19 @@ namespace Envelope.DB {
             ) WITHOUT ROWID
         """;
 
+        private static const string MONTHLY_BUDGET = """
+            CREATE TABLE IF NOT EXISTS monthly_budgets (
+                `month` INTEGER NOT NULL,
+                `year` INTEGER NOT NULL,
+                `outflow` DOUBLE,
+                `inflow` DOUBLE,
+            PRIMARY KEY (`month`, `year`)
+            ) WITHOUT ROWID
+        """;
+
         private static const string SQL_CATEGORY_COUNT = "SELECT COUNT(*) AS category_count from categories";
         private static const string SQL_INSERT_CATEGORY_FOR_NAME = "INSERT INTO `categories` (`name`) VALUES (:name);";
-        private static const string SQL_SET_CATEGORY_BUDGET = "INSERT INTO `categories_budgets` (`category_id`, `year`, `month`, `amount_budgeted`) VALUES (:category_id, :year, :month, :amount_budgeted)";
+        private static const string SQL_SET_CATEGORY_BUDGET = "INSERT INTO `categories_budgets` (`category_id`, `year`, `month`, `amount_budgeted`) VALUES (:category_id, :year, :month, :amount_budgeted)";        
         private static const string SQL_UPDATE_CATEGORY_BUDGET = "UPDATE `categories_budgets` SET `amount_budgeted` = :amount_budgeted WHERE `category_id` = :category_id AND `year` = :year AND `month` = :month";
         private static const string SQL_DELETE_TRANSACTION = "DELETE FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_TRANSACTION_BY_ID = "SELECT * FROM `transactions` WHERE `id` = :id";
@@ -86,6 +99,15 @@ namespace Envelope.DB {
         private static const string SQL_UPDATE_CATEGORY = "UPDATE `categories` SET `name` = :name, `description` = :description, `parent_category_id` = :parent_category_id WHERE `id` = :category_id";
         private static const string SQL_CATEGORIZE_ALL_FOR_MERCHANT = "UPDATE `transactions` SET `category_id` = :category_id WHERE `label` = :merchant";
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days')";
+
+        private static const string SQL_LOAD_TRANSACTIONS_FOR_MONTH = """SELECT t.*, c.*, cb.* FROM transactions t
+            LEFT JOIN categories c
+            ON c.id = t.category_id
+            LEFT JOIN categories_budgets cb
+            ON cb.category_id = t.category_id AND cb.year = :year and cb.month = :month
+            WHERE date(t.date, 'unixepoch') BETWEEN date(:date, 'start of month') AND date(:date, 'start of month', '+1 month', '-1 days')
+            ORDER BY t.date DESC""";
+
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id";
 
         private static const string SQL_INSERT_CATEGORY = """INSERT INTO `categories`
@@ -148,6 +170,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_update_transaction;
         private SQLHeavy.Query q_load_uncategorized_transactions;
         private SQLHeavy.Query q_categorize_for_merchant;
+        private SQLHeavy.Query q_load_transactions_for_month_and_year;
 
         private SQLHeavy.Query q_load_current_transactions;
         private SQLHeavy.Query q_load_current_transactions_for_category;
@@ -186,7 +209,7 @@ namespace Envelope.DB {
                 results.next ();
             }
 
-            info ("%d unique merchants", merchants.size);
+            debug ("%d unique merchants", merchants.size);
 
             return merchants;
         }
@@ -498,13 +521,38 @@ namespace Envelope.DB {
 
         public Gee.ArrayList<Transaction> get_current_transactions () throws SQLHeavy.Error {
 
+            int month, year;
+            Envelope.Util.Date.get_year_month (out month, out year);
+
+            return get_transactions_for_month_and_year (month, year);
+        }
+
+        public Gee.ArrayList<Transaction> get_transactions_for_month_and_year (int month, int year) throws SQLHeavy.Error {
+
+            debug ("loading transactions for %d-%02d".printf (year, month));
+
             Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
 
-            SQLHeavy.QueryResult results = q_load_current_transactions.execute ();
+            q_load_transactions_for_month_and_year.clear ();
+            q_load_transactions_for_month_and_year.set_int ("month", month);
+            q_load_transactions_for_month_and_year.set_int ("year", year);
+            q_load_transactions_for_month_and_year.set_string ("date", "%4d-%02d-01".printf (year, month));
+
+            SQLHeavy.QueryResult results = q_load_transactions_for_month_and_year.execute ();
 
             while (!results.finished) {
                 Transaction transaction;
                 query_result_to_transaction (results, out transaction);
+
+                MonthlyCategory category;
+                int parent_category_id;
+                query_result_to_category (results, out category, out parent_category_id);
+
+                transaction.category = category.@id != NULL ? category : null;
+
+                //if (category.@id != NULL) {
+                //    transaction.category = category;
+                //}
 
                 list.add (transaction);
 
@@ -590,7 +638,7 @@ namespace Envelope.DB {
             if (category != null) {
                 transaction.category = category;
             }
-            else if (category_id != null) {
+            else if (category_id != NULL) {
                 var cat = Envelope.Service.CategoryStore.get_default ().get_category_by_id (category_id);
 
                 if (cat != null) {
@@ -670,6 +718,7 @@ namespace Envelope.DB {
                 database.execute (ACCOUNTS);
                 database.execute (CATEGORIES);
                 database.execute (MONTHLY_CATEGORIES);
+                database.execute (MONTHLY_BUDGET);
 
                 init_statements ();
             }
@@ -688,6 +737,11 @@ namespace Envelope.DB {
             database.foreign_keys = true;
         }
 
+        /**
+         * Initialize prepared statements
+         *
+         * TODO find a way to make this lazy
+         */
         private void init_statements () throws SQLHeavy.Error {
             q_load_account                              = database.prepare (SQL_LOAD_ACCOUNT_BY_ID);
             q_load_all_accounts                         = database.prepare (SQL_LOAD_ALL_ACCOUNTS);
@@ -709,6 +763,7 @@ namespace Envelope.DB {
             q_categorize_for_merchant                   = database.prepare (SQL_CATEGORIZE_ALL_FOR_MERCHANT);
             q_update_category                           = database.prepare (SQL_UPDATE_CATEGORY);
             q_delete_account                            = database.prepare (SQL_DELETE_ACCOUNT);
+            q_load_transactions_for_month_and_year      = database.prepare (SQL_LOAD_TRANSACTIONS_FOR_MONTH);
         }
 
         private void check_create_categories () throws SQLHeavy.Error {
