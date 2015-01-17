@@ -38,7 +38,7 @@ namespace Envelope.Window {
         public Menu                         settings_menu { get; private set; }
         public Granite.Widgets.OverlayBar   overlay_bar {get; private set; }
 
-        private Granite.Widgets.ThinPaned   paned;
+        private Gtk.Paned                   paned;
         private Gtk.MenuItem                preferences_menu_item;
         private Gtk.Popover                 menu_popover;
         private Gtk.Overlay                 overlay;
@@ -99,7 +99,7 @@ namespace Envelope.Window {
             app_menu.popover = menu_popover;
 
             // main paned widget
-            paned = new Granite.Widgets.ThinPaned ();
+            paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL);
             paned.position = 250;
             paned.position_set = true;
             overlay.add (paned);
