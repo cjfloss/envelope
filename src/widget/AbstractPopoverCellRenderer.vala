@@ -42,7 +42,7 @@ namespace Envelope.Widget {
             connect_real_signals ();
         }
 
-        public override unowned bool activate ( Gdk.Event event,
+        public override weak Gtk.CellEditable start_editing ( Gdk.Event event,
                                         Gtk.Widget widget,
                                         string path,
                                         Gdk.Rectangle background_area,
@@ -58,16 +58,16 @@ namespace Envelope.Widget {
             popover.relative_to = widget;
             popover.set_position (set_top ? Gtk.PositionType.TOP : Gtk.PositionType.BOTTOM);
 
-            return true;
+            return null;
         }
 
         private void build_real_ui () {
-            mode = Gtk.CellRendererMode.ACTIVATABLE;
-            editable = false;
+            mode = Gtk.CellRendererMode.EDITABLE;
+            editable = true;
             editable_set = true;
 
             popover = new Gtk.Popover (relative_to);
-            popover.modal = false; // modal = true causes conflict with treeview
+            popover.modal = true;
             popover.border_width = 12;
             popover.set_position (Gtk.PositionType.BOTTOM);
 

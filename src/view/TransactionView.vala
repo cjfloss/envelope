@@ -421,7 +421,6 @@ namespace Envelope.View {
             var renderer_category = new CellRendererCategoryPicker (treeview);
             renderer_category.store = CategoryStore.get_default ();
             renderer_category.text_column = CategoryStore.Column.LABEL;
-            renderer_category.mode = Gtk.CellRendererMode.ACTIVATABLE;
             renderer_category.edited.connect ((path, text) => {
 
                 if (text.strip () == "") {
@@ -538,7 +537,6 @@ namespace Envelope.View {
             });
 
             crdp = new CellRendererDatePicker (treeview);
-            crdp.mode = Gtk.CellRendererMode.ACTIVATABLE;
             crdp.xalign = 1.0f;
             crdp.edited.connect ((path, text) => {
 

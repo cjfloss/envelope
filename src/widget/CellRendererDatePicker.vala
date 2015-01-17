@@ -29,18 +29,17 @@ namespace Envelope.Widget {
             base (relative_to);
         }
 
-        public override unowned bool activate (Gdk.Event event,
+        public override weak Gtk.CellEditable start_editing (Gdk.Event event,
                                             Gtk.Widget widget,
                                             string path,
                                             Gdk.Rectangle background_area,
                                             Gdk.Rectangle cell_area,
                                             Gtk.CellRendererState flags) {
 
-            base.activate (event, widget, path, background_area, cell_area, flags);
-
+            base.start_editing (event, widget, path, background_area, cell_area, flags);
             popover.show ();
 
-            return true;
+            return null;
         }
 
         protected override void build_ui () {
