@@ -122,7 +122,7 @@ namespace Envelope.View {
         public void add_transaction (Transaction transaction) {
             var in_amount = "";
             var out_amount = "";
-            var formatted_amount = Envelope.Util.String.format_currency (transaction.amount);
+            var formatted_amount = Envelope.Util.String.format_currency (transaction.amount, false);
 
             switch (transaction.direction) {
                 case Transaction.Direction.INCOMING:
@@ -377,7 +377,7 @@ namespace Envelope.View {
             treeview.headers_clickable = true;
             treeview.show_expanders = false;
             treeview.rules_hint = true;
-            treeview.enable_grid_lines = Gtk.TreeViewGridLines.BOTH;
+            treeview.enable_grid_lines = Gtk.TreeViewGridLines.NONE;
             treeview.set_model (view_store);
             treeview.set_search_column (1);
             treeview.hadjustment.page_size = 10d;
@@ -597,7 +597,7 @@ namespace Envelope.View {
             treeview.append_column (category_column);
 
             var out_column = new Gtk.TreeViewColumn ();
-            out_column.set_title (_("Outflow"));
+            out_column.set_title (_("Outflow (%s)").printf (Envelope.Util.String.get_currency_symbol ()));
             out_column.max_width = -1;
             out_column.pack_start (renderer_out, true);
             out_column.resizable = true;
@@ -607,7 +607,7 @@ namespace Envelope.View {
             treeview.append_column (out_column);
 
             var in_column = new Gtk.TreeViewColumn ();
-            in_column.set_title (_("Inflow"));
+            in_column.set_title (_("Inflow (%s)").printf (Envelope.Util.String.get_currency_symbol ()));
             in_column.max_width = -1;
             in_column.pack_start (renderer_in, true);
             in_column.resizable = true;
