@@ -44,7 +44,8 @@ namespace Envelope.View {
             MEMO,
             ID,
             TRANSACTION,
-            CATEGORY
+            CATEGORY,
+            COLOR
         }
 
         private enum AddTransactionAction {
@@ -73,9 +74,10 @@ namespace Envelope.View {
         private Gtk.TreeModelFilter view_store;
         private Gtk.TreeIter current_editing_iter;
 
+        private Gdk.RGBA future_transaction_text_color;
+
         private bool populating_from_list = false;
 
-        private DateTime now = new DateTime.now_local ();
         private DateTime filter_from = null;
         private DateTime filter_to = null;
 
@@ -341,6 +343,11 @@ namespace Envelope.View {
 
             debug ("building transaction grid ui");
 
+            future_transaction_text_color = Gdk.RGBA ();
+            future_transaction_text_color.red = 0.7;
+            future_transaction_text_color.green = 0.7;
+            future_transaction_text_color.blue = 0.7;
+
             grid_scroll = new Gtk.ScrolledWindow (null, null);
             grid_scroll.vexpand = true;
             grid_scroll.vexpand_set = true;
@@ -554,23 +561,15 @@ namespace Envelope.View {
                 }
             });
 
-            // renderer for future transactions
-            var crb = new Gtk.CellRendererPixbuf ();
-            crb.icon_name = "go-up-symbolic";
-            crb.follow_state = true;
-            crb.xalign = 0.0f;
-            crb.xpad = 0;
-
             // columns
             var date_column = new Gtk.TreeViewColumn ();
             date_column.set_title (_("Date"));
             date_column.max_width = -1;
-            date_column.pack_start (crb, false);
             date_column.pack_start (crdp, true);
             date_column.resizable = true;
             date_column.reorderable = true;
             date_column.sort_column_id = Column.DATE;
-            date_column.set_cell_data_func (crb, cell_renderer_badge_func);
+            date_column.set_cell_data_func (crdp, cell_renderer_color_function);
             date_column.set_attributes (crdp, "text", Column.DATE);
             treeview.append_column (date_column);
 
@@ -582,6 +581,7 @@ namespace Envelope.View {
             merchant_column.reorderable = true;
             merchant_column.sort_column_id = Column.MERCHANT;
             merchant_column.set_attributes (renderer_label, "text", Column.MERCHANT);
+            merchant_column.set_cell_data_func (renderer_label, cell_renderer_color_function);
             treeview.append_column (merchant_column);
 
             var category_column = new Gtk.TreeViewColumn ();
@@ -591,6 +591,7 @@ namespace Envelope.View {
             category_column.resizable = true;
             category_column.reorderable = true;
             category_column.set_cell_data_func (renderer_category, cell_renderer_category_func);
+            category_column.set_cell_data_func (renderer_category, cell_renderer_color_function);
             category_column.set_attributes (renderer_category, "text", Column.CATEGORY);
             treeview.append_column (category_column);
 
@@ -602,6 +603,7 @@ namespace Envelope.View {
             out_column.reorderable = true;
             out_column.sort_column_id = Column.OUTFLOW;
             out_column.set_attributes (renderer_out, "text", Column.OUTFLOW);
+            out_column.set_cell_data_func (renderer_out, cell_renderer_color_outflow_function);
             treeview.append_column (out_column);
 
             var in_column = new Gtk.TreeViewColumn ();
@@ -612,6 +614,7 @@ namespace Envelope.View {
             in_column.reorderable = true;
             in_column.sort_column_id = Column.INFLOW;
             in_column.set_attributes (renderer_in, "text", Column.INFLOW);
+            in_column.set_cell_data_func (renderer_in, cell_renderer_color_inflow_function);
             treeview.append_column (in_column);
 
             var memo_column = new Gtk.TreeViewColumn ();
@@ -623,6 +626,7 @@ namespace Envelope.View {
             memo_column.sort_column_id = Column.MEMO;
             memo_column.spacing = 10;
             memo_column.set_attributes (renderer_memo, "text", Column.MEMO);
+            memo_column.set_cell_data_func (renderer_memo, cell_renderer_color_function);
             treeview.append_column (memo_column);
 
             // right-click menu
@@ -637,16 +641,6 @@ namespace Envelope.View {
             treeview.show_all ();
         }
 
-        private void cell_renderer_badge_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
-
-            Gtk.CellRendererPixbuf cr = renderer as Gtk.CellRendererPixbuf;
-
-            Transaction transaction;
-            view_store.@get (iter, Column.TRANSACTION, out transaction, -1);
-
-            cr.visible = transaction != null && transaction.date.compare (now) == 1;
-        }
-
         private void cell_renderer_category_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
 
             //cell_renderer_date_color_func (layout, renderer, model, iter);
@@ -659,6 +653,18 @@ namespace Envelope.View {
 
             cp.merchant_name = merchant;
             cp.category_name = category_name;
+        }
+
+        private void cell_renderer_color_inflow_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+            set_cell_foreground_from_date (layout, renderer, model, iter, CELL_COLOR_INCOMING);
+        }
+
+        private void cell_renderer_color_outflow_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+            set_cell_foreground_from_date (layout, renderer, model, iter, CELL_COLOR_OUTGOING);
+        }
+
+        private void cell_renderer_color_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+            set_cell_foreground_from_date (layout, renderer, model, iter);
         }
 
         private Gtk.TreeIter add_empty_row (Gtk.TreeIter? parent = null) {
@@ -994,6 +1000,35 @@ namespace Envelope.View {
                     }
                     catch (ServiceError err) {
                         error ("could not update transaction (%s)", err.message);
+                    }
+                }
+            }
+        }
+
+        private void set_cell_foreground_from_date (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter, string? default_color = null) {
+            string date;
+            model.@get (iter, Column.DATE, out date, -1);
+
+            Date dt = Date ();
+            dt.set_parse (date);
+
+            if (dt.valid ()) {
+                var now = new DateTime.now_local ();
+                var t_date = new DateTime.local (dt.get_year (), dt.get_month (), dt.get_day (), 0, 0, 0);
+
+                Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
+
+                if (now.compare (t_date) == -1) {
+                    crt.foreground_rgba = future_transaction_text_color;
+                    crt.foreground_set = true;
+                }
+                else {
+                    if (default_color != null) {
+                        crt.foreground = default_color;
+                        crt.foreground_set = true;
+                    }
+                    else {
+                        crt.foreground_set = false;
                     }
                 }
             }
