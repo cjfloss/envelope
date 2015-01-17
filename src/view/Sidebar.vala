@@ -190,7 +190,6 @@ namespace Envelope.View {
             crt.edited.connect (item_renamed);
             crt.editing_started.connect (cr_start_editing);
             crt.editing_canceled.connect (cr_cancel_editing);
-
             col.set_attributes (crt, "markup", Column.LABEL);
             col.set_cell_data_func (crt, treeview_text_renderer_function);
 
@@ -585,17 +584,18 @@ namespace Envelope.View {
                 state_currency = Envelope.Util.String.format_currency (state_amount);
             }
 
-            store.@set (iter, Column.LABEL, label,
+            store.@set (iter,
+                Column.LABEL, Markup.escape_text(label),
                 Column.ACCOUNT, account,
                 Column.ICON, icon,
                 Column.ACTION, action,
-                Column.DESCRIPTION, account != null ? account.description : null,
+                Column.DESCRIPTION, account != null ? Markup.escape_text(account.description) : null,
                 Column.CATEGORY, category,
                 Column.STATE, state_currency,
                 Column.TREE_CATEGORY, tree_category,
                 Column.IS_HEADER, is_header,
                 Column.COLORIZE, colorize,
-                Column.TOOLTIP, tooltip != "" ? tooltip : label,
+                Column.TOOLTIP, Markup.escape_text (tooltip != "" ? tooltip : label),
                 Column.BUDGET_STATE, budget_state,
                 Column.EDITABLE, is_editable, -1);
 
