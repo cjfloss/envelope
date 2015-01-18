@@ -385,7 +385,13 @@ namespace Envelope.View {
             treeview.show_expanders = false;
             treeview.rules_hint = true;
             treeview.enable_grid_lines = Gtk.TreeViewGridLines.NONE;
-            treeview.set_model (view_store);
+
+            var tree_model_sort = new Gtk.TreeModelSort.with_model (view_store);
+            tree_model_sort.set_sort_func (Column.INFLOW, treemodel_sort_amount);
+            tree_model_sort.set_sort_func (Column.OUTFLOW, treemodel_sort_amount);
+            tree_model_sort.set_sort_func (Column.DATE, treemodel_sort_date);
+
+            treeview.set_model (tree_model_sort);
             treeview.set_search_column (1);
             treeview.hadjustment.page_size = 10d;
             treeview.show_all ();
@@ -590,6 +596,7 @@ namespace Envelope.View {
             category_column.pack_start (renderer_category, true);
             category_column.resizable = true;
             category_column.reorderable = true;
+            category_column.sort_column_id = Column.CATEGORY;
             category_column.set_cell_data_func (renderer_category, cell_renderer_category_func);
             category_column.set_cell_data_func (renderer_category, cell_renderer_color_function);
             category_column.set_attributes (renderer_category, "text", Column.CATEGORY);
@@ -665,6 +672,97 @@ namespace Envelope.View {
 
         private void cell_renderer_color_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
             set_cell_foreground_from_date (layout, renderer, model, iter);
+        }
+
+        private int treemodel_sort_amount (Gtk.TreeModel model, Gtk.TreeIter iter1, Gtk.TreeIter iter2) {
+
+            var sortable = treeview.model as Gtk.TreeModelSort;
+
+            int column;
+            Gtk.SortType type;
+            sortable.get_sort_column_id (out column, out type);
+
+            string? amount1;
+            string? amount2;
+            model.@get (iter1, column, out amount1, -1);
+            model.@get (iter2, column, out amount2, -1);
+
+            if ((amount1 == null && amount2 == null) || (amount1 == "" && amount2 == "")) {
+                return 0;
+            }
+
+            if ((amount1 == null || amount1 == "") && (amount2 != null && amount2 != "")) {
+                return -1;
+            }
+
+            if ((amount1 != null && amount1 != "") && (amount2 == null || amount2 == "")) {
+                return 1;
+            }
+
+            try {
+                double parsed1 = Envelope.Util.String.parse_currency (amount1);
+                double parsed2 = Envelope.Util.String.parse_currency (amount2);
+
+                if (parsed1 > parsed2) { return 1; }
+                if (parsed1 < parsed2) { return -1; }
+            }
+            catch (Envelope.Util.String.ParseError err) {
+                return 0;
+            }
+
+            return 0;
+        }
+
+        private int treemodel_sort_date (Gtk.TreeModel model, Gtk.TreeIter iter1, Gtk.TreeIter iter2) {
+
+            var sortable = treeview.model as Gtk.TreeModelSort;
+
+            int column;
+            Gtk.SortType type;
+            sortable.get_sort_column_id (out column, out type);
+
+            string? date1;
+            string? date2;
+            model.@get (iter1, column, out date1, -1);
+            model.@get (iter2, column, out date2, -1);
+
+            if ((date1 == null && date2 == null) || (date1 == "" && date2 == "")) {
+                return 0;
+            }
+
+            if ((date1 == null || date1 == "") && (date2 != null && date2 != "")) {
+                return -1;
+            }
+
+            if ((date1 != null && date1 != "") && (date2 == null || date2 == "")) {
+                return 1;
+            }
+
+            Date dt1 = Date ();
+            dt1.clear ();
+
+            Date dt2 = Date ();
+            dt2.clear ();
+
+            dt1.set_parse (date1);
+            dt2.set_parse (date2);
+
+            var valid1 = dt1.valid ();
+            var valid2 = dt2.valid ();
+
+            if (!valid1 && !valid2) {
+                return 0;
+            }
+
+            if (valid1 && !valid2) {
+                return 1;
+            }
+
+            if (!valid1 && valid2) {
+                return -1;
+            }
+
+            return dt1.compare (dt2);
         }
 
         private Gtk.TreeIter add_empty_row (Gtk.TreeIter? parent = null) {
