@@ -394,8 +394,6 @@ namespace Envelope.View {
             Gtk.TreeIter? iter;
             var account = get_account_iter_by_id (account_id, out iter);
 
-            debug ("account by id %d: %s", account_id, account != null ? account.number : "null");
-
             if (account != null) {
 
                 debug ("selecting account %d", account.@id);
@@ -412,8 +410,6 @@ namespace Envelope.View {
         public bool select_category_by_id (int category_id) {
             Gtk.TreeIter? iter;
             var category = get_category_iter_by_id (category_id, out iter);
-
-            debug ("category by id %d: %s", category_id, category != null ? category.name : "null");
 
             if (category != null) {
 
@@ -572,8 +568,6 @@ namespace Envelope.View {
                                        string tooltip = "",
                                        BudgetState? budget_state = null,
                                        bool is_editable = false) {
-
-            debug ("add item '%s'", label);
 
             Gtk.TreeIter iter;
 
@@ -954,9 +948,6 @@ namespace Envelope.View {
                             break;
 
                         case TreeCategory.CATEGORIES:
-
-                            debug ("BALANCE EDITED FOR CATEGORY");
-
                             MonthlyCategory category;
                             store.@get (iter, Column.CATEGORY, out category, -1);
 
@@ -1263,8 +1254,6 @@ namespace Envelope.View {
         }
 
         private bool tree_button_primary_pressed (Gtk.TreePath path, Gtk.TreeView tree_view) {
-
-            debug ("BUTTON PRIMARY PRESSED");
 
             bool toggle = false;
 

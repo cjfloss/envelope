@@ -29,7 +29,6 @@ namespace Envelope.View {
 
         public static new TransactionView get_default () {
             if (transaction_view_instance == null) {
-                debug ("returning new instance of TransactionView");
                 transaction_view_instance = new TransactionView ();
             }
 
@@ -260,8 +259,6 @@ namespace Envelope.View {
         }
 
         private void get_transaction_iter (Transaction transaction, out Gtk.TreeIter? iter) {
-
-            debug ("looking for tree iterator matching transaction %d".printf (transaction.@id));
 
             Gtk.TreeIter? found_iter = null;
             int id = transaction.@id;
@@ -860,8 +857,6 @@ namespace Envelope.View {
                 }
             });
 
-            debug ("notify signals");
-
             notify["with-filter-view"].connect ( () => {
 
                 debug ("with_filter_view changed (%s)", with_filter_view ? "true" : "false");
@@ -1010,8 +1005,6 @@ namespace Envelope.View {
                     error ("could not parse transaction amount (%s)".printf (err.message));
                 }
 
-                debug ("parsed amount: %f", amount);
-
                 // date
                 uint year, month, day;
                 crdp.calendar.get_date (out year, out month, out day);
@@ -1020,8 +1013,6 @@ namespace Envelope.View {
 
                 // category
                 Category? category = CategoryStore.get_default ().get_category_by_name (t_category);
-
-                debug ("found category %d in store", category != null ? category.@id : -1);
 
                 try {
                     var acct_ref = Sidebar.get_default ().selected_account;
@@ -1086,8 +1077,6 @@ namespace Envelope.View {
                     transaction.date = new DateTime.local (parse_date.get_year (),
                         parse_date.get_month (),
                         parse_date.get_day (), 0, 0, 0);
-
-                    debug ("new transaction date: %s", transaction.date.to_string ());
 
                     // category
                     transaction.category = CategoryStore.get_default ().get_category_by_name (category_name);
