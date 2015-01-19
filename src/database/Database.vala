@@ -82,7 +82,7 @@ namespace Envelope.DB {
 
         private static const string SQL_CATEGORY_COUNT = "SELECT COUNT(*) AS category_count from categories";
         private static const string SQL_INSERT_CATEGORY_FOR_NAME = "INSERT INTO `categories` (`name`) VALUES (:name);";
-        private static const string SQL_SET_CATEGORY_BUDGET = "INSERT INTO `categories_budgets` (`category_id`, `year`, `month`, `amount_budgeted`) VALUES (:category_id, :year, :month, :amount_budgeted)";        
+        private static const string SQL_SET_CATEGORY_BUDGET = "INSERT INTO `categories_budgets` (`category_id`, `year`, `month`, `amount_budgeted`) VALUES (:category_id, :year, :month, :amount_budgeted)";
         private static const string SQL_UPDATE_CATEGORY_BUDGET = "UPDATE `categories_budgets` SET `amount_budgeted` = :amount_budgeted WHERE `category_id` = :category_id AND `year` = :year AND `month` = :month";
         private static const string SQL_DELETE_TRANSACTION = "DELETE FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_TRANSACTION_BY_ID = "SELECT * FROM `transactions` WHERE `id` = :id";
@@ -681,19 +681,11 @@ namespace Envelope.DB {
 
         private void init_database () {
 
-            var app_path = File.new_for_path (Path.build_path (Path.DIR_SEPARATOR_S,
-                Environment.get_user_data_dir (), Build.PROGRAM_NAME));
+            var app_path = Granite.Services.Paths.user_data_folder;
 
-            try {
-                app_path.make_directory_with_parents (null);
-            }
-            catch (GLib.Error err) {
-                if (!(err is IOError.EXISTS)) {
-                    error ("could not create database (%s)", err.message);
-                }
-            }
+            Granite.Services.Paths.ensure_directory_exists (app_path);
 
-            string db_path = Path.build_filename (app_path.get_path (), DATABASE_FILENAME);
+            var db_path = Path.build_filename (app_path.get_path (), DATABASE_FILENAME);
             var db_file = File.new_for_path (db_path);
 
             try {
