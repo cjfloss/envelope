@@ -88,7 +88,7 @@ namespace Envelope.View {
 
         public string search_term { get; set; }
 
-        public Gee.ArrayList<Transaction> transactions { get; set; }
+        public Gee.List<Transaction> transactions { get; set; }
 
         public bool with_filter_view { get; set; default = true; }
         public bool with_add_transaction_view { get; set; default = true; }
@@ -595,7 +595,7 @@ namespace Envelope.View {
             category_column.reorderable = true;
             category_column.sort_column_id = Column.CATEGORY;
             category_column.set_cell_data_func (renderer_category, cell_renderer_category_func);
-            category_column.set_cell_data_func (renderer_category, cell_renderer_color_function);
+            //category_column.set_cell_data_func (renderer_category, cell_renderer_color_function);
             category_column.set_attributes (renderer_category, "text", Column.CATEGORY);
             treeview.append_column (category_column);
 
@@ -647,13 +647,13 @@ namespace Envelope.View {
 
         private void cell_renderer_category_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
 
-            //cell_renderer_date_color_func (layout, renderer, model, iter);
+            cell_renderer_color_function (layout, renderer, model, iter);
 
             CellRendererCategoryPicker cp = renderer as CellRendererCategoryPicker;
 
             string merchant;
             string category_name;
-            view_store.@get (iter, Column.MERCHANT, out merchant, Column.CATEGORY, out category_name, -1);
+            model.@get (iter, Column.MERCHANT, out merchant, Column.CATEGORY, out category_name, -1);
 
             cp.merchant_name = merchant;
             cp.category_name = category_name;

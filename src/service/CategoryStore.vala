@@ -43,9 +43,9 @@ namespace Envelope.Service {
          */
         public void reload () {
             try {
-                ArrayList<Category> categories = BudgetManager.get_default ().get_categories ();
+                Collection<MonthlyCategory> categories = BudgetManager.get_default ().get_categories ();
 
-                foreach (Category category in categories) {
+                foreach (MonthlyCategory category in categories) {
 
                     Gtk.TreeIter iter;
                     append (out iter);
@@ -116,7 +116,7 @@ namespace Envelope.Service {
         }
 
         private void build_store () {
-            set_column_types ({typeof (string), typeof (Category)});
+            set_column_types ({typeof (string), typeof (MonthlyCategory)});
             reload ();
         }
 

@@ -38,7 +38,7 @@ namespace Envelope {
             }
         }
 
-        public Gee.ArrayList<Transaction> transactions { get; set; }
+        public Gee.List<Transaction> transactions { get; set; }
         public string number { get; set; }
         public string description { get; set; }
         public Type account_type { get; set; default = Type.CHECKING; }

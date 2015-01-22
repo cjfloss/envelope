@@ -34,8 +34,8 @@ namespace Envelope.Service {
 
         public double remaining { get { return inflow - outflow; }}
 
-        ArrayList<Transaction> transactions;
-        ArrayList<MonthlyCategory> categories;
+        Collection<Transaction> transactions;
+        Collection<MonthlyCategory> categories;
 
         public double budgeted_outflow { get {
 
@@ -48,7 +48,7 @@ namespace Envelope.Service {
             return amount;
         }}
 
-        ArrayList<Transaction> uncategorized;
+        Collection<Transaction> uncategorized;
 
         double uncategorized_inflow;
         double uncategorized_outflow;
@@ -86,14 +86,14 @@ namespace Envelope.Service {
         private DatabaseManager dbm = DatabaseManager.get_default ();
 
         // cached category list
-        private ArrayList<MonthlyCategory> categories;
+        private Collection<MonthlyCategory> categories;
 
         /**
          * Get all categories
          *
          * @return {Gee.ArrayList<Category>} list of categories
          */
-        public ArrayList<MonthlyCategory> get_categories () throws ServiceError {
+        public Collection<MonthlyCategory> get_categories () throws ServiceError {
 
             if (categories != null && !categories.is_empty) {
                 return categories;
@@ -101,10 +101,6 @@ namespace Envelope.Service {
 
             try {
                 categories = dbm.load_categories ();
-
-                if (!categories.is_empty) {
-                    categories.sort ();
-                }
 
                 debug ("loaded %d categorie(s)".printf (categories.size));
 
@@ -183,7 +179,7 @@ namespace Envelope.Service {
         /**
          * Get the transactions for the current month
          */
-        public ArrayList<Transaction> get_current_transactions () throws ServiceError {
+        public Collection<Transaction> get_current_transactions () throws ServiceError {
 
             try {
                 return dbm.get_current_transactions ();
@@ -198,7 +194,7 @@ namespace Envelope.Service {
          *
          * @return ArrayList<Transaction> list of transactions in the requested period
          */
-        public ArrayList<Transaction> get_transactions_for_month (int year, int month) throws ServiceError {
+        public Collection<Transaction> get_transactions_for_month (int year, int month) throws ServiceError {
             try {
                 return dbm.get_transactions_for_month_and_year (month, year);
             }
@@ -210,7 +206,7 @@ namespace Envelope.Service {
         /**
          * Get all transactions not associated with any category
          */
-        public ArrayList<Transaction> get_uncategorized_transactions () throws ServiceError {
+        public Collection<Transaction> get_uncategorized_transactions () throws ServiceError {
 
             try {
                 return dbm.load_uncategorized_transactions ();
@@ -227,12 +223,12 @@ namespace Envelope.Service {
          * @param {double} inflow
          * @param {double} outflow
          */
-        public ArrayList<Transaction>  compute_current_category_operations (Category category, out double inflow, out double outflow) throws ServiceError {
+        public Gee.List<Transaction>  compute_current_category_operations (Category category, out double inflow, out double outflow) throws ServiceError {
 
             return_val_if_fail (category.@id != null, null);
 
             try {
-                ArrayList<Transaction> transactions = dbm.get_current_transactions_for_category (category);
+                Gee.List<Transaction> transactions = dbm.get_current_transactions_for_category (category);
 
                 debug ("transaction for category %s: %d", category.name, transactions.size);
 
@@ -317,12 +313,10 @@ namespace Envelope.Service {
             double inflow = 0d;
             double outflow = 0d;
 
-            ArrayList<Transaction> transactions = get_transactions_for_month (year, month);
-            ArrayList<Transaction> uncategorized = new ArrayList<Transaction> ();
+            Collection<Transaction> transactions = get_transactions_for_month (year, month);
+            Collection<Transaction> uncategorized = new ArrayList<Transaction> ();
 
             foreach (Transaction t in transactions) {
-
-                debug ("analysizing transaciton");
 
                 switch (t.direction) {
                     case Transaction.Direction.INCOMING:

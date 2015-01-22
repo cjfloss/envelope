@@ -163,7 +163,7 @@ namespace Envelope.View {
             var budget_manager = BudgetManager.get_default ();
 
             try {
-                ArrayList<Category> categories = budget_manager.get_categories ();
+                var categories = budget_manager.get_categories ();
 
                 charts_container.foreach ( (widget) => {
                     charts_container.remove (widget);
@@ -173,7 +173,7 @@ namespace Envelope.View {
 
                     double inflow;
                     double outflow;
-                    ArrayList<Transaction> transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
+                    var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
 
                     if (!transactions.is_empty) {
 

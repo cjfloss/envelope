@@ -97,7 +97,7 @@ namespace Envelope.View {
         private Granite.Widgets.CellRendererExpander cre;
         private Gtk.CellRendererText crt_balance_total;
 
-        public Gee.ArrayList<Account> accounts { get; set; }
+        public Gee.Collection<Account> accounts { get; set; }
 
         public BudgetState budget_state { get; set; }
 

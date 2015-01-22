@@ -16,6 +16,8 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
+using Gee;
+
 namespace Envelope.DB {
 
     class DatabaseManager : Object {
@@ -183,6 +185,11 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_delete_category;
         private SQLHeavy.Query q_update_category;
 
+        // in-memory caches for often-used objects
+        private Map<int, Account>           account_cache     = new HashMap<int, Account> ();
+        private Map<int, Category>          category_cache    = new HashMap<int, Category> ();
+        private Map<string, Merchant>       merchant_cache    = new HashMap<string, Merchant> ();
+
         public static new DatabaseManager get_default () {
             if (database_manager_instance == null) {
                 database_manager_instance = new DatabaseManager ();
@@ -195,9 +202,13 @@ namespace Envelope.DB {
             return database.begin_transaction ();
         }
 
-        public Gee.ArrayList<Merchant> get_merchants () throws SQLHeavy.Error {
+        public Collection<Merchant> get_merchants () throws SQLHeavy.Error {
 
-            var merchants = new Gee.ArrayList<Merchant> ();
+            if (!merchant_cache.is_empty) {
+                return merchant_cache.values;
+            }
+
+            var merchants = new TreeSet<Merchant> ();
 
             SQLHeavy.QueryResult results = q_get_unique_merchants.execute ();
 
@@ -206,6 +217,10 @@ namespace Envelope.DB {
                 query_result_to_merchant (results, out merchant);
 
                 merchants.add (merchant);
+
+                // add to cache too
+                merchant_cache.@set (merchant.label, merchant);
+
                 results.next ();
             }
 
@@ -216,41 +231,61 @@ namespace Envelope.DB {
 
         public Account? load_account (int account_id) throws SQLHeavy.Error {
 
-            q_load_account.clear ();
+            if (account_cache.has_key (account_id)) {
+                return account_cache.@get (account_id);
+            }
+
             q_load_account.set_int ("accountid", account_id);
 
             SQLHeavy.QueryResult results = q_load_account.execute ();
 
             if (!results.finished) {
+
                 Account account;
                 query_result_to_account (results, out account);
+                q_load_account.clear ();
+
+                account_cache.@set (account.@id, account);
 
                 return account;
             }
+
+
 
             return null;
         }
 
         public void delete_account (Account account) throws SQLHeavy.Error {
-            q_delete_account.clear ();
-            q_delete_account.set_int ("account_id", account.@id);
 
+            q_delete_account.set_int ("account_id", account.@id);
             q_delete_account.execute ();
             q_delete_account.clear ();
+
+            // delete from cache
+            if (account_cache.has_key (account.@id)) {
+                account_cache.unset (account.@id);
+            }
         }
 
-        public Gee.ArrayList<Account> load_all_accounts () throws SQLHeavy.Error {
-            var list = new Gee.ArrayList<Account> ();
+        public Collection<Account> load_all_accounts () throws SQLHeavy.Error {
 
-            q_load_all_accounts.clear ();
+            if (!account_cache.is_empty) {
+                return account_cache.values;
+            }
+
+            var list = new TreeSet<Account> ();
 
             SQLHeavy.QueryResult results = q_load_all_accounts.execute ();
 
             while (!results.finished) {
+
                 Account account;
                 query_result_to_account (results, out account);
 
                 list.add (account);
+
+                // add to cache too
+                account_cache.@set (account.@id, account);
 
                 results.next ();
             }
@@ -262,10 +297,7 @@ namespace Envelope.DB {
 
         public void create_category (Category category) throws SQLHeavy.Error {
 
-            q_insert_category.clear ();
-
             q_insert_category.set_string ("name", category.name);
-            //q_insert_category.set_double ("amount_budgeted", category.amount_budgeted);
 
             if (category.description != null) {
                 q_insert_category.set_string ("description", category.description);
@@ -283,15 +315,17 @@ namespace Envelope.DB {
 
             var id = q_insert_category.execute_insert ();
 
-            debug ("category %s created with id %d", category.name, (int) id);
+            q_insert_category.clear ();
 
             category.@id = (int) id;
+
+            // add to cache
+            category_cache.@set (category.@id, category);
+
             category_created (category);
         }
 
         public void update_category (Category category) throws SQLHeavy.Error {
-
-            q_update_category.clear ();
 
             q_update_category.set_int ("category_id", category.@id);
             q_update_category.set_string ("name", category.name);
@@ -307,13 +341,15 @@ namespace Envelope.DB {
 
             q_update_category.execute ();
             q_update_category.clear ();
+
+            category_cache.@set (category.@id, category);
         }
 
         public void categorize_for_merchant (string merchant, Category category) throws SQLHeavy.Error {
-            q_categorize_for_merchant.clear ();
             q_categorize_for_merchant.set_string ("merchant", merchant);
             q_categorize_for_merchant.set_int ("category_id", category.@id);
             q_categorize_for_merchant.execute ();
+            q_categorize_for_merchant.clear ();
         }
 
         public void create_account (Account account) throws SQLHeavy.Error {
@@ -325,9 +361,10 @@ namespace Envelope.DB {
                 "type", typeof (int), (int) account.account_type
                 );
 
-            debug ("account %s created with id %d", account.number, (int) id);
-
             account.@id = (int) id;
+
+            account_cache.@set (account.@id, account);
+
             account_created (account);
         }
 
@@ -336,21 +373,24 @@ namespace Envelope.DB {
             q_rename_account.set_string ("number", new_name);
             q_rename_account.execute ();
             q_rename_account.clear ();
+
+            // update cache
+            account_cache.@set (account.@id, account);
         }
 
         public void update_account_balance (Account account, ref SQLHeavy.Transaction transaction)  throws SQLHeavy.Error {
             transaction
                 .prepare (SQL_UPDATE_ACCOUNT_BALANCE)
                 .execute ("balance", typeof (double), account.balance, "account_id", typeof (int), account.@id);
+
+            // update cache
+            account_cache.@set (account.@id, account);
         }
 
-        public Gee.ArrayList<Transaction> load_account_transactions (Account account) throws SQLHeavy.Error {
+        public Gee.List<Transaction> load_account_transactions (Account account) throws SQLHeavy.Error {
 
-            debug ("loading transactions for account %d".printf (account.@id));
+            var list = new ArrayList<Transaction> ();
 
-            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
-
-            q_load_account_transactions.clear ();
             q_load_account_transactions.set_int ("account_id", account.@id);
 
             SQLHeavy.QueryResult results = q_load_account_transactions.execute ();
@@ -365,21 +405,22 @@ namespace Envelope.DB {
                 results.next ();
             }
 
+            q_load_account_transactions.clear ();
+
             return list;
         }
 
-        public Gee.ArrayList<Transaction> load_uncategorized_transactions () throws SQLHeavy.Error {
-            debug ("loading uncategorized transactions");
+        public Collection<Transaction> load_uncategorized_transactions () throws SQLHeavy.Error {
 
-            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
+            var list = new ArrayList<Transaction> ();
 
             SQLHeavy.QueryResult results = q_load_uncategorized_transactions.execute ();
 
             while (!results.finished) {
+
                 Transaction transaction;
                 query_result_to_transaction (results, out transaction);
 
-                // TODO account
                 list.add (transaction);
 
                 results.next ();
@@ -427,16 +468,15 @@ namespace Envelope.DB {
         /**
          * Insert multiple transactions
          */
-        public void insert_transactions (Gee.ArrayList<Transaction> transactions, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+        public void insert_transactions (Collection<Transaction> transactions, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
             var stmt = db_transaction.prepare (SQL_INSERT_TRANSACTION);
 
+            // TODO bulk insert
             foreach (Transaction t in transactions) {
                 insert_transaction (t, ref db_transaction, stmt);
             }
         }
-
-
 
         public void delete_transaction (int transaction_id, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
@@ -480,6 +520,7 @@ namespace Envelope.DB {
 
         public Transaction? get_transaction_by_id (int id) throws SQLHeavy.Error {
 
+            // TODO make statement global
             var stmt = database.prepare (SQL_GET_TRANSACTION_BY_ID);
             stmt.set_int ("id", id);
 
@@ -495,11 +536,13 @@ namespace Envelope.DB {
             return null;
         }
 
-        public Gee.ArrayList<MonthlyCategory> load_categories () throws SQLHeavy.Error {
+        public Collection<MonthlyCategory> load_categories () throws SQLHeavy.Error {
 
-            debug ("loading categories");
+            if (!category_cache.is_empty) {
+                return category_cache.values as Collection<MonthlyCategory>;
+            }
 
-            Gee.ArrayList<MonthlyCategory> list = new Gee.ArrayList<MonthlyCategory> ();
+            var list = new TreeSet<MonthlyCategory> ();
 
             SQLHeavy.QueryResult results = q_load_categories.execute ();
 
@@ -513,13 +556,16 @@ namespace Envelope.DB {
 
                 list.add (category);
 
+                // add to cache too
+                category_cache.@set (category.@id, category);
+
                 results.next ();
             }
 
             return list;
         }
 
-        public Gee.ArrayList<Transaction> get_current_transactions () throws SQLHeavy.Error {
+        public Collection<Transaction> get_current_transactions () throws SQLHeavy.Error {
 
             int month, year;
             Envelope.Util.Date.get_year_month (out month, out year);
@@ -527,13 +573,10 @@ namespace Envelope.DB {
             return get_transactions_for_month_and_year (month, year);
         }
 
-        public Gee.ArrayList<Transaction> get_transactions_for_month_and_year (int month, int year) throws SQLHeavy.Error {
+        public Collection<Transaction> get_transactions_for_month_and_year (int month, int year) throws SQLHeavy.Error {
 
-            debug ("loading transactions for %d-%02d".printf (year, month));
+            var list = new ArrayList<Transaction> ();
 
-            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
-
-            q_load_transactions_for_month_and_year.clear ();
             q_load_transactions_for_month_and_year.set_int ("month", month);
             q_load_transactions_for_month_and_year.set_int ("year", year);
             q_load_transactions_for_month_and_year.set_string ("date", "%4d-%02d-01".printf (year, month));
@@ -550,23 +593,20 @@ namespace Envelope.DB {
 
                 transaction.category = category.@id != NULL ? category : null;
 
-                //if (category.@id != NULL) {
-                //    transaction.category = category;
-                //}
-
                 list.add (transaction);
 
                 results.next ();
             }
 
+            q_load_transactions_for_month_and_year.clear ();
+
             return list;
         }
 
-        public Gee.ArrayList<Transaction> get_current_transactions_for_category (Category category) throws SQLHeavy.Error {
+        public Gee.List<Transaction> get_current_transactions_for_category (Category category) throws SQLHeavy.Error {
 
-            Gee.ArrayList<Transaction> list = new Gee.ArrayList<Transaction> ();
+            var list = new ArrayList<Transaction> ();
 
-            q_load_current_transactions_for_category.clear ();
             q_load_current_transactions_for_category.set_int ("category_id", category.@id);
 
             SQLHeavy.QueryResult results = q_load_current_transactions_for_category.execute ();
@@ -580,14 +620,19 @@ namespace Envelope.DB {
                 results.next ();
             }
 
+            q_load_current_transactions_for_category.clear ();
+
             return list;
         }
 
         public void delete_category (Category category) throws SQLHeavy.Error {
             // no need to update transactions; ON DELETE SET NULL
-            q_delete_category.clear ();
             q_delete_category.set_int ("category_id", category.@id);
             q_delete_category.execute ();
+            q_delete_category.clear ();
+
+            // remove from cache
+            category_cache.unset (category.@id);
         }
 
         private DatabaseManager () {
@@ -634,6 +679,7 @@ namespace Envelope.DB {
             transaction.direction = Transaction.Direction.from_int (direction);
             transaction.amount = amount;
             transaction.date = new DateTime.from_unix_local (timestamp);
+            transaction.account = load_account (results.get_int ("account_id"));
 
             if (category != null) {
                 transaction.category = category;

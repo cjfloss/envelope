@@ -56,7 +56,7 @@ namespace Envelope.Service {
         }
 
         private void load_merchants () throws SQLHeavy.Error {
-            ArrayList<Merchant> merchants = DatabaseManager.get_default ().get_merchants ();
+            Collection<Merchant> merchants = DatabaseManager.get_default ().get_merchants ();
 
             if (!merchants.is_empty) {
 

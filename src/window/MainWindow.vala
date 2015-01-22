@@ -155,15 +155,14 @@ namespace Envelope.Window {
             // sidebar
             sidebar = Sidebar.get_default ();
 
-            Gee.ArrayList<Account> accounts;
+            Gee.Collection<Account> accounts;
 
             try {
                 accounts = AccountManager.get_default ().get_accounts ();
                 sidebar.accounts = accounts;
             }
             catch (ServiceError err) {
-                warning ("could not load accounts (%s)".printf (err.message));
-                accounts = new Gee.ArrayList<Account> ();
+                error ("could not load accounts (%s)", err.message);
             }
 
             sidebar.update_view ();
@@ -196,7 +195,6 @@ namespace Envelope.Window {
                 header_bar.has_subtitle = false;
                 header_bar.subtitle = "";
 
-                debug ("saving account in state");
                 var saved_state = SavedState.get_default ();
                 saved_state.selected_category_id = -1;
                 saved_state.selected_account_id = account.@id;
@@ -315,7 +313,7 @@ namespace Envelope.Window {
 
                 try {
                     double inflow, outflow;
-                    Gee.ArrayList<Transaction> transactions = BudgetManager.get_default ()
+                    var transactions = BudgetManager.get_default ()
                         .compute_current_category_operations (category, out inflow, out outflow);
 
                     transaction_view.transactions = transactions;
@@ -407,7 +405,7 @@ namespace Envelope.Window {
             });
         }
 
-        private void determine_initial_content_view (Gee.ArrayList<Account> accounts, out Gtk.Widget widget) {
+        private void determine_initial_content_view (Gee.Collection<Account> accounts, out Gtk.Widget widget) {
             if (accounts.size > 0) {
                 widget = BudgetOverview.get_default ();
             }
