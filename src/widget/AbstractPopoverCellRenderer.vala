@@ -42,7 +42,7 @@ namespace Envelope.Widget {
             connect_real_signals ();
         }
 
-        public override weak Gtk.CellEditable start_editing ( Gdk.Event event,
+        public override unowned Gtk.CellEditable start_editing ( Gdk.Event event,
                                         Gtk.Widget widget,
                                         string path,
                                         Gdk.Rectangle background_area,
