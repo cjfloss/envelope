@@ -381,7 +381,7 @@ namespace Envelope.View {
             treeview.headers_clickable = true;
             treeview.show_expanders = false;
             treeview.rules_hint = true;
-            treeview.enable_grid_lines = Gtk.TreeViewGridLines.NONE;
+            treeview.enable_grid_lines = Gtk.TreeViewGridLines.HORIZONTAL;
 
             var tree_model_sort = new Gtk.TreeModelSort.with_model (view_store);
             tree_model_sort.set_sort_func (Column.INFLOW, treemodel_sort_amount);
@@ -883,7 +883,7 @@ namespace Envelope.View {
             });
         }
 
-        private void btn_add_transactions_clicked () {
+        public void btn_add_transactions_clicked () {
             switch (current_add_transaction_action) {
                 case AddTransactionAction.NONE:
                     // add a row
@@ -892,11 +892,9 @@ namespace Envelope.View {
                     // convert to child model iter
                     Gtk.TreeIter child_iter;
                     view_store.convert_child_iter_to_iter (out child_iter, current_editing_iter);
-                    //treeview.get_selection ().select_iter (child_iter);
 
                     Gtk.TreePath path = view_store.get_path (child_iter);
-                    treeview.scroll_to_cell (path, treeview.get_column (0), false, 0, 0);
-                    //treeview.set_cursor (path, treeview.get_column (0), true);
+                    treeview.scroll_to_cell (path, treeview.get_column (0), true, 0, 0);
 
                     btn_add_transaction.get_style_context ().add_class("suggested-action");
                     btn_add_transaction.label = _("Apply");
@@ -904,6 +902,9 @@ namespace Envelope.View {
                     current_add_transaction_action = AddTransactionAction.EDITING;
 
                     btn_add_transaction_cancel.show ();
+
+                    // focus
+                    treeview.get_selection ().select_path (path);
 
                     break;
 
@@ -951,14 +952,17 @@ namespace Envelope.View {
             }
 
             Transaction transaction;
-            view_store.@get (iter, Column.TRANSACTION, out transaction, -1);
+            treeview.model.@get (iter, Column.TRANSACTION, out transaction, -1);
+
+            debug ("removing transaction with date %s", transaction.date.to_string ());
 
             try {
                 AccountManager.get_default ().remove_transaction (ref transaction);
 
-                Gtk.TreeIter child_iter;
-                view_store.convert_iter_to_child_iter (out child_iter, iter);
-                transactions_store.remove (ref child_iter);
+                Gtk.TreeIter transaction_iter;
+                get_transaction_iter_from_sort_iter (out transaction_iter, iter);
+
+                transactions_store.remove (ref transaction_iter);
 
                 Envelope.App.toast (_("Transaction removed"));
             }
@@ -1119,6 +1123,18 @@ namespace Envelope.View {
                     }
                 }
             }
+        }
+
+        /**
+         * Convert an TreeIter from the TreeModelSort to an iter to the transactions store
+         *
+         * @param transaction_iter the Gtk.TreeIter to initialize
+         * @param sort_iter the Gtk.TreeIter to convert
+         */
+        private void get_transaction_iter_from_sort_iter (out Gtk.TreeIter transaction_iter, Gtk.TreeIter sort_iter) {
+            Gtk.TreeIter view_iter;
+            (treeview.model as Gtk.TreeModelSort).convert_iter_to_child_iter (out view_iter, sort_iter);
+            view_store.convert_iter_to_child_iter (out transaction_iter, view_iter);
         }
     }
 }
