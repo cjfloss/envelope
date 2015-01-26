@@ -82,6 +82,7 @@ namespace Envelope.Service {
         public signal void category_added (Category category);
         public signal void category_deleted (Category category);
         public signal void category_renamed (Category category, string old_name);
+        public signal void category_budget_changed (MonthlyCategory category);
 
         private DatabaseManager dbm = DatabaseManager.get_default ();
 
@@ -157,6 +158,20 @@ namespace Envelope.Service {
                 dbm.update_category (category);             // update in database
                 categories = null;                          // invalidate categories cache
                 compute_state_and_fire_changed_event ();    // re-compute budget state and fire state_changed
+            }
+            catch (SQLHeavy.Error err) {
+                throw new ServiceError.DATABASE_ERROR (err.message);
+            }
+        }
+
+        public void set_current_budgeted_amount (MonthlyCategory category) throws ServiceError {
+            // get current month and year
+            int month, year;
+            Envelope.Util.Date.get_year_month (out month, out year);
+
+            try {
+                dbm.set_category_budgeted_amount (category, year, month);
+                category_budget_changed (category);
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);

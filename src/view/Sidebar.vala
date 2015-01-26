@@ -241,6 +241,7 @@ namespace Envelope.View {
             budget_manager.category_added.connect (update_categories_section);
             budget_manager.category_deleted.connect (update_categories_section);
             budget_manager.category_renamed.connect (update_categories_section);
+            budget_manager.category_budget_changed.connect (update_categories_section);
 
             var account_manager = AccountManager.get_default ();
             account_manager.account_created.connect (add_new_account);
@@ -954,7 +955,7 @@ namespace Envelope.View {
                             category.amount_budgeted = amount;
                             store.@set (iter, Column.STATE, Envelope.Util.String.format_currency (amount), -1);
 
-                            //BudgetManager.get_default ().update_category (category);
+                            BudgetManager.get_default ().set_current_budgeted_amount (category);
 
                             break;
 

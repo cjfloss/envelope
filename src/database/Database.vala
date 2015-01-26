@@ -86,6 +86,7 @@ namespace Envelope.DB {
         private static const string SQL_INSERT_CATEGORY_FOR_NAME = "INSERT INTO `categories` (`name`) VALUES (:name);";
         private static const string SQL_SET_CATEGORY_BUDGET = "INSERT INTO `categories_budgets` (`category_id`, `year`, `month`, `amount_budgeted`) VALUES (:category_id, :year, :month, :amount_budgeted)";
         private static const string SQL_UPDATE_CATEGORY_BUDGET = "UPDATE `categories_budgets` SET `amount_budgeted` = :amount_budgeted WHERE `category_id` = :category_id AND `year` = :year AND `month` = :month";
+        private static const string SQL_CHECK_CATEGORY_BUDGET_SET = "SELECT COUNT(*) AS size FROM categories_budgets WHERE category_id = :category_id AND year = :year AND month = :month";
         private static const string SQL_DELETE_TRANSACTION = "DELETE FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_TRANSACTION_BY_ID = "SELECT * FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `category_id` IS NULL";
@@ -146,12 +147,42 @@ namespace Envelope.DB {
             (:number, :description, :balance, :type);
             """;
 
+        /**
+         * An account was inserted in the database
+         *
+         * @param account the account which was inserted
+         */
         public signal void account_created (Account account);
+
+        /**
+         * An account was removed from the database
+         *
+         * @param account the account which was removed
+         */
         public signal void account_deleted (Account account);
+
+        /**
+         * An account was updated in the database
+         *
+         * @param account the account which was updated
+         */
         public signal void accout_updated (Account account);
+
+        /**
+         * A category was inserted in the database
+         *
+         * @param category the category which was inserted
+         */
         public signal void category_created (Category category);
+
+        /**
+         * A transaction was inserted in the database
+         *
+         * @param transaction the transaction which was inserted
+         */
         public signal void transaction_created (Transaction transaction);
 
+        // singleton instance
         private static DatabaseManager database_manager_instance = null;
 
         // database handler
@@ -184,12 +215,20 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_insert_category;
         private SQLHeavy.Query q_delete_category;
         private SQLHeavy.Query q_update_category;
+        private SQLHeavy.Query q_update_category_budgeted_amount;
+        private SQLHeavy.Query q_set_category_budgeted_amount;
+        private SQLHeavy.Query q_check_category_budget_set;
 
         // in-memory caches for often-used objects
         private Map<int, Account>           account_cache     = new HashMap<int, Account> ();
         private Map<int, Category>          category_cache    = new HashMap<int, Category> ();
         private Map<string, Merchant>       merchant_cache    = new HashMap<string, Merchant> ();
 
+        /**
+         * Obtain a reference to the singleton instance of the DatabaseManager
+         *
+         * @return the DatabaseManager singleton instance
+         */
         public static new DatabaseManager get_default () {
             if (database_manager_instance == null) {
                 database_manager_instance = new DatabaseManager ();
@@ -198,10 +237,20 @@ namespace Envelope.DB {
             return database_manager_instance;
         }
 
+        /**
+         * Start a database transaction.
+         *
+         * @return the transaction instance
+         */
         public SQLHeavy.Transaction start_transaction () throws SQLHeavy.Error {
             return database.begin_transaction ();
         }
 
+        /**
+         * Get the list of all merchants
+         *
+         * @return list of unique merchants
+         */
         public Collection<Merchant> get_merchants () throws SQLHeavy.Error {
 
             if (!merchant_cache.is_empty) {
@@ -229,6 +278,13 @@ namespace Envelope.DB {
             return merchants;
         }
 
+        /**
+         * Fetch the account having the specified id
+         *
+         * @param account_id the id of the account to load
+         * @return the Account object having the specified id, or null if not found
+         * @throws SQLHeavy.Error
+         */
         public Account? load_account (int account_id) throws SQLHeavy.Error {
 
             if (account_cache.has_key (account_id)) {
@@ -250,11 +306,15 @@ namespace Envelope.DB {
                 return account;
             }
 
-
-
             return null;
         }
 
+        /**
+         * Delete an account from the database.
+         *
+         * @param account the account to delete
+         * @throws SQLHeavy.Error
+         */
         public void delete_account (Account account) throws SQLHeavy.Error {
 
             q_delete_account.set_int ("account_id", account.@id);
@@ -267,6 +327,11 @@ namespace Envelope.DB {
             }
         }
 
+        /**
+         * Load all accounts from the database
+         *
+         * @return the list of accounts
+         */
         public Collection<Account> load_all_accounts () throws SQLHeavy.Error {
 
             if (!account_cache.is_empty) {
@@ -290,11 +355,15 @@ namespace Envelope.DB {
                 results.next ();
             }
 
-            info ("%d account(s)", list.size);
-
             return list;
         }
 
+        /**
+         * Create a new category
+         *
+         * @param category the category to save
+         * @throws SQLHeavy.Error
+         */
         public void create_category (Category category) throws SQLHeavy.Error {
 
             q_insert_category.set_string ("name", category.name);
@@ -325,6 +394,11 @@ namespace Envelope.DB {
             category_created (category);
         }
 
+        /**
+         * Update a category
+         *
+         * @param category the category to update
+         */
         public void update_category (Category category) throws SQLHeavy.Error {
 
             q_update_category.set_int ("category_id", category.@id);
@@ -345,6 +419,49 @@ namespace Envelope.DB {
             category_cache.@set (category.@id, category);
         }
 
+        public void set_category_budgeted_amount (MonthlyCategory category, int year, int month) throws SQLHeavy.Error {
+
+            q_check_category_budget_set.set_int ("category_id", category.@id);
+            q_check_category_budget_set.set_int ("year", year);
+            q_check_category_budget_set.set_int ("month", month);
+
+            SQLHeavy.QueryResult results = q_check_category_budget_set.execute ();
+
+            q_check_category_budget_set.clear ();
+
+            int size = results.get_int ("size");
+
+            if (size == 0) {
+                q_set_category_budgeted_amount.set_int ("category_id", category.@id);
+                q_set_category_budgeted_amount.set_int ("year", year);
+                q_set_category_budgeted_amount.set_int ("month", month);
+                q_set_category_budgeted_amount.set_double ("amount_budgeted", category.amount_budgeted);
+                q_set_category_budgeted_amount.execute ();
+                q_set_category_budgeted_amount.clear ();
+            }
+            else {
+                update_category_budgeted_amount (category, year, month);
+            }
+        }
+
+        public void update_category_budgeted_amount (MonthlyCategory category, int year, int month) throws SQLHeavy.Error {
+
+            q_update_category_budgeted_amount.set_int ("category_id", category.@id);
+            q_update_category_budgeted_amount.set_double ("amount_budgeted", category.amount_budgeted);
+            q_update_category_budgeted_amount.set_int ("year", year);
+            q_update_category_budgeted_amount.set_int ("month", month);
+
+            q_update_category_budgeted_amount.execute ();
+            q_update_category_budgeted_amount.clear ();
+        }
+
+        /**
+         * Assign all transactions having the specified merchant to a category
+         *
+         * @param merchant the name of the merchant to match
+         * @param category the category to assign to each transaction
+         * @throws SQLHeavy.Error
+         */
         public void categorize_for_merchant (string merchant, Category category) throws SQLHeavy.Error {
             q_categorize_for_merchant.set_string ("merchant", merchant);
             q_categorize_for_merchant.set_int ("category_id", category.@id);
@@ -352,6 +469,12 @@ namespace Envelope.DB {
             q_categorize_for_merchant.clear ();
         }
 
+        /**
+         * Create a new account
+         *
+         * @param account the account to create
+         * @throws SQLHeavy.Error
+         */
         public void create_account (Account account) throws SQLHeavy.Error {
 
             var id = q_insert_account.execute_insert (
@@ -368,6 +491,13 @@ namespace Envelope.DB {
             account_created (account);
         }
 
+        /**
+         * Rename an account
+         *
+         * @param account the account to rename
+         * @param new_name the new name to assign
+         * @throws SQLHeavy.Error
+         */
         public void rename_account (Account account, string new_name) throws SQLHeavy.Error {
             q_rename_account.set_int ("account_id", account.@id);
             q_rename_account.set_string ("number", new_name);
@@ -378,6 +508,13 @@ namespace Envelope.DB {
             account_cache.@set (account.@id, account);
         }
 
+        /**
+         * Update the account's balance in the database
+         *
+         * @param account the account to update
+         * @param transaction the database transaction to use
+         * @throws SQLHeavy.Error
+         */
         public void update_account_balance (Account account, ref SQLHeavy.Transaction transaction)  throws SQLHeavy.Error {
             transaction
                 .prepare (SQL_UPDATE_ACCOUNT_BALANCE)
@@ -387,6 +524,13 @@ namespace Envelope.DB {
             account_cache.@set (account.@id, account);
         }
 
+        /**
+         * Load transactions for the specified account
+         *
+         * @param account the account to load transactions from
+         * @return the list of transactions for this account
+         * @throws SQLHeavy.Error
+         */
         public Gee.List<Transaction> load_account_transactions (Account account) throws SQLHeavy.Error {
 
             var list = new ArrayList<Transaction> ();
@@ -410,6 +554,12 @@ namespace Envelope.DB {
             return list;
         }
 
+        /**
+         * Load all transactions not associated to a category
+         *
+         * @return the list of uncategorized transactions
+         * @throws SQLHeavy.Error
+         */
         public Collection<Transaction> load_uncategorized_transactions () throws SQLHeavy.Error {
 
             var list = new ArrayList<Transaction> ();
@@ -638,6 +788,7 @@ namespace Envelope.DB {
         private DatabaseManager () {
             Object ();
             init_database ();
+            connect_signals ();
         }
 
         private void query_result_to_account (SQLHeavy.QueryResult results, out Account account) throws SQLHeavy.Error {
@@ -669,7 +820,7 @@ namespace Envelope.DB {
             var direction = results.get_int ("direction");
             var amount = results.get_double ("amount");
             var timestamp = results.get_int64 ("date");
-            int? category_id = results.get_int ("category_id");
+            int category_id = results.get_int ("category_id");
 
             transaction = new Transaction ();
 
@@ -684,12 +835,8 @@ namespace Envelope.DB {
             if (category != null) {
                 transaction.category = category;
             }
-            else if (category_id != NULL) {
-                var cat = Envelope.Service.CategoryStore.get_default ().get_category_by_id (category_id);
-
-                if (cat != null) {
-                    transaction.category = cat;
-                }
+            else if (category_id != 0) {
+                transaction.category = Envelope.Service.CategoryStore.get_default ().get_category_by_id (category_id);
             }
         }
 
@@ -775,6 +922,13 @@ namespace Envelope.DB {
             database.foreign_keys = true;
         }
 
+        private void connect_signals () {
+            // invalidate merchant cache when a transaction is recorded
+            transaction_created.connect ( (transaction) =>  {
+                merchant_cache.clear ();
+            });
+        }
+
         /**
          * Initialize prepared statements
          *
@@ -802,6 +956,9 @@ namespace Envelope.DB {
             q_update_category                           = database.prepare (SQL_UPDATE_CATEGORY);
             q_delete_account                            = database.prepare (SQL_DELETE_ACCOUNT);
             q_load_transactions_for_month_and_year      = database.prepare (SQL_LOAD_TRANSACTIONS_FOR_MONTH);
+            q_update_category_budgeted_amount           = database.prepare (SQL_UPDATE_CATEGORY_BUDGET);
+            q_set_category_budgeted_amount              = database.prepare (SQL_SET_CATEGORY_BUDGET);
+            q_check_category_budget_set                 = database.prepare (SQL_CHECK_CATEGORY_BUDGET_SET);
         }
 
         private void check_create_categories () throws SQLHeavy.Error {

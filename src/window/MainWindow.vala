@@ -379,13 +379,13 @@ namespace Envelope.Window {
             });
 
             add_transaction_button.clicked.connect ( () => {
-                TransactionView.get_default ().add_transaction_row ();
-
                 var child = content_revealer.get_child ();
 
                 if (!(child is TransactionView)) {
                     set_content_view (TransactionView.get_default ());
                 }
+
+                TransactionView.get_default ().btn_add_transactions_clicked ();
             });
 
             account_manager.transaction_recorded.connect ( () => {
