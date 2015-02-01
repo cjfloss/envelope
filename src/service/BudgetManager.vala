@@ -121,9 +121,9 @@ namespace Envelope.Service {
         public Category create_category (string name, double budgeted_amount = 0d) throws ServiceError {
 
             try {
-                Category category = new Category ();
+                MonthlyCategory category = new MonthlyCategory ();
                 category.name = name;
-                //category.amount_budgeted = budgeted_amount;
+                category.amount_budgeted = budgeted_amount;
 
                 dbm.create_category (category);
                 categories = null;
