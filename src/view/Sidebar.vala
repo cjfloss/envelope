@@ -36,7 +36,7 @@ namespace Envelope.View {
             return sidebar_instance;
         }
 
-        private static const int COLUMN_COUNT = 13;
+        private static const int COLUMN_COUNT = 15;
 
         private static const string ICON_ACCOUNT    = "text-spreadsheet";
         private static const string ICON_OUTFLOW    = "go-up-symbolic";
@@ -66,7 +66,9 @@ namespace Envelope.View {
             COLORIZE,
             TOOLTIP,
             BUDGET_STATE,
-            EDITABLE
+            EDITABLE,
+            OUTFLOW,
+            INFLOW
         }
 
         private enum TreeCategory {
@@ -109,6 +111,10 @@ namespace Envelope.View {
                                 // while editing is taking place to prevent
                                 // segmentation faults
 
+        // category update in popover
+        private CategoryProperties popover_category_properties;
+        private Envelope.Widget.CellRendererPopoverContainer crpc;
+
         public signal void overview_selected ();
         public signal void category_selected (Category category);
         public signal void list_account_selected (Account account);
@@ -129,7 +135,9 @@ namespace Envelope.View {
                 typeof (bool),
                 typeof (string),
                 typeof (BudgetState),
-                typeof (bool)
+                typeof (bool),
+                typeof (double),
+                typeof (double)
             );
 
             build_ui ();
@@ -164,7 +172,7 @@ namespace Envelope.View {
 
             // selection
             var selection = treeview.get_selection ();
-            selection.set_mode (Gtk.SelectionMode.SINGLE);
+            selection.set_mode (Gtk.SelectionMode.BROWSE);
             selection.set_select_function (tree_selection_func);
 
             var col = new Gtk.TreeViewColumn ();
@@ -181,17 +189,14 @@ namespace Envelope.View {
             col.set_attributes (cri, "icon-name", Column.ICON);
             col.set_cell_data_func (cri, treeview_icon_renderer_function);
 
-            var crt = new Gtk.CellRendererText ();
-            col.pack_start (crt, true);
-            crt.editable = true;
-            crt.editable_set = true;
-            crt.ellipsize = Pango.EllipsizeMode.END;
-            crt.ellipsize_set = true;
-            crt.edited.connect (item_renamed);
-            crt.editing_started.connect (cr_start_editing);
-            crt.editing_canceled.connect (cr_cancel_editing);
-            col.set_attributes (crt, "markup", Column.LABEL);
-            col.set_cell_data_func (crt, treeview_text_renderer_function);
+            popover_category_properties = new CategoryProperties ();
+
+            var crpc = new CellRendererPopoverContainer (treeview);
+            crpc.editable = true;
+            crpc.editable_set = true;
+            col.pack_start (crpc, true);
+            col.set_attributes (crpc, "markup", Column.LABEL);
+            col.set_cell_data_func (crpc, treeview_text_renderer_function);
 
             cre = new Granite.Widgets.CellRendererExpander ();
             cre.is_category_expander = true;
@@ -471,58 +476,22 @@ namespace Envelope.View {
 
                     double cat_inflow;
                     double cat_outflow;
-                    BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
+                    budget_manager.compute_current_category_operations (category, out cat_inflow, out cat_outflow);
 
-                    var current_category_iter = add_item (category_iter, category.name, TreeCategory.CATEGORIES, null, category, Action.SHOW_CATEGORY, cat_inflow - cat_outflow, ICON_CATEGORY);
-
-                    // add subitems
-                    if (cat_outflow != 0) {
-
-                        add_item (current_category_iter, _("Budgeted amount"),
-                            TreeCategory.CATEGORIES,
-                            null,
-                            category,
-                            Action.NONE,
-                            category.amount_budgeted, null,
-                            false, true, "", null, true);
-
-                        add_item (current_category_iter, _("Spending"),
-                            TreeCategory.CATEGORIES,
-                            null,
-                            category,
-                            Action.NONE,
-                            cat_outflow, null,
-                            false, true, "", null, false);
-
-                        if (cat_outflow > category.amount_budgeted) {
-                            add_item (current_category_iter, _("Over"),
-                                TreeCategory.CATEGORIES,
-                                null,
-                                category,
-                                Action.NONE,
-                                cat_outflow - category.amount_budgeted, null,
-                                false, true, "", null, false);
-                        }
-                        else {
-                            add_item (current_category_iter, _("Remaining"),
-                                TreeCategory.CATEGORIES,
-                                null,
-                                category,
-                                Action.NONE,
-                                category.amount_budgeted - cat_outflow, null,
-                                false, true, "", null, false);
-                        }
-                    }
-
-                    if (cat_inflow != 0) {
-                        add_item (current_category_iter, _("Earnings"),
-                            TreeCategory.CATEGORIES,
-                            null,
-                            category,
-                            Action.NONE,
-                            cat_inflow, null,
-                            false, true, "", null, false);
-                    }
+                    var current_category_iter = add_item (category_iter,
+                        category.name,
+                        TreeCategory.CATEGORIES,
+                        null, category,
+                        Action.SHOW_CATEGORY,
+                        category.amount_budgeted + cat_inflow - cat_outflow,
+                        ICON_CATEGORY,
+                        false,
+                        false,
+                        "",
+                        null,
+                        false,
+                        cat_outflow,
+                        cat_inflow);
                 }
             }
             catch (ServiceError err) {
@@ -568,7 +537,9 @@ namespace Envelope.View {
                                        bool colorize = false,
                                        string tooltip = "",
                                        BudgetState? budget_state = null,
-                                       bool is_editable = false) {
+                                       bool is_editable = false,
+                                       double outflow = 0d,
+                                       double inflow = 0d) {
 
             Gtk.TreeIter iter;
 
@@ -592,7 +563,9 @@ namespace Envelope.View {
                 Column.COLORIZE, colorize,
                 Column.TOOLTIP, Markup.escape_text (tooltip != "" ? tooltip : label),
                 Column.BUDGET_STATE, budget_state,
-                Column.EDITABLE, is_editable, -1);
+                Column.EDITABLE, is_editable,
+                Column.OUTFLOW, outflow,
+                Column.INFLOW, inflow, -1);
 
             return iter;
         }
@@ -716,6 +689,9 @@ namespace Envelope.View {
             crt.editable = false;
             crt.editable_set = true;
 
+            CellRendererPopoverContainer cr = crt as CellRendererPopoverContainer;
+            cr.content = null;
+
             if (is_header) {
                 crt.weight = CELL_FONT_WEIGHT_HEADER;
                 crt.weight_set = true;
@@ -734,6 +710,9 @@ namespace Envelope.View {
             crt.editable = false;
             crt.editable_set = true;
 
+            CellRendererPopoverContainer cr = crt as CellRendererPopoverContainer;
+            cr.content = null;
+
             if (is_header) {
                 crt.weight = CELL_FONT_WEIGHT_HEADER;
                 crt.weight_set = true;
@@ -748,10 +727,22 @@ namespace Envelope.View {
         private void treeview_text_renderer_function_categories (Gtk.CellRendererText crt, Gtk.TreeIter iter, Gtk.TreeModel model) {
 
             bool is_header;
-            model.@get (iter, Column.IS_HEADER, out is_header, -1);
+            MonthlyCategory? category;
+            double inflow;
+            double outflow;
+            model.@get (iter,
+                Column.IS_HEADER, out is_header,
+                Column.CATEGORY, out category,
+                Column.INFLOW, out inflow,
+                Column.OUTFLOW, out outflow, -1);
 
-            crt.editable = false;
+            //crt.editable = false;
             crt.editable_set = true;
+            crt.editable = true;
+
+            CellRendererPopoverContainer cr = crt as CellRendererPopoverContainer;
+            cr.content = category != null ? popover_category_properties : null;
+            crt.editable = cr.content != null;
 
             if (is_header) {
                 crt.weight = CELL_FONT_WEIGHT_HEADER;
@@ -759,8 +750,8 @@ namespace Envelope.View {
             }
             else {
                 crt.weight_set = false;
-                crt.editable = true;
-                crt.editable_set = true;
+                //crt.editable = true;
+                //crt.editable_set = true;
             }
         }
 
@@ -988,23 +979,40 @@ namespace Envelope.View {
             Gtk.TreeModel model;
             if (store.get_iter (out iter, path)) {
 
+                if (selected_iter == iter) {
+                    return;
+                }
+
                 selected_iter = iter;
 
                 Account account;
                 Action action;
-                Category category;
+                Category? category;
                 TreeCategory tree_category;
                 bool is_header;
+                double inflow;
+                double outflow;
 
                 store.@get (iter,
                     Column.ACCOUNT, out account,
                     Column.CATEGORY, out category,
                     Column.ACTION, out action,
                     Column.TREE_CATEGORY, out tree_category,
-                    Column.IS_HEADER, out is_header, -1);
+                    Column.IS_HEADER, out is_header,
+                    Column.INFLOW, out inflow,
+                    Column.OUTFLOW, out outflow, -1);
 
                 if (account != null) {
                     account_selected (account);
+                }
+
+                // If we are on a category row, set the current category in
+                // the categroy properties popover
+                // TODO maybe move this to a new method "category_selected ()"
+                if (category != null) {
+                    popover_category_properties.category = category as MonthlyCategory;
+                    popover_category_properties.inflow = inflow;
+                    popover_category_properties.outflow = outflow;
                 }
 
                 switch (action) {
@@ -1262,11 +1270,6 @@ namespace Envelope.View {
                 toggle = true;
             }
 
-            if (is_category_at_path (path)) {
-                toggle = true;
-                //tree_view.get_selection ().select_path (path);
-            }
-
             if (toggle) {
                 if (tree_view.is_row_expanded (path)) {
                     tree_view.collapse_row (path);
@@ -1312,7 +1315,7 @@ namespace Envelope.View {
 
             // we don't want to allow selection on category subitems (like budgeted amount, spending, income, etc)
             if (is_category_at_path (path)) {
-                return path.get_depth () < 3;
+                return true;
             }
 
             return true;

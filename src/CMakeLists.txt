@@ -49,6 +49,7 @@ vala_precompile(VALA_C ${EXEC_NAME}
   view/AccountWelcomeScreen.vala
   view/BudgetOverview.vala
   view/FilterView.vala
+  view/CategoryProperties.vala
 
   window/MainWindow.vala
 
@@ -61,6 +62,8 @@ vala_precompile(VALA_C ${EXEC_NAME}
   widget/CellRendererDatePicker.vala
   widget/CellRendererTextCompletion.vala
   widget/CellRendererCategoryPicker.vala
+  widget/CellRendererUpdatable.vala
+  widget/CellRendererPopoverContainer.vala
 
   Envelope.vala
 
