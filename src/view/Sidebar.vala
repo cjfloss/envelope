@@ -194,6 +194,9 @@ namespace Envelope.View {
             var crpc = new CellRendererPopoverContainer (treeview);
             crpc.editable = true;
             crpc.editable_set = true;
+            crpc.edited.connect (item_renamed);
+            crpc.editing_started.connect (cr_start_editing);
+            crpc.editing_canceled.connect (cr_cancel_editing);
             col.pack_start (crpc, true);
             col.set_attributes (crpc, "markup", Column.LABEL);
             col.set_cell_data_func (crpc, treeview_text_renderer_function);
@@ -1147,11 +1150,11 @@ namespace Envelope.View {
 
                     case TreeCategory.CATEGORIES:
 
-                        store.@set (iter,
+                        /*store.@set (iter,
                             Column.LABEL, text,
                             Column.TOOLTIP, text, -1);
 
-                        list_category_name_updated (category, text);
+                        list_category_name_updated (category, text);*/
                         break;
 
                     default:
