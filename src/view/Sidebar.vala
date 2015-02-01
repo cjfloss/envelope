@@ -476,7 +476,7 @@ namespace Envelope.View {
 
                     double cat_inflow;
                     double cat_outflow;
-                    BudgetManager.get_default ().compute_current_category_operations (category, out cat_inflow, out cat_outflow);
+                    budget_manager.compute_current_category_operations (category, out cat_inflow, out cat_outflow);
 
                     var current_category_iter = add_item (category_iter,
                         category.name,
@@ -741,7 +741,8 @@ namespace Envelope.View {
             crt.editable = true;
 
             CellRendererPopoverContainer cr = crt as CellRendererPopoverContainer;
-            cr.content = popover_category_properties;
+            cr.content = category != null ? popover_category_properties : null;
+            crt.editable = cr.content != null;
 
             if (is_header) {
                 crt.weight = CELL_FONT_WEIGHT_HEADER;
