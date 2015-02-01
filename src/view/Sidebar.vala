@@ -111,6 +111,7 @@ namespace Envelope.View {
                                 // while editing is taking place to prevent
                                 // segmentation faults
 
+        // category update in popover
         private CategoryProperties popover_category_properties;
         private Envelope.Widget.CellRendererPopoverContainer crpc;
 
@@ -195,21 +196,7 @@ namespace Envelope.View {
             crpc.editable_set = true;
             col.pack_start (crpc, true);
             col.set_attributes (crpc, "markup", Column.LABEL);
-            //col.set_attributes (crcp, "category", Column.CATEGORY);
             col.set_cell_data_func (crpc, treeview_text_renderer_function);
-
-            /*var crt = new Gtk.CellRendererText ();
-            col.pack_start (crt, true);
-            crt.editable = true;
-            crt.editable_set = true;
-            crt.ellipsize = Pango.EllipsizeMode.END;
-            crt.ellipsize_set = true;
-            crt.edited.connect (item_renamed);
-            crt.editing_started.connect (cr_start_editing);
-            crt.editing_canceled.connect (cr_cancel_editing);
-            col.set_attributes (crt, "markup", Column.LABEL);
-            col.set_cell_data_func (crt, treeview_text_renderer_function);
-            */
 
             cre = new Granite.Widgets.CellRendererExpander ();
             cre.is_category_expander = true;
