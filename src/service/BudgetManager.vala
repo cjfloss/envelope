@@ -26,16 +26,16 @@ namespace Envelope.Service {
      */
     public struct BudgetState {
 
-        DateTime from;
-        DateTime to;
+        public DateTime from;
+        public DateTime to;
 
-        double inflow;
-        double outflow;
+        public double inflow;
+        public double outflow;
 
         public double remaining { get { return inflow - outflow; }}
 
-        Collection<Transaction> transactions;
-        Collection<MonthlyCategory> categories;
+        public Collection<Transaction> transactions;
+        public Collection<MonthlyCategory> categories;
 
         public double budgeted_outflow { get {
 
@@ -48,10 +48,14 @@ namespace Envelope.Service {
             return amount;
         }}
 
-        Collection<Transaction> uncategorized;
+        public Collection<Transaction> uncategorized;
 
-        double uncategorized_inflow;
-        double uncategorized_outflow;
+        public double uncategorized_inflow;
+        public double uncategorized_outflow;
+
+        public double budget_available { get {
+            return inflow - budgeted_outflow;
+        }}
     }
 
     private static BudgetManager budget_manager_instance = null;
@@ -358,6 +362,7 @@ namespace Envelope.Service {
             budget_state.outflow = outflow;
             budget_state.uncategorized = uncategorized;
             budget_state.transactions = transactions;
+            budget_state.categories = get_categories ();
         }
 
         /**
