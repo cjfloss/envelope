@@ -23,20 +23,21 @@ namespace Envelope.View {
 
     public class CategoryProperties : CellRendererUpdatable {
 
+        private static const int ENTRY_WIDTH = 15;
+
         public MonthlyCategory category { get; set; }
         public double inflow { get; set; }
         public double outflow { get; set; }
 
         private Gtk.Entry category_name_entry;
         private Gtk.Entry budgeted_amount_entry;
-        private Gtk.Label date_label;
         private Gtk.Label inflow_label;
         private Gtk.Label inflow_label_label;
         private Gtk.Label outflow_label;
         private Gtk.Label outflow_label_label;
         private Gtk.Label remaining_label;
         private Gtk.Label remaining_label_label;
-        private Gtk.Label empty_label;
+        private Gtk.Label available_label;
         private Gtk.Button ok_button;
         private Gtk.Button cancel_button;
 
@@ -50,7 +51,8 @@ namespace Envelope.View {
 
         public override void update () {
             category_name_entry.text = category.name;
-            budgeted_amount_entry.text = Envelope.Util.String.format_currency (category.amount_budgeted);
+            budgeted_amount_entry.text = category.amount_budgeted != 0d ?
+                Envelope.Util.String.format_currency (category.amount_budgeted) : "";
 
             inflow_label.label = Envelope.Util.String.format_currency (inflow);
             inflow_label.visible = inflow > 0d;
@@ -65,22 +67,29 @@ namespace Envelope.View {
             remaining_label.visible = category.amount_budgeted != 0d;
             remaining_label_label.visible = remaining_label.visible;
 
-            empty_label.visible = outflow == 0d && inflow == 0d;
+            available_label.label = "Max. %s".printf (Envelope.Util.String.format_currency (BudgetManager.get_default ().state.budget_available));
         }
 
         private void build_ui () {
 
             column_spacing = 10;
             row_spacing = 10;
-            column_homogeneous = true;
+            //column_homogeneous = true;
+
+            // title
+            var title_label = new Gtk.Label (_("Edit category"));
+            Granite.Widgets.Utils.apply_text_style_to_label (Granite.TextStyle.H3, title_label);
+            attach_next_to (title_label, null, Gtk.PositionType.TOP, 3, 1);
 
             // category name text entry
-            category_name_entry = new Gtk.Entry ();
-            attach_next_to (category_name_entry, null, Gtk.PositionType.TOP, 2, 1);
+            var category_name_label = new Gtk.Label (_("Name"));
+            category_name_label.xalign = 1.0f;
+            attach_next_to (category_name_label, title_label, Gtk.PositionType.BOTTOM, 1, 1);
 
-            date_label = new Gtk.Label ("");
-            //Granite.Widgets.Utils.apply_text_style_to_label (Granite.TextStyle.H2, date_label);
-            //grid.attach_next_to (date_label, null, Gtk.PositionType.BOTTOM, 2, 1);
+            category_name_entry = new Gtk.Entry ();
+            category_name_entry.width_chars = ENTRY_WIDTH;
+            category_name_entry.max_width_chars = ENTRY_WIDTH;
+            attach_next_to (category_name_entry, category_name_label, Gtk.PositionType.RIGHT, 2, 1);
 
             // budgeted amount
             var budgeted_amount_label = new Gtk.Label (_("Budget"));
@@ -88,9 +97,14 @@ namespace Envelope.View {
             attach_next_to (budgeted_amount_label, null, Gtk.PositionType.BOTTOM, 1, 1);
 
             budgeted_amount_entry = new Gtk.Entry ();
-            budgeted_amount_entry.width_chars = 10;
-            budgeted_amount_entry.max_width_chars = 10;
+            budgeted_amount_entry.width_chars = ENTRY_WIDTH;
+            budgeted_amount_entry.max_width_chars = ENTRY_WIDTH;
+            budgeted_amount_entry.placeholder_text = _("Monthly budget");
             attach_next_to (budgeted_amount_entry, budgeted_amount_label, Gtk.PositionType.RIGHT, 1, 1);
+
+            available_label = new Gtk.Label ("");
+            available_label.xalign = 0.0f;
+            attach_next_to (available_label, budgeted_amount_entry, Gtk.PositionType.RIGHT, 1, 1);
 
             // outflow
             outflow_label_label = new Gtk.Label (_("Outflow"));
@@ -119,18 +133,20 @@ namespace Envelope.View {
             remaining_label.xalign = 0.0f;
             attach_next_to (remaining_label, remaining_label_label, Gtk.PositionType.RIGHT, 1, 1);
 
-            // empty label
-            empty_label = new Gtk.Label (_("No transactions recorded for this cateogry yet"));
-            attach_next_to (empty_label, null, Gtk.PositionType.BOTTOM, 2, 1);
+            // button box
+            var box = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
+            box.set_layout (Gtk.ButtonBoxStyle.END);
+            box.set_spacing (5);
+            attach_next_to (box, null, Gtk.PositionType.BOTTOM, 3, 1);
 
             // Cancel button
             cancel_button = new Gtk.Button.with_label (_("Cancel"));
-            attach_next_to (cancel_button, null, Gtk.PositionType.BOTTOM, 1, 1);
+            box.add (cancel_button);
 
             // OK button
             ok_button = new Gtk.Button.with_label (_("Apply"));
             ok_button.get_style_context ().add_class("suggested-action");
-            attach_next_to (ok_button, cancel_button, Gtk.PositionType.RIGHT, 1, 1);
+            box.add (ok_button);
 
             show_all ();
         }
