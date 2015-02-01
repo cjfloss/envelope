@@ -35,7 +35,7 @@ namespace Envelope.Widget {
         protected abstract void connect_signals ();
 
         protected AbstractPopoverCellRenderer (Gtk.Widget relative_to) {
-            Object ();
+            base ();
             this.relative_to = relative_to;
 
             build_real_ui ();
@@ -49,6 +49,8 @@ namespace Envelope.Widget {
                                         Gdk.Rectangle cell_area,
                                         Gtk.CellRendererState flags) {
 
+            unowned Gtk.CellEditable return_value = base.start_editing (event, widget, path, background_area, cell_area, flags);
+
             current_path = path;
 
             Cairo.RectangleInt pos;
@@ -58,7 +60,7 @@ namespace Envelope.Widget {
             popover.relative_to = widget;
             popover.set_position (set_top ? Gtk.PositionType.TOP : Gtk.PositionType.BOTTOM);
 
-            return null;
+            return return_value;
         }
 
         private void build_real_ui () {
@@ -115,7 +117,7 @@ namespace Envelope.Widget {
 
             position.width = area.width;
             position.height = area.height;
-            position.y = area.y + area.height + 2;
+            position.y = area.y/* + area.height + 2*/;
             position.x = area.x;
 
             return false;
