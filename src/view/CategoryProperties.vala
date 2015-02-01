@@ -17,12 +17,13 @@
 */
 
 using Envelope.Widget;
+using Envelope.Service;
 
 namespace Envelope.View {
 
     public class CategoryProperties : CellRendererUpdatable {
 
-        public unowned MonthlyCategory category { get; set; }
+        public MonthlyCategory category { get; set; }
         public double inflow { get; set; }
         public double outflow { get; set; }
 
@@ -38,6 +39,8 @@ namespace Envelope.View {
         private Gtk.Label empty_label;
         private Gtk.Button ok_button;
         private Gtk.Button cancel_button;
+
+        private BudgetManager bm = BudgetManager.get_default ();
 
         public CategoryProperties () {
             Object ();
@@ -133,13 +136,28 @@ namespace Envelope.View {
         }
 
         private void connect_signals () {
-            cancel_button.clicked.connect ( () => {
-                dismiss ();
-            });
+            cancel_button.clicked.connect (cancel_clicked);
+            ok_button.clicked.connect (ok_clicked);
+        }
 
-            ok_button.clicked.connect ( () => {
-                dismiss ();
-            });
+        private void cancel_clicked () {
+            dismiss ();
+        }
+
+        private void ok_clicked () {
+
+            category.name = category_name_entry.text.strip ();
+            category.amount_budgeted = Envelope.Util.String.parse_currency (budgeted_amount_entry.text);
+
+            try {
+                bm.set_current_budgeted_amount (category);
+                bm.update_category (category);
+            }
+            catch (ServiceError err) {
+                error ("could not update category (%s)", err.message);
+            }
+
+            dismiss ();
         }
     }
 }

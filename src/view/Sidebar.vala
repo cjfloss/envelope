@@ -740,7 +740,7 @@ namespace Envelope.View {
         private void treeview_text_renderer_function_categories (Gtk.CellRendererText crt, Gtk.TreeIter iter, Gtk.TreeModel model) {
 
             bool is_header;
-            MonthlyCategory category;
+            MonthlyCategory? category;
             double inflow;
             double outflow;
             model.@get (iter,
@@ -754,10 +754,6 @@ namespace Envelope.View {
             crt.editable = true;
 
             CellRendererPopoverContainer cr = crt as CellRendererPopoverContainer;
-            popover_category_properties.category = category;
-            popover_category_properties.inflow = inflow;
-            popover_category_properties.outflow = outflow;
-
             cr.content = popover_category_properties;
 
             if (is_header) {
@@ -1003,19 +999,32 @@ namespace Envelope.View {
 
                 Account account;
                 Action action;
-                Category category;
+                Category? category;
                 TreeCategory tree_category;
                 bool is_header;
+                double inflow;
+                double outflow;
 
                 store.@get (iter,
                     Column.ACCOUNT, out account,
                     Column.CATEGORY, out category,
                     Column.ACTION, out action,
                     Column.TREE_CATEGORY, out tree_category,
-                    Column.IS_HEADER, out is_header, -1);
+                    Column.IS_HEADER, out is_header,
+                    Column.INFLOW, out inflow,
+                    Column.OUTFLOW, out outflow, -1);
 
                 if (account != null) {
                     account_selected (account);
+                }
+
+                // If we are on a category row, set the current category in
+                // the categroy properties popover
+                // TODO maybe move this to a new method "category_selected ()"
+                if (category != null) {
+                    popover_category_properties.category = category as MonthlyCategory;
+                    popover_category_properties.inflow = inflow;
+                    popover_category_properties.outflow = outflow;
                 }
 
                 switch (action) {
