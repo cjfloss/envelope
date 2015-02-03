@@ -86,7 +86,7 @@ namespace Envelope.View {
         private Gtk.MenuItem right_click_menu_item_split;
         private Gtk.MenuItem right_click_menu_item_remove;
 
-        public string search_term { get; set; }
+        public string search_term { get; set; default = ""; }
 
         public Gee.List<Transaction> transactions { get; set; }
 
@@ -116,7 +116,10 @@ namespace Envelope.View {
         }
 
         public void set_search_filter (string term) {
-            search_term = term;
+
+            debug ("set_search_filter (%s)", term);
+
+            search_term = term.strip ().length > 0 ? term.strip ().up () : "";
             apply_filters ();
         }
 
@@ -209,14 +212,17 @@ namespace Envelope.View {
                 return true; //editing... always shown
             }
 
-            var search = search_term != null && search_term.strip ().length > 0 ? search_term.strip ().up () : "";
+            if (search_term != "") {
 
-            if (search.length > 0) {
                 var label = transaction.label.up ();
-                var desc = (transaction.description != null ? transaction.description : "").up ();
 
-                if (label.index_of (search) == -1 && desc.index_of (search) == -1) {
-                    return false;
+                if (label.index_of (search_term) == -1) {
+
+                    var desc = (transaction.description != null ? transaction.description : "").up ();
+
+                    if (desc.index_of (search_term) == -1) {
+                        return false;
+                    }
                 }
             }
 
