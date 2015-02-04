@@ -65,3 +65,12 @@ You can also run the unit tests:
 ```sh
 $ tests/envelope-tests
 ```
+
+## Contributing
+
+Want to help? Just fork this repository, pick an issue and start hacking. Just follow the coding style and document your changes.
+
+### Commit messages
+
+Commit messages should follow the [AngularJS commit message conventions](https://docs.google.com/document/d/1QrDFcIiPjSLDn3EL15IJygNPiHORgU1_OOAqWjiDU5Y/edit),
+since the changelog is generated from the commit history.
