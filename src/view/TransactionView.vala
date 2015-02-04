@@ -404,6 +404,8 @@ namespace Envelope.View {
             // memo cell renderer
             renderer_memo = new Gtk.CellRendererText();
             renderer_memo.editable = true;
+            renderer_memo.ellipsize = Pango.EllipsizeMode.END;
+            renderer_memo.ellipsize_set = true;
             renderer_memo.edited.connect ((path, text) => {
 
                 Gtk.TreeIter iter;
@@ -422,6 +424,8 @@ namespace Envelope.View {
             renderer_label.store = MerchantStore.get_default ();
             renderer_label.text_column = 0;
             renderer_label.editable = true;
+            renderer_label.ellipsize = Pango.EllipsizeMode.END;
+            renderer_label.ellipsize_set = true;
             renderer_label.edited.connect ((path, text) =>  {
 
                 Gtk.TreeIter iter;
@@ -439,6 +443,8 @@ namespace Envelope.View {
             var renderer_category = new CellRendererCategoryPicker (treeview);
             renderer_category.store = CategoryStore.get_default ();
             renderer_category.text_column = CategoryStore.Column.LABEL;
+            renderer_category.ellipsize = Pango.EllipsizeMode.END;
+            renderer_category.ellipsize_set = true;
             renderer_category.edited.connect ((path, text) => {
 
                 if (text.strip () == "") {
@@ -495,6 +501,8 @@ namespace Envelope.View {
             renderer_out.editable = true;
             renderer_out.foreground = CELL_COLOR_OUTGOING;
             renderer_out.xalign = 1.0f;
+            renderer_out.ellipsize = Pango.EllipsizeMode.END;
+            renderer_out.ellipsize_set = true;
             renderer_out.edited.connect ((path, text) =>  {
 
                 Gtk.TreeIter iter;
@@ -527,6 +535,8 @@ namespace Envelope.View {
             renderer_in.editable = true;
             renderer_in.foreground = CELL_COLOR_INCOMING;
             renderer_in.xalign = 1.0f;
+            renderer_in.ellipsize = Pango.EllipsizeMode.END;
+            renderer_in.ellipsize_set = true;
             renderer_in.edited.connect ((path, text) =>  {
 
                 Gtk.TreeIter iter;
@@ -556,6 +566,8 @@ namespace Envelope.View {
 
             crdp = new CellRendererDatePicker (treeview);
             crdp.xalign = 1.0f;
+            crdp.ellipsize = Pango.EllipsizeMode.END;
+            crdp.ellipsize_set = true;
             crdp.edited.connect ((path, text) => {
 
                 if (crdp.date_selected) {
