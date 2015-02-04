@@ -389,6 +389,7 @@ namespace Envelope.View {
             treeview.show_expanders = false;
             treeview.rules_hint = true;
             treeview.enable_grid_lines = Gtk.TreeViewGridLines.HORIZONTAL;
+            treeview.fixed_height_mode = true;
 
             var tree_model_sort = new Gtk.TreeModelSort.with_model (view_store);
             tree_model_sort.set_sort_func (Column.INFLOW, treemodel_sort_amount);
@@ -581,6 +582,7 @@ namespace Envelope.View {
             date_column.sort_column_id = Column.DATE;
             date_column.set_cell_data_func (crdp, cell_renderer_color_function);
             date_column.set_attributes (crdp, "text", Column.DATE);
+            date_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
             treeview.append_column (date_column);
 
             var merchant_column = new Gtk.TreeViewColumn ();
@@ -592,6 +594,7 @@ namespace Envelope.View {
             merchant_column.sort_column_id = Column.MERCHANT;
             merchant_column.set_attributes (renderer_label, "text", Column.MERCHANT);
             merchant_column.set_cell_data_func (renderer_label, cell_renderer_color_function);
+            merchant_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
             treeview.append_column (merchant_column);
 
             var category_column = new Gtk.TreeViewColumn ();
@@ -603,6 +606,7 @@ namespace Envelope.View {
             category_column.sort_column_id = Column.CATEGORY;
             category_column.set_cell_data_func (renderer_category, cell_renderer_category_func);
             category_column.set_attributes (renderer_category, "text", Column.CATEGORY);
+            category_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
             treeview.append_column (category_column);
 
             var out_column = new Gtk.TreeViewColumn ();
@@ -614,6 +618,7 @@ namespace Envelope.View {
             out_column.sort_column_id = Column.OUTFLOW;
             out_column.set_attributes (renderer_out, "text", Column.OUTFLOW);
             out_column.set_cell_data_func (renderer_out, cell_renderer_color_outflow_function);
+            out_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
             treeview.append_column (out_column);
 
             var in_column = new Gtk.TreeViewColumn ();
@@ -625,6 +630,7 @@ namespace Envelope.View {
             in_column.sort_column_id = Column.INFLOW;
             in_column.set_attributes (renderer_in, "text", Column.INFLOW);
             in_column.set_cell_data_func (renderer_in, cell_renderer_color_inflow_function);
+            in_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
             treeview.append_column (in_column);
 
             var memo_column = new Gtk.TreeViewColumn ();
@@ -637,6 +643,7 @@ namespace Envelope.View {
             memo_column.spacing = 10;
             memo_column.set_attributes (renderer_memo, "text", Column.MEMO);
             memo_column.set_cell_data_func (renderer_memo, cell_renderer_color_function);
+            memo_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
             treeview.append_column (memo_column);
 
             // right-click menu
