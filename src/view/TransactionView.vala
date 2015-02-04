@@ -52,7 +52,7 @@ namespace Envelope.View {
             EDITING
         }
 
-        private static const int COLUMN_COUNT = 8;
+        private static const int COLUMN_COUNT = 9;
         private static const string CELL_COLOR_INCOMING = "#4e9a06";
         private static const string CELL_COLOR_OUTGOING = "#A62626";
         private static string CELL_DATE_FORMAT = "%x"; // preferred format according to locale
@@ -73,7 +73,7 @@ namespace Envelope.View {
         private Gtk.TreeModelFilter view_store;
         private Gtk.TreeIter current_editing_iter;
 
-        private Gdk.RGBA future_transaction_text_color;
+        private string future_transaction_text_color;
 
         private bool populating_from_list = false;
 
@@ -105,7 +105,8 @@ namespace Envelope.View {
                 typeof (string),
                 typeof (int),
                 typeof (Transaction),
-                typeof (string)); // todo change to category type
+                typeof (string),
+                typeof (string));
 
             view_store = new Gtk.TreeModelFilter (transactions_store, null);
             view_store.set_visible_func (view_store_filter_func);
@@ -151,6 +152,8 @@ namespace Envelope.View {
                 category_name = transaction.category.name;
             }
 
+            var color = get_foreground_from_date (transaction.date);
+
             transactions_store.append (out iter, parent_iter);
             transactions_store.@set (iter,
                 Column.DATE, transaction.date.format (CELL_DATE_FORMAT),
@@ -160,7 +163,8 @@ namespace Envelope.View {
                 Column.MEMO, transaction.description,
                 Column.ID, transaction.@id,
                 Column.TRANSACTION, transaction,
-                Column.CATEGORY, category_name, -1);
+                Column.CATEGORY, category_name,
+                Column.COLOR, color, -1);
 
             update_view ();
         }
@@ -346,10 +350,7 @@ namespace Envelope.View {
 
             debug ("building transaction grid ui");
 
-            future_transaction_text_color = Gdk.RGBA ();
-            future_transaction_text_color.red = 0.7;
-            future_transaction_text_color.green = 0.7;
-            future_transaction_text_color.blue = 0.7;
+            future_transaction_text_color = "#aaa";
 
             grid_scroll = new Gtk.ScrolledWindow (null, null);
             grid_scroll.vexpand = true;
@@ -675,6 +676,26 @@ namespace Envelope.View {
 
         private void cell_renderer_color_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
             set_cell_foreground_from_date (layout, renderer, model, iter);
+        }
+
+        private void set_cell_foreground_from_date (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter, string? default_color = null) {
+
+            Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
+
+            string? color;
+            model.@get (iter, Column.COLOR, out color, -1);
+
+            if (color != null) {
+                crt.foreground = color;
+                crt.foreground_set = true;
+            }
+            else if (default_color != null) {
+                crt.foreground = default_color;
+                crt.foreground_set = true;
+            }
+            else {
+                crt.foreground_set = false;
+            }
         }
 
         private int treemodel_sort_amount (Gtk.TreeModel model, Gtk.TreeIter iter1, Gtk.TreeIter iter2) {
@@ -1102,33 +1123,25 @@ namespace Envelope.View {
             }
         }
 
-        private void set_cell_foreground_from_date (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter, string? default_color = null) {
-            string date;
-            model.@get (iter, Column.DATE, out date, -1);
+        private string? get_foreground_from_date (DateTime? date, string? default_color = null) {
 
-            Date dt = Date ();
-            dt.set_parse (date);
-
-            if (dt.valid ()) {
+            if (date != null) {
                 var now = new DateTime.now_local ();
-                var t_date = new DateTime.local (dt.get_year (), dt.get_month (), dt.get_day (), 0, 0, 0);
 
-                Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
-
-                if (now.compare (t_date) == -1) {
-                    crt.foreground_rgba = future_transaction_text_color;
-                    crt.foreground_set = true;
+                if (now.compare (date) == -1) {
+                    return future_transaction_text_color;
                 }
                 else {
                     if (default_color != null) {
-                        crt.foreground = default_color;
-                        crt.foreground_set = true;
+                        return default_color;
                     }
                     else {
-                        crt.foreground_set = false;
+                        return null;
                     }
                 }
             }
+
+            return null;
         }
 
         /**
