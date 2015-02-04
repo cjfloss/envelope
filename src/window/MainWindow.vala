@@ -43,8 +43,6 @@ namespace Envelope.Window {
         private Gtk.Popover                 menu_popover;
         private Gtk.Overlay                 overlay;
 
-        private Gtk.Revealer                content_revealer;
-
         private AccountManager              account_manager = AccountManager.get_default ();
         private BudgetManager               budget_manager = BudgetManager.get_default ();
 
@@ -79,10 +77,6 @@ namespace Envelope.Window {
             overlay = new Gtk.Overlay ();
             this.add (overlay);
 
-            content_revealer = new Gtk.Revealer ();
-            content_revealer.set_transition_duration (TRANSITION_DURATION);
-            content_revealer.set_transition_type (Gtk.RevealerTransitionType.CROSSFADE);
-
             // overlay bar for toast notifitcations
             overlay_bar = new Granite.Widgets.OverlayBar (overlay);
 
@@ -104,13 +98,10 @@ namespace Envelope.Window {
             paned.position_set = true;
             overlay.add (paned);
 
-            paned.pack2 (content_revealer, true, false);
-
             // header bar
             header_bar = new Gtk.HeaderBar ();
             header_bar.show_close_button = true;
             set_titlebar (header_bar);
-            //header_bar.pack_end (app_menu);
 
             // import button
             import_button = new Gtk.Button.from_icon_name ("document-import", Gtk.IconSize.LARGE_TOOLBAR);
@@ -171,15 +162,6 @@ namespace Envelope.Window {
                 Gtk.Widget widget;
                 string window_title;
                 determine_account_content_view (account, out widget, out window_title);
-
-                Type t = widget.get_type ();
-
-                debug ("view to show: %s".printf (t.name ()));
-
-                if (content_revealer.get_child () != widget) {
-                    var current_view = content_revealer.get_child ();
-                    current_view.@ref ();
-                }
 
                 set_content_view (widget);
 
@@ -302,7 +284,7 @@ namespace Envelope.Window {
 
                 var budget_overview = BudgetOverview.get_default ();
 
-                if (content_revealer.get_child () != budget_overview) {
+                if (paned.get_child2 () != budget_overview) {
                     set_content_view (budget_overview);
                 }
             });
@@ -320,7 +302,7 @@ namespace Envelope.Window {
                     transaction_view.with_filter_view = false;
                     transaction_view.with_add_transaction_view = false;
 
-                    if (content_revealer.get_child () != transaction_view) {
+                    if (paned.get_child2 () != transaction_view) {
                         set_content_view (transaction_view);
                     }
 
@@ -379,7 +361,7 @@ namespace Envelope.Window {
             });
 
             add_transaction_button.clicked.connect ( () => {
-                var child = content_revealer.get_child ();
+                var child = paned.get_child2 ();
 
                 if (!(child is TransactionView)) {
                     set_content_view (TransactionView.get_default ());
@@ -473,37 +455,20 @@ namespace Envelope.Window {
 
         private void set_content_view (Gtk.Widget widget) {
 
-            if (content_revealer.child_revealed) {
-
-                content_revealer.reveal_child = false;
-
-                Timeout.add (TRANSITION_DURATION, () => {
-                    reveal_view (widget);
-                    return false;
-                });
-            }
-            else {
-                reveal_view (widget);
-            }
-        }
-
-        private void reveal_view (Gtk.Widget widget) {
-            var child = content_revealer.get_child ();
+            var child = paned.get_child2 ();
 
             if (child != null) {
 
-                content_revealer.remove (child);
+                paned.remove (child);
 
                 if (child != widget) {
                     child.@ref ();
                 }
             }
 
-            content_revealer.add (widget);
+            paned.pack2 (widget, true, false);
 
             widget.show ();
-
-            content_revealer.reveal_child = true;
 
             main_view_changed (widget);
         }
