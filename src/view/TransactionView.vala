@@ -602,7 +602,6 @@ namespace Envelope.View {
             category_column.reorderable = true;
             category_column.sort_column_id = Column.CATEGORY;
             category_column.set_cell_data_func (renderer_category, cell_renderer_category_func);
-            //category_column.set_cell_data_func (renderer_category, cell_renderer_color_function);
             category_column.set_attributes (renderer_category, "text", Column.CATEGORY);
             treeview.append_column (category_column);
 
