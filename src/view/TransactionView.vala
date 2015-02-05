@@ -588,6 +588,7 @@ namespace Envelope.View {
             var date_column = new Gtk.TreeViewColumn ();
             date_column.set_title (_("Date"));
             date_column.max_width = -1;
+            date_column.min_width = 80;
             date_column.pack_start (crdp, true);
             date_column.resizable = true;
             date_column.reorderable = true;
@@ -600,6 +601,7 @@ namespace Envelope.View {
             var merchant_column = new Gtk.TreeViewColumn ();
             merchant_column.set_title (_("Merchant"));
             merchant_column.max_width = -1;
+            merchant_column.min_width = 150;
             merchant_column.pack_start (renderer_label, true);
             merchant_column.resizable = true;
             merchant_column.reorderable = true;
@@ -612,6 +614,7 @@ namespace Envelope.View {
             var category_column = new Gtk.TreeViewColumn ();
             category_column.set_title (_("Category"));
             category_column.max_width = -1;
+            category_column.min_width = 100;
             category_column.pack_start (renderer_category, true);
             category_column.resizable = true;
             category_column.reorderable = true;
@@ -624,6 +627,7 @@ namespace Envelope.View {
             var out_column = new Gtk.TreeViewColumn ();
             out_column.set_title (_("Outflow (%s)").printf (Envelope.Util.String.get_currency_symbol ()));
             out_column.max_width = -1;
+            out_column.min_width = 80;
             out_column.pack_start (renderer_out, true);
             out_column.resizable = true;
             out_column.reorderable = true;
@@ -636,6 +640,7 @@ namespace Envelope.View {
             var in_column = new Gtk.TreeViewColumn ();
             in_column.set_title (_("Inflow (%s)").printf (Envelope.Util.String.get_currency_symbol ()));
             in_column.max_width = -1;
+            in_column.min_width = 80;
             in_column.pack_start (renderer_in, true);
             in_column.resizable = true;
             in_column.reorderable = true;
