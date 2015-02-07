@@ -306,12 +306,12 @@ namespace Envelope.Window {
                         set_content_view (transaction_view);
                     }
 
-                    header_bar.title = category.name;
+                    header_bar.title = category != null ? category.name : _("Uncategorized");
                     header_bar.subtitle = new DateTime.now_local ().format ("%B %Y");
                     header_bar.has_subtitle = true;
 
                     var saved_state = SavedState.get_default ();
-                    saved_state.selected_category_id = category.@id;
+                    saved_state.selected_category_id = category != null ? category.@id : -1;
                     saved_state.selected_account_id = -1;
                 }
                 catch (ServiceError err) {
