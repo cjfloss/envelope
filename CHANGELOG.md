@@ -1,3 +1,16 @@
+#  (2015-02-07)
+
+## Features
+
+  - **BudgetManager:** handle null category for uncategorized transactions
+    ([86ac9749](https://github.com/nlaplante/envelope/commit/86ac9749af33beda476cbafaf50e456ef62e7f32))
+  - **Database:** add query for current uncategorized transactions
+    ([49a03a8a](https://github.com/nlaplante/envelope/commit/49a03a8a4b929012c84f5d8b301900c7c392b8d9))
+  - **Settings:** handle uncategorized sidebar selected item
+    ([641b71e8](https://github.com/nlaplante/envelope/commit/641b71e8c2a794f8b4a3a3c4df42251c0db3c26a))
+  - **Sidebar:** uncategorized item shows current uncategorized transactions
+    ([dbcc71ab](https://github.com/nlaplante/envelope/commit/dbcc71ab21b31720c374fca7af5353823fb47a6b))  
+
 #  (2015-02-04)
 
 ## Features
