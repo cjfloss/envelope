@@ -242,14 +242,12 @@ namespace Envelope.Service {
          * @param {double} inflow
          * @param {double} outflow
          */
-        public Gee.List<Transaction>  compute_current_category_operations (Category category, out double inflow, out double outflow) throws ServiceError {
-
-            return_val_if_fail (category.@id != null, null);
+        public Gee.List<Transaction>  compute_current_category_operations (Category? category, out double inflow, out double outflow) throws ServiceError {
 
             try {
                 Gee.List<Transaction> transactions = dbm.get_current_transactions_for_category (category);
 
-                debug ("transaction for category %s: %d", category.name, transactions.size);
+                debug ("transaction for category %s: %d", category != null ? category.name : "(uncategorized)", transactions.size);
 
                 inflow = 0d;
                 outflow = 0d;
