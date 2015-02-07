@@ -116,7 +116,7 @@ namespace Envelope.View {
         private Envelope.Widget.CellRendererPopoverContainer crpc;
 
         public signal void overview_selected ();
-        public signal void category_selected (Category category);
+        public signal void category_selected (Category? category);
         public signal void list_account_selected (Account account);
         public signal void list_account_name_updated (Account account, string new_name);
         public signal void list_category_name_updated (Category category, string new_name);
@@ -472,7 +472,7 @@ namespace Envelope.View {
 
                 // Add "Uncategorized"
                 uncategorized_iter = add_item (category_iter, _("Uncategorized"), TreeCategory.CATEGORIES,
-                    null, null, Action.NONE, (double) budget_manager.state.uncategorized.size, ICON_CATEGORY,
+                    null, null, Action.SHOW_CATEGORY, (double) budget_manager.state.uncategorized.size, ICON_CATEGORY,
                     false, false, "", null, false);
 
                 foreach (MonthlyCategory category in budget_manager.get_categories ()) {
