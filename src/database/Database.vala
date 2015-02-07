@@ -112,6 +112,7 @@ namespace Envelope.DB {
             ORDER BY t.date DESC""";
 
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id";
+        private static const string SQL_LOAD_CURRENT_UNCATEGORIZED_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id IS NULL";
 
         private static const string SQL_INSERT_CATEGORY = """INSERT INTO `categories`
             (`name`, `description`, `parent_category_id`)
@@ -207,6 +208,7 @@ namespace Envelope.DB {
 
         private SQLHeavy.Query q_load_current_transactions;
         private SQLHeavy.Query q_load_current_transactions_for_category;
+        private SQLHeavy.Query q_load_current_uncategorized_transactions;
 
         private SQLHeavy.Query q_get_unique_merchants;
 
@@ -753,13 +755,21 @@ namespace Envelope.DB {
             return list;
         }
 
-        public Gee.List<Transaction> get_current_transactions_for_category (Category category) throws SQLHeavy.Error {
+        public Gee.List<Transaction> get_current_transactions_for_category (Category? category) throws SQLHeavy.Error {
 
             var list = new ArrayList<Transaction> ();
 
-            q_load_current_transactions_for_category.set_int ("category_id", category.@id);
+            SQLHeavy.Query query;
 
-            SQLHeavy.QueryResult results = q_load_current_transactions_for_category.execute ();
+            if (category != null) {
+                query = q_load_current_transactions_for_category;
+                query.set_int ("category_id", category.@id);
+            }
+            else {
+                query = q_load_current_uncategorized_transactions;
+            }
+
+            SQLHeavy.QueryResult results = query.execute ();
 
             while (!results.finished) {
                 Transaction transaction;
@@ -770,7 +780,7 @@ namespace Envelope.DB {
                 results.next ();
             }
 
-            q_load_current_transactions_for_category.clear ();
+            query.clear ();
 
             return list;
         }
@@ -951,6 +961,7 @@ namespace Envelope.DB {
             q_delete_category                           = database.prepare (SQL_DELETE_CATEOGRY);
             q_load_current_transactions                 = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS);
             q_load_current_transactions_for_category    = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY);
+            q_load_current_uncategorized_transactions   = database.prepare (SQL_LOAD_CURRENT_UNCATEGORIZED_TRANSACTIONS);
             q_load_uncategorized_transactions           = database.prepare (SQL_GET_UNCATEGORIZED_TRANSACTIONS);
             q_categorize_for_merchant                   = database.prepare (SQL_CATEGORIZE_ALL_FOR_MERCHANT);
             q_update_category                           = database.prepare (SQL_UPDATE_CATEGORY);
