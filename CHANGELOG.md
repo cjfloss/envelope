@@ -1,10 +1,15 @@
 #  (2015-02-08)
 
+## Features
+
+  - **TransactionView:** refilter view
+    ([c9ea0b23](https://github.com/nlaplante/envelope/commit/c9ea0b23ab777f62a88e84ee9ec84e0c2f394447))
+
 ## Bug Fixes
 
-- **TransactionView:** use correct iter when column is sorted
-  ([7798e063](https://github.com/nlaplante/envelope/commit/7798e063dc461b323fc738290ce7e073b3c2c982),
-   [#30](https://github.com/nlaplante/envelope/issues/30))
+  - **TransactionView:** use correct iter when column is sorted
+    ([7798e063](https://github.com/nlaplante/envelope/commit/7798e063dc461b323fc738290ce7e073b3c2c982),
+     [#30](https://github.com/nlaplante/envelope/issues/30))
 
 #  (2015-02-07)
 
