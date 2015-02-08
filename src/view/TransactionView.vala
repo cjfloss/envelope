@@ -71,6 +71,7 @@ namespace Envelope.View {
 
         private Gtk.TreeStore transactions_store;
         private Gtk.TreeModelFilter view_store;
+        private Gtk.TreeModelSort tree_model_sort;
         private Gtk.TreeIter current_editing_iter;
 
         private string future_transaction_text_color;
@@ -391,7 +392,7 @@ namespace Envelope.View {
             treeview.enable_grid_lines = Gtk.TreeViewGridLines.HORIZONTAL;
             treeview.fixed_height_mode = true;
 
-            var tree_model_sort = new Gtk.TreeModelSort.with_model (view_store);
+            tree_model_sort = new Gtk.TreeModelSort.with_model (view_store);
             tree_model_sort.set_sort_func (Column.INFLOW, treemodel_sort_amount);
             tree_model_sort.set_sort_func (Column.OUTFLOW, treemodel_sort_amount);
             tree_model_sort.set_sort_func (Column.DATE, treemodel_sort_date);
@@ -409,11 +410,10 @@ namespace Envelope.View {
             renderer_memo.edited.connect ((path, text) => {
 
                 Gtk.TreeIter iter;
-
-                if (view_store.get_iter_from_string (out iter, path)) {
+                if (tree_model_sort.get_iter_from_string (out iter, path)) {
 
                     Gtk.TreeIter store_iter;
-                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+                    get_transaction_iter_from_sort_iter (out store_iter, iter);
 
                     transactions_store.@set (store_iter, Column.MEMO, text, -1);
                 }
@@ -429,11 +429,10 @@ namespace Envelope.View {
             renderer_label.edited.connect ((path, text) =>  {
 
                 Gtk.TreeIter iter;
-
-                if (view_store.get_iter_from_string (out iter, path)) {
+                if (tree_model_sort.get_iter_from_string (out iter, path)) {
 
                     Gtk.TreeIter store_iter;
-                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+                    get_transaction_iter_from_sort_iter (out store_iter, iter);
 
                     transactions_store.@set (store_iter, Column.MERCHANT, text, -1);
                 }
@@ -452,8 +451,7 @@ namespace Envelope.View {
                 }
 
                 Gtk.TreeIter iter;
-
-                if (view_store.get_iter_from_string (out iter, path)) {
+                if (tree_model_sort.get_iter_from_string (out iter, path)) {
 
                     var category = CategoryStore.get_default ().get_category_by_name (text);
 
@@ -470,7 +468,7 @@ namespace Envelope.View {
                     }
 
                     Gtk.TreeIter store_iter;
-                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+                    get_transaction_iter_from_sort_iter (out store_iter, iter);
 
                     string merchant;
                     transactions_store.@get (store_iter, Column.MERCHANT, out merchant, -1);
@@ -506,11 +504,10 @@ namespace Envelope.View {
             renderer_out.edited.connect ((path, text) =>  {
 
                 Gtk.TreeIter iter;
-
-                if (view_store.get_iter_from_string (out iter, path)) {
+                if (tree_model_sort.get_iter_from_string (out iter, path)) {
 
                     Gtk.TreeIter store_iter;
-                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+                    get_transaction_iter_from_sort_iter (out store_iter, iter);
 
                     string? outflow;
 
@@ -540,11 +537,10 @@ namespace Envelope.View {
             renderer_in.edited.connect ((path, text) =>  {
 
                 Gtk.TreeIter iter;
-
-                if (view_store.get_iter_from_string (out iter, path)) {
+                if (tree_model_sort.get_iter_from_string (out iter, path)) {
 
                     Gtk.TreeIter store_iter;
-                    view_store.convert_iter_to_child_iter (out store_iter, iter);
+                    get_transaction_iter_from_sort_iter (out store_iter, iter);
 
                     string? inflow;
 
@@ -573,11 +569,10 @@ namespace Envelope.View {
                 if (crdp.date_selected) {
 
                     Gtk.TreeIter iter;
-
-                    if (view_store.get_iter_from_string (out iter, path)) {
+                    if (tree_model_sort.get_iter_from_string (out iter, path)) {
 
                         Gtk.TreeIter store_iter;
-                        view_store.convert_iter_to_child_iter (out store_iter, iter);
+                        get_transaction_iter_from_sort_iter (out store_iter, iter);
 
                         transactions_store.@set (store_iter, Column.DATE, text, -1);
                     }
