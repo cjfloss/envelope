@@ -1,3 +1,11 @@
+#  (2015-02-08)
+
+## Bug Fixes
+
+- **TransactionView:** use correct iter when column is sorted
+  ([7798e063](https://github.com/nlaplante/envelope/commit/7798e063dc461b323fc738290ce7e073b3c2c982),
+   [#30](https://github.com/nlaplante/envelope/issues/30))
+
 #  (2015-02-07)
 
 ## Features
