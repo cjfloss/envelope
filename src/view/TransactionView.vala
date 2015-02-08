@@ -848,7 +848,7 @@ namespace Envelope.View {
                 filter_from = filter_view.from;
                 filter_to = filter_view.to;
 
-                add_transactions ();
+                view_store.refilter ();
             });
 
             // right-click menu
