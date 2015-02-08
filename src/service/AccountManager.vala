@@ -74,8 +74,6 @@ namespace Envelope.Service {
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
-
-            return false;
         }
 
         /**

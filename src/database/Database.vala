@@ -201,7 +201,6 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_delete_account_transactions;
         private SQLHeavy.Query q_insert_account_transaction;
         private SQLHeavy.Query q_delete_transaction;
-        private SQLHeavy.Query q_update_transaction;
         private SQLHeavy.Query q_load_uncategorized_transactions;
         private SQLHeavy.Query q_categorize_for_merchant;
         private SQLHeavy.Query q_load_transactions_for_month_and_year;

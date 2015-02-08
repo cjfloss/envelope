@@ -113,7 +113,6 @@ namespace Envelope.View {
 
         // category update in popover
         private CategoryProperties popover_category_properties;
-        private Envelope.Widget.CellRendererPopoverContainer crpc;
 
         public signal void overview_selected ();
         public signal void category_selected (Category? category);
@@ -481,7 +480,7 @@ namespace Envelope.View {
                     double cat_outflow;
                     budget_manager.compute_current_category_operations (category, out cat_inflow, out cat_outflow);
 
-                    var current_category_iter = add_item (category_iter,
+                    add_item (category_iter,
                         category.name,
                         TreeCategory.CATEGORIES,
                         null, category,
@@ -979,7 +978,6 @@ namespace Envelope.View {
             debug ("row activated");
 
             Gtk.TreeIter iter;
-            Gtk.TreeModel model;
             if (store.get_iter (out iter, path)) {
 
                 if (selected_iter == iter) {

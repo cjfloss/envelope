@@ -269,7 +269,7 @@ namespace Envelope.Window {
                 if (cat.name != new_name) {
                     try {
                         cat.name = new_name;
-                        BudgetManager.get_default ().update_category (category);
+                        budget_manager.update_category (category);
                     }
                     catch (ServiceError err) {
                         cat.name = old_name;
@@ -295,8 +295,7 @@ namespace Envelope.Window {
 
                 try {
                     double inflow, outflow;
-                    var transactions = BudgetManager.get_default ()
-                        .compute_current_category_operations (category, out inflow, out outflow);
+                    var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
 
                     transaction_view.transactions = transactions;
                     transaction_view.with_filter_view = false;
