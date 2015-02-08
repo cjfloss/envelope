@@ -399,7 +399,6 @@ namespace Envelope.View {
 
             treeview.set_model (tree_model_sort);
             treeview.set_search_column (1);
-            treeview.hadjustment.page_size = 10d;
             treeview.show_all ();
 
             // memo cell renderer
