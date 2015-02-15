@@ -512,7 +512,7 @@ namespace Envelope.View {
 
                     if (text.strip () != "") {
                         try {
-                            outflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text));
+                            outflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text), false);
                         }
                         catch (Envelope.Util.String.ParseError err) {
                             outflow = "<error>";
@@ -545,7 +545,7 @@ namespace Envelope.View {
 
                     if (text.strip () != "") {
                         try {
-                            inflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text));
+                            inflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text), false);
                         }
                         catch (Envelope.Util.String.ParseError err) {
                             inflow = "<error>";
