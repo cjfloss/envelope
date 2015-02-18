@@ -172,7 +172,7 @@ namespace Envelope.Window {
                     transaction_view.with_add_transaction_view = true;
                 }
 
-                search_entry.placeholder_text = "Search in %s%s".printf (account.number, Envelope.Util.String.ELLIPSIS);
+                search_entry.placeholder_text = "Search in %s".printf (account.number);
 
                 header_bar.title = window_title;
                 header_bar.has_subtitle = false;
