@@ -120,6 +120,7 @@ namespace Envelope.Window {
 
             // search entry & completion
             search_entry = new Gtk.SearchEntry ();
+            search_entry.width_chars = 30;
             search_entry.placeholder_text = _("Search transactions\u2026");
 
             var search_entry_completion = new Gtk.EntryCompletion ();
