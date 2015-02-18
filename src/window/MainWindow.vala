@@ -182,6 +182,8 @@ namespace Envelope.Window {
                 saved_state.selected_account_id = account.@id;
             });
 
+
+
             // If we have accounts, show the transaction view
             // otherwise show welcome screen
             Gtk.Widget content_view;
@@ -308,6 +310,13 @@ namespace Envelope.Window {
                     header_bar.title = category != null ? category.name : _("Uncategorized");
                     header_bar.subtitle = new DateTime.now_local ().format ("%B %Y");
                     header_bar.has_subtitle = true;
+
+                    if (category != null) {
+                      search_entry.placeholder_text = _("Search in %s".printf (category.name));
+                    }
+                    else {  // uncategorized
+                      search_entry.placeholder_text = _("Search uncategorized");
+                    }
 
                     var saved_state = SavedState.get_default ();
                     saved_state.selected_category_id = category != null ? category.@id : -1;
