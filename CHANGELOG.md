@@ -1,3 +1,27 @@
+#  (2015-02-18)
+
+## Bug Fixes
+
+- **Application name:** Update .desktop name to Envelope
+  ([f0f0ff39](https://github.com/nlaplante/envelope/commit/f0f0ff39578343bbc60696c4eef38d8b24b4f7d3),
+   [#39](https://github.com/nlaplante/envelope/issues/39))
+- **TransactionView:**
+  - remove currency from cell after editing amount
+  ([8d4530e2](https://github.com/nlaplante/envelope/commit/8d4530e209ff868cceef5c32c5d97c3c08eaf144),
+   [#41](https://github.com/nlaplante/envelope/issues/41))
+- **Search:**
+   - change placeholder text when selecting category
+   ([0c423a3c](https://github.com/nlaplante/envelope/commit/0c423a3cf7f4718ecdfa13eb69a67ef17b50f1e2),
+    [#19](https://github.com/nlaplante/envelope/issues/19))
+
+## Features    
+
+- **Search:**
+  - remove ellipsis in placeholder text
+  ([983fd617](https://github.com/nlaplante/envelope/commit/983fd6179cfb14b49abf4dc056fc36c79cd1d2c2))
+  - make search bar wider
+  ([a766150f](https://github.com/nlaplante/envelope/commit/a766150fce823d96b1e17bc36cf60231eb719eae))
+
 #  (2015-02-08)
 
 ## Features
