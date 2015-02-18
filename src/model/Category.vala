@@ -16,15 +16,17 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
+using Gee;
+
 namespace Envelope {
 
-    public class Category : Object, Gee.Comparable<Category> {
+    public class Category : Object, Comparable<Category> {
 
         public string name { get; set; }
         public string? description { get; set; }
         public int? @id { get; set; }
         public Category? parent { get; set; default = null; }
-        public Gee.ArrayList<Transaction> transactions { get; set; }
+        public ArrayList<Transaction> transactions { get; set; }
 
         public Category () {
             Object ();

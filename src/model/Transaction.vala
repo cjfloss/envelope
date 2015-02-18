@@ -16,9 +16,11 @@
  * with envelope. If not, see http://www.gnu.org/licenses/.
  */
 
+using Gee;
+
 namespace Envelope {
 
-    public class Transaction : Object, Gee.Comparable<Transaction> {
+    public class Transaction : Object, Comparable<Transaction> {
 
         public enum Direction {
             INCOMING,

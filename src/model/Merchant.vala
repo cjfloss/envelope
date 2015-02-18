@@ -16,10 +16,12 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
+using Gee;
+
 namespace Envelope {
 
-    public class Merchant : Object, Gee.Comparable<Merchant> {
-        
+    public class Merchant : Object, Comparable<Merchant> {
+
         public string label { get; private set; }
         public int occurences { get; private set; }
 

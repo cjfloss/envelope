@@ -16,6 +16,7 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
+using Gee;
 using Envelope.Service;
 
 namespace Envelope {
@@ -32,7 +33,7 @@ namespace Envelope {
             return budget_instance;
         }
 
-        public Gee.ArrayList<Category> categories { get; set; }
+        public ArrayList<Category> categories { get; set; }
 
         public BudgetState current_state { get; set; }
 
