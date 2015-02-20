@@ -129,7 +129,7 @@ namespace Envelope.Service {
          *
          * @return bool true if transaction suceedded, false otherwise
          */
-        public void rename_account (ref Account account, string new_number) throws AccountError, ServiceError {
+        public void rename_account (Account account, string new_number) throws AccountError, ServiceError {
             try {
                 dbm.rename_account (account, new_number);
                 account.number = new_number;
