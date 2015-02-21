@@ -221,9 +221,9 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_check_category_budget_set;
 
         // in-memory caches for often-used objects
-        private Map<int, Account>           account_cache     = new HashMap<int, Account> ();
-        private Map<int, Category>          category_cache    = new HashMap<int, Category> ();
-        private Map<string, Merchant>       merchant_cache    = new HashMap<string, Merchant> ();
+        private SortedMap<int, Account>           account_cache     = new TreeMap<int, Account> ();
+        private SortedMap<string, Category>       category_cache    = new TreeMap<string, Category> ();
+        private SortedMap<string, Merchant>       merchant_cache    = new TreeMap<string, Merchant> ();
 
         /**
          * Obtain a reference to the singleton instance of the DatabaseManager
@@ -390,7 +390,7 @@ namespace Envelope.DB {
             category.@id = (int) id;
 
             // add to cache
-            category_cache.@set (category.@id, category);
+            category_cache.@set (category.name.up (), category);
 
             category_created (category);
         }
@@ -417,7 +417,7 @@ namespace Envelope.DB {
             q_update_category.execute ();
             q_update_category.clear ();
 
-            category_cache.@set (category.@id, category);
+            category_cache.@set (category.name.up (), category);
         }
 
         public void set_category_budgeted_amount (MonthlyCategory category, int year, int month) throws SQLHeavy.Error {
@@ -708,7 +708,7 @@ namespace Envelope.DB {
                 list.add (category);
 
                 // add to cache too
-                category_cache.@set (category.@id, category);
+                category_cache.@set (category.name.up (), category);
 
                 results.next ();
             }
@@ -791,7 +791,7 @@ namespace Envelope.DB {
             q_delete_category.clear ();
 
             // remove from cache
-            category_cache.unset (category.@id);
+            category_cache.unset (category.name.up ());
         }
 
         private DatabaseManager () {
