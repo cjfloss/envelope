@@ -1,3 +1,14 @@
+#  (2015-02-22)
+
+## Bug Fixes
+
+- **Database:** map categories using name instead of id
+  ([97c1a25b](https://github.com/nlaplante/envelope/commit/97c1a25b6444b836fcadf049856db8810d4150df),
+   [#40](https://github.com/nlaplante/envelope/issues/40))
+- **Header bar:** remove export button
+ ([431dc7a6](https://github.com/nlaplante/envelope/commit/431dc7a6986586450e7b9ca503f4e9abd194a949),
+  [#43](https://github.com/nlaplante/envelope/issues/43))
+  
 #  (2015-02-18)
 
 ## Bug Fixes
@@ -14,7 +25,7 @@
    ([0c423a3c](https://github.com/nlaplante/envelope/commit/0c423a3cf7f4718ecdfa13eb69a67ef17b50f1e2),
     [#19](https://github.com/nlaplante/envelope/issues/19))
 
-## Features    
+## Features
 
 - **Search:**
   - remove ellipsis in placeholder text
