@@ -30,7 +30,7 @@ namespace Envelope.Window {
         // window elements
         public Gtk.HeaderBar                header_bar { get; private set; }
         public Gtk.Button                   import_button { get; private set; }
-        public Gtk.Button                   export_button { get; private set; }
+        //public Gtk.Button                   export_button { get; private set; }
         public Gtk.Button                   add_transaction_button { get; private set; }
         public Gtk.SearchEntry              search_entry { get; private set; }
         public Sidebar                      sidebar { get; private set; }
@@ -109,9 +109,9 @@ namespace Envelope.Window {
             header_bar.pack_start (import_button);
 
             // export button
-            export_button = new Gtk.Button.from_icon_name ("document-export", Gtk.IconSize.LARGE_TOOLBAR);
-            export_button.tooltip_text = _("Backup budget");
-            header_bar.pack_end (export_button);
+            //export_button = new Gtk.Button.from_icon_name ("document-export", Gtk.IconSize.LARGE_TOOLBAR);
+            //export_button.tooltip_text = _("Backup budget");
+            //header_bar.pack_end (export_button);
 
             // add transaction button
             add_transaction_button = new Gtk.Button.from_icon_name ("document-new", Gtk.IconSize.LARGE_TOOLBAR);
