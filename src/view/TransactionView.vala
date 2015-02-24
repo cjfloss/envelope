@@ -70,7 +70,6 @@ namespace Envelope.View {
         private Gtk.InfoBar infobar;
 
         private Gtk.TreeStore transactions_store;
-        private Gtk.TreeModelFilter view_store;
         private Gtk.TreeModelSort tree_model_sort;
         private Gtk.TreeIter current_editing_iter;
 
@@ -108,9 +107,6 @@ namespace Envelope.View {
                 typeof (Transaction),
                 typeof (string),
                 typeof (string));
-
-            view_store = new Gtk.TreeModelFilter (transactions_store, null);
-            view_store.set_visible_func (view_store_filter_func);
 
             build_ui ();
             connect_signals ();
@@ -208,38 +204,6 @@ namespace Envelope.View {
             }
         }
 
-        private bool view_store_filter_func (Gtk.TreeModel model, Gtk.TreeIter iter) {
-
-            Transaction transaction;
-            model.@get (iter, Column.TRANSACTION, out transaction, -1);
-
-            if (transaction == null || transaction.@id == null) {
-                return true; //editing... always shown
-            }
-
-            if (search_term != "") {
-
-                var label = transaction.label.up ();
-
-                if (label.index_of (search_term) == -1) {
-
-                    var desc = (transaction.description != null ? transaction.description : "").up ();
-
-                    if (desc.index_of (search_term) == -1) {
-                        return false;
-                    }
-                }
-            }
-
-            // no search, or transaction matches search, continue with dates
-            var tdate = transaction.date;
-
-            var is_after_start = filter_from != null ? tdate.compare (filter_from) >= 0 : true;
-            var is_before_end = filter_to != null ? tdate.compare (filter_to) <= 0 : true;
-
-            return is_after_start && is_before_end;
-        }
-
         /**
          * Adds a list of transactions to the grid store
          */
@@ -260,7 +224,7 @@ namespace Envelope.View {
 
             // check if we need to display the infobar
             Gtk.TreeIter iter_first;
-            if (!view_store.get_iter_first (out iter_first)) {
+            if (!transactions_store.get_iter_first (out iter_first)) {
                 // we don't have children; display infobar
                 infobar.show_all ();
             }
@@ -392,7 +356,7 @@ namespace Envelope.View {
             treeview.enable_grid_lines = Gtk.TreeViewGridLines.HORIZONTAL;
             treeview.fixed_height_mode = true;
 
-            tree_model_sort = new Gtk.TreeModelSort.with_model (view_store);
+            tree_model_sort = new Gtk.TreeModelSort.with_model (transactions_store);
             tree_model_sort.set_sort_func (Column.INFLOW, treemodel_sort_amount);
             tree_model_sort.set_sort_func (Column.OUTFLOW, treemodel_sort_amount);
             tree_model_sort.set_sort_func (Column.DATE, treemodel_sort_date);
@@ -840,7 +804,7 @@ namespace Envelope.View {
                 transaction_edited (path, iter);
             });
 
-            FilterView.get_default ().date_filter_changed.connect ( () => {
+            /*FilterView.get_default ().date_filter_changed.connect ( () => {
 
                 var filter_view = FilterView.get_default ();
 
@@ -848,7 +812,7 @@ namespace Envelope.View {
                 filter_to = filter_view.to;
 
                 view_store.refilter ();
-            });
+            });*/
 
             // right-click menu
             treeview.button_press_event.connect ( (button_event) => {
@@ -933,11 +897,7 @@ namespace Envelope.View {
                     // add a row
                     current_editing_iter = add_empty_row ();
 
-                    // convert to child model iter
-                    Gtk.TreeIter child_iter;
-                    view_store.convert_child_iter_to_iter (out child_iter, current_editing_iter);
-
-                    Gtk.TreePath path = view_store.get_path (child_iter);
+                    Gtk.TreePath path = transactions_store.get_path (current_editing_iter);
                     treeview.scroll_to_cell (path, treeview.get_column (0), true, 0, 0);
 
                     btn_add_transaction.get_style_context ().add_class("suggested-action");
@@ -1028,46 +988,42 @@ namespace Envelope.View {
             string t_out_amount;
             string t_category;
 
-            Gtk.TreeIter view_iter;
-            if (view_store.convert_child_iter_to_iter (out view_iter, current_editing_iter)) {
+            transactions_store.@get (current_editing_iter, Column.DATE, out t_date,
+                Column.MERCHANT, out t_label,
+                Column.MEMO, out t_description,
+                Column.INFLOW, out t_in_amount,
+                Column.OUTFLOW, out t_out_amount,
+                Column.CATEGORY, out t_category, -1);
 
-                view_store.@get (view_iter, Column.DATE, out t_date,
-                    Column.MERCHANT, out t_label,
-                    Column.MEMO, out t_description,
-                    Column.INFLOW, out t_in_amount,
-                    Column.OUTFLOW, out t_out_amount,
-                    Column.CATEGORY, out t_category, -1);
+            // amount
+            double amount = 0d;
 
-                // amount
-                double amount = 0d;
-
-                try {
-                    if (t_in_amount != "") {
-                        amount = Envelope.Util.String.parse_currency (t_in_amount);
-                    }
-                    else if (t_out_amount != "") {
-                        amount = - Envelope.Util.String.parse_currency (t_out_amount);
-                    }
+            try {
+                if (t_in_amount != "") {
+                    amount = Envelope.Util.String.parse_currency (t_in_amount);
                 }
-                catch (Envelope.Util.String.ParseError err) {
-                    error ("could not parse transaction amount (%s)".printf (err.message));
+                else if (t_out_amount != "") {
+                    amount = - Envelope.Util.String.parse_currency (t_out_amount);
                 }
+            }
+            catch (Envelope.Util.String.ParseError err) {
+                error ("could not parse transaction amount (%s)".printf (err.message));
+            }
 
-                // date
-                uint year, month, day;
-                crdp.calendar.get_date (out year, out month, out day);
+            // date
+            uint year, month, day;
+            crdp.calendar.get_date (out year, out month, out day);
 
-                var date = new DateTime.local ((int) year, (int) month + 1, (int) day, 0, 0, 0);
+            var date = new DateTime.local ((int) year, (int) month + 1, (int) day, 0, 0, 0);
 
-                // category
-                Category? category = CategoryStore.get_default ().get_category_by_name (t_category);
+            // category
+            Category? category = CategoryStore.get_default ().get_category_by_name (t_category);
 
-                try {
-                    var acct_ref = Sidebar.get_default ().selected_account;
-                    AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, category,  null);
-                } catch (ServiceError err) {
-                    error (err.message);
-                }
+            try {
+                var acct_ref = Sidebar.get_default ().selected_account;
+                AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, category,  null);
+            } catch (ServiceError err) {
+                error (err.message);
             }
         }
 
@@ -1168,9 +1124,7 @@ namespace Envelope.View {
          * @param sort_iter the Gtk.TreeIter to convert
          */
         private void get_transaction_iter_from_sort_iter (out Gtk.TreeIter transaction_iter, Gtk.TreeIter sort_iter) {
-            Gtk.TreeIter view_iter;
-            (treeview.model as Gtk.TreeModelSort).convert_iter_to_child_iter (out view_iter, sort_iter);
-            view_store.convert_iter_to_child_iter (out transaction_iter, view_iter);
+            (treeview.model as Gtk.TreeModelSort).convert_iter_to_child_iter (out transaction_iter, sort_iter);
         }
     }
 }

@@ -94,6 +94,9 @@ namespace Envelope.DB {
         private static const string SQL_DELETE_ACCOUNT = "DELETE FROM `accounts` WHERE `id` = :account_id";
         private static const string SQL_UPDATE_ACCOUNT_BALANCE = "UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id";
         private static const string SQL_LOAD_ACCOUNT_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `account_id` = :account_id ORDER BY `date` DESC";
+        private static const string SQL_LOAD_ACCOUNT_TRANSACTIONS_RANGE = "SELECT * FROM transactions WHERE account_id = :account_id AND date(date, 'unixepoch') BETWEEN date(:start_date, 'unixepoch') AND date(:end_date, 'unixepoch') ORDER BY date DESC";
+        private static const string SQL_LOAD_ACCOUNT_TRANSACTIONS_AFTER = "SELECT * FROM transactions WHERE account_id = :account_id AND date(date, 'unixepoch') > date(:start_date, 'unixepoch') ORDER BY date DESC";
+        private static const string SQL_ACCOUNT_TRANSACTION_COUNT = "SELECT count(*) as count FROM transactions WHERE account_id = :account_id";
         private static const string SQL_DELETE_ACCOUNT_TRANSACTIONS = "DELETE FROM `transactions` WHERE `account_id` = :account_id";
         private static const string SQL_GET_UNIQUE_MERCHANTS = "SELECT `label`, COUNT(`label`) as `number` FROM `transactions` GROUP BY `label` ORDER BY `number` DESC, `label` ASC";
         private static const string SQL_LOAD_CATEGORIES = "SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted` FROM `categories` `c` LEFT JOIN `categories_budgets` `cb` ON `cb`.`category_id` = `c`.`id` AND `cb`.`year` = strftime('%Y', 'now') AND `cb`.`month` = strftime('%m', 'now') ORDER BY `c`.`name` ASC";
@@ -196,8 +199,11 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_rename_account;
         private SQLHeavy.Query q_delete_account;
         private SQLHeavy.Query q_update_account_balance;
+        private SQLHeavy.Query q_account_transaction_count;
 
         private SQLHeavy.Query q_load_account_transactions;
+        private SQLHeavy.Query q_load_account_transactions_range;
+        private SQLHeavy.Query q_load_account_transactions_after;
         private SQLHeavy.Query q_delete_account_transactions;
         private SQLHeavy.Query q_insert_account_transaction;
         private SQLHeavy.Query q_delete_transaction;
@@ -277,6 +283,17 @@ namespace Envelope.DB {
             debug ("%d unique merchants", merchants.size);
 
             return merchants;
+        }
+
+        public int get_account_transaction_count (Account account) throws SQLHeavy.Error {
+
+          q_account_transaction_count.set_int ("account_id", account.@id);
+
+          SQLHeavy.QueryResult results = q_account_transaction_count.execute ();
+
+          q_account_transaction_count.clear ();
+
+          return results.get_int ("count");
         }
 
         /**
@@ -551,6 +568,54 @@ namespace Envelope.DB {
             }
 
             q_load_account_transactions.clear ();
+
+            return list;
+        }
+
+        /**
+         * Load transactions for the specified account which occured within a date range.
+         *
+         * @param account the account to load the transactions from
+         * @param start_date the start date of the date range
+         * @param end_date the end date of the date range
+         * @return the list of transactions
+         * @throws SQLHeavy.Error
+         */
+        public Gee.List<Transaction>? load_account_transactions_between_dates (Account account, DateTime start_date, DateTime? end_date)
+          throws SQLHeavy.Error {
+
+            if (end_date != null) {
+              // make sure that the end date is the same or after start date
+              return_val_if_fail (start_date.compare (end_date) <= 0, null);
+            }
+
+            var list = new ArrayList<Transaction> ();
+
+            SQLHeavy.Query query;
+
+            if (end_date != null) {
+              query = q_load_account_transactions_range;
+              query.set_int64 ("end_date", end_date.to_unix ());
+            }
+            else {
+              query = q_load_account_transactions_after;
+            }
+
+            query.set_int ("account_id", account.@id);
+            query.set_int64 ("start_date", start_date.to_unix ());
+
+            SQLHeavy.QueryResult results = query.execute ();
+
+            while (!results.finished) {
+              Transaction transaction;
+              query_result_to_transaction (results, out transaction);
+
+              list.add (transaction);
+
+              results.next ();
+            }
+
+            query.clear ();
 
             return list;
         }
@@ -950,6 +1015,9 @@ namespace Envelope.DB {
             q_rename_account                            = database.prepare (SQL_RENAME_ACCOUNT);
             q_update_account_balance                    = database.prepare (SQL_UPDATE_ACCOUNT_BALANCE);
             q_load_account_transactions                 = database.prepare (SQL_LOAD_ACCOUNT_TRANSACTIONS);
+            q_load_account_transactions_range           = database.prepare (SQL_LOAD_ACCOUNT_TRANSACTIONS_RANGE);
+            q_load_account_transactions_after           = database.prepare (SQL_LOAD_ACCOUNT_TRANSACTIONS_AFTER);
+            q_account_transaction_count                 = database.prepare (SQL_ACCOUNT_TRANSACTION_COUNT);
             q_delete_account_transactions               = database.prepare (SQL_DELETE_ACCOUNT_TRANSACTIONS);
             q_delete_transaction                        = database.prepare (SQL_DELETE_TRANSACTION);
             q_insert_account_transaction                = database.prepare (SQL_INSERT_TRANSACTION);
