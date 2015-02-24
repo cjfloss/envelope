@@ -331,7 +331,7 @@ namespace Envelope.Window {
 
             sidebar.overview_selected.connect (on_sidebar_overview_selected);
 
-            sidebar.category_selected.connect (on_sidebar_category_selected);
+            sidebar.list_category_selected.connect (on_sidebar_category_selected);
 
             main_view_changed.connect ( (window, widget) => {
                 // check if we need to show the transaction search entry
