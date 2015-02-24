@@ -76,6 +76,15 @@ namespace Envelope.Service {
             }
         }
 
+        public bool account_has_transactions (Account account) throws ServiceError {
+          try {
+            return dbm.get_account_transaction_count (account) > 0;
+          }
+          catch (SQLHeavy.Error err) {
+              throw new ServiceError.DATABASE_ERROR (err.message);
+          }
+        }
+
         /**
          * Create a new account
          *
@@ -164,6 +173,18 @@ namespace Envelope.Service {
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
+        }
+
+        /**
+         * Load all transactions from account within a date range
+         */
+        public Gee.List<Transaction> load_account_transactions_in_range (Account account, DateTime start_date, DateTime? end_date) throws ServiceError {
+          try {
+            return dbm.load_account_transactions_between_dates (account, start_date, end_date);
+          }
+          catch (SQLHeavy.Error err) {
+            throw new ServiceError.DATABASE_ERROR (err.message);
+          }
         }
 
         public Transaction record_transaction (ref Account account, DateTime date, string label, string description, double amount, Category? category, Transaction? parent = null) throws ServiceError {
