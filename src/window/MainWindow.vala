@@ -331,7 +331,7 @@ namespace Envelope.Window {
 
             sidebar.overview_selected.connect (on_sidebar_overview_selected);
 
-            sidebar.list_category_selected.connect (on_sidebar_category_selected);
+            sidebar.category_selected.connect (on_sidebar_category_selected);
 
             main_view_changed.connect ( (window, widget) => {
                 // check if we need to show the transaction search entry
@@ -399,18 +399,6 @@ namespace Envelope.Window {
             account_manager.transactions_imported.connect ( (transactions, account) => {
                 sidebar.select_account (account);
             });
-
-            FilterView.get_default ().date_filter_changed.connect ( () => {
-              var filter_view = FilterView.get_default ();
-              var transaction_view = TransactionView.get_default ();
-
-              // TODO check if we need to show transactions from category or account
-              var transactions = AccountManager.get_default ().load_account_transactions_in_range (Sidebar.get_default ().selected_account,
-                filter_view.from, filter_view.to);
-
-              transaction_view.transactions = transactions;
-
-            });
         }
 
         private void determine_initial_content_view (Gee.Collection<Account> accounts, out Gtk.Widget widget) {
@@ -436,22 +424,18 @@ namespace Envelope.Window {
         private void determine_account_content_view (Account account, out Gtk.Widget widget, out string window_title) {
 
             try {
-                var filter_view = FilterView.get_default ();
-                var account_manager = AccountManager.get_default ();
+                var transactions = AccountManager.get_default ().load_account_transactions (account);
+                account.transactions = transactions;
 
-                if (account_manager.account_has_transactions (account)) {
-
-                  var transactions = account_manager.load_account_transactions_in_range (account, filter_view.from, filter_view.to);
-                  account.transactions = transactions;
-
-                  widget = TransactionView.get_default ();
-                  (widget as TransactionView).transactions = account.transactions;
-                  window_title = _("Transactions in %s").printf (account.number);
+                if (transactions.size == 0) {
+                    widget = AccountWelcomeScreen.get_default ();
+                    (widget as AccountWelcomeScreen).account = account;
+                    window_title = null;
                 }
                 else {
-                  widget = AccountWelcomeScreen.get_default ();
-                  (widget as AccountWelcomeScreen).account = account;
-                  window_title = null;
+                    widget = TransactionView.get_default ();
+                    (widget as TransactionView).transactions = account.transactions;
+                    window_title = _("Transactions in %s").printf (account.number);
                 }
             }
             catch (ServiceError err) {

@@ -104,7 +104,6 @@ namespace Envelope.View {
         public BudgetState budget_state { get; set; }
 
         public Account selected_account { get; private set; }
-        public Category selected_category { get; private set; }
 
         private int current_account_id;
 
@@ -116,9 +115,9 @@ namespace Envelope.View {
         private CategoryProperties popover_category_properties;
 
         public signal void overview_selected ();
+        public signal void category_selected (Category? category);
         public signal void list_account_selected (Account account);
         public signal void list_account_name_updated (Account account, string new_name);
-        public signal void list_category_selected (Category category);
         public signal void list_category_name_updated (Category category, string new_name);
 
         private Sidebar () {
@@ -1052,11 +1051,6 @@ namespace Envelope.View {
             current_account_id = account.@id;
             selected_account = account;
             list_account_selected (account);
-        }
-
-        private void category_selected (Category category) {
-          selected_category = category;
-          list_category_selected (category);
         }
 
         private bool get_account_iter (Account account, out Gtk.TreeIter iter) {
