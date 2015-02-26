@@ -24,12 +24,12 @@ namespace Envelope {
      * Monthly budget class used to track monthly income, expenses,
      * budgeted and available amounts.
      *
-     * 
+     *
      */
     public class Budget : Object, Comparable<Budget> {
 
         // private collections backing the transactions and categories properties
-        private List<Transaction>? budget_transactions;
+        private Gee.List<Transaction>? budget_transactions;
         private SortedSet<MonthlyCategory>? budget_categories;
 
         /**
@@ -45,7 +45,7 @@ namespace Envelope {
         /**
          * The list of transactions in the budget's time frame
          */
-        public List<Transaction>? transactions { get {
+        public Gee.List<Transaction>? transactions { owned get {
             if (budget_transactions == null) {
                 budget_transactions = new ArrayList<Transaction> ();
             }
@@ -56,9 +56,9 @@ namespace Envelope {
         /**
          * The list of categories associated to the budget's time frame
          */
-        public SortedSet<MonthlyCategory>? categories { get {
+        public SortedSet<MonthlyCategory>? categories { owned get {
             if (budget_categories == null) {
-                budget_categories = new TreeSet<MonthlyCategories> ();
+                budget_categories = new TreeSet<MonthlyCategory> ();
             }
 
             return budget_categories.read_only_view;
@@ -77,7 +77,7 @@ namespace Envelope {
         /**
          * Total budgeted amount in the budget's time frame
          */
-        public doubl budgeted { get; private set; }
+        public double budgeted { get; private set; }
 
         /**
          * Available amouont to budget in the budget's time frame
@@ -106,7 +106,7 @@ namespace Envelope {
          * @param month the month of the budget
          */
         public Budget (uint year, uint month) {
-            Object ();            
+            Object ();
 
             this.year = year;
             this.month = month;
@@ -118,7 +118,7 @@ namespace Envelope {
 
         /**
          * Create a new budget for the specified time frame, with the specified transactions and categories
-         * 
+         *
          * @param year the year of the budget
          * @param month the month of the budget
          * @param transactions the transactions for the budget
@@ -127,7 +127,7 @@ namespace Envelope {
         public Budget.with_transactions_categories (
             uint year,
             uint month,
-            List<Transaction> transactions,
+            Gee.List<Transaction> transactions,
             SortedSet<MonthlyCategory> categories) {
 
                 Object ();
@@ -138,7 +138,16 @@ namespace Envelope {
                 this.budget_transactions = transactions;
                 this.budget_categories = categories;
 
-                compute_flows (this.transactions, this.categories, out outflow, out inflow, out budgeted, out available);
+                double _outflow;
+                double _inflow;
+                double _budgeted;
+                double _available;
+                compute_flows (this.transactions, this.categories, out _outflow, out _inflow, out _budgeted, out _available);
+
+                outflow = _outflow;
+                inflow = _inflow;
+                budgeted = _budgeted;
+                available = _available;
 
                 connect_signals ();
         }
@@ -146,7 +155,7 @@ namespace Envelope {
         /**
          * Create a new budget based on another budget.
          *
-         * It creates a budget for the month following the specified budget's time frame, and 
+         * It creates a budget for the month following the specified budget's time frame, and
          * reuses the same budgeted amounts for each category.
          *
          * @param budget the previous budget to base this budget on
@@ -256,8 +265,8 @@ namespace Envelope {
 
         /**
          * Handler for category.amount_budgeted notify signal
-         */ 
-        private on_category_amount_budgeted_changed (string name, ParamSpec spec) {
+         */
+        private void on_category_amount_budgeted_changed (ParamSpec spec) {
             recalculate ();
         }
 
@@ -266,9 +275,19 @@ namespace Envelope {
          */
         private void recalculate () {
 
-            debug ("recalculating budget %d-%d", year, month);
+            debug ("recalculating budget %u-%u", year, month);
 
-            compute_flows (transactions, categories, out outflow, out inflow, out budgeted, out available);
+            double _outflow;
+            double _inflow;
+            double _budgeted;
+            double _available;
+            compute_flows (transactions, categories, out _outflow, out _inflow, out _budgeted, out _available);
+
+            outflow = _outflow;
+            inflow = _inflow;
+            budgeted = _budgeted;
+            available = _available;
+
             recalculated ();
         }
 
@@ -283,7 +302,7 @@ namespace Envelope {
          * @param budgeted      [out] total budgeted amount
          * @param available     [out] available amount to assign to categories
          */
-        private static void compute_flows (List<Transaction>? transactions, 
+        private static void compute_flows (Gee.List<Transaction>? transactions,
             SortedSet<MonthlyCategory>? categories,
             out double outflow,
             out double inflow,
@@ -318,6 +337,6 @@ namespace Envelope {
                     available -= category.amount_budgeted;
                 }
             }
-        }        
+        }
     }
 }

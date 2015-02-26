@@ -51,7 +51,7 @@ namespace Envelope.Util.Date {
      * @param next_month [out] the DateTime representing the next month
      */
     public void next_month (uint year, uint month, out DateTime next_month) {
-        next_month = (new DateTime.local (year, month, 1, 0, 0, 0)).add_months (1);
+        next_month = (new DateTime.local ((int) year, (int) month, 1, 0, 0, 0)).add_months (1);
     }
 
     /**
