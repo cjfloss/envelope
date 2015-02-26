@@ -170,8 +170,7 @@ namespace Envelope {
 
             foreach (MonthlyCategory category in budget.categories) {
 
-                var new_category = new MonthlyCategory.for_month (
-                    date_from.get_year (), date_from.get_month ());
+                var new_category = new MonthlyCategory.for_month (year, month);
 
                 new_category.name = category.name;
                 new_category.description = category.description;
