@@ -44,6 +44,17 @@ namespace Envelope.Util.Date {
     }
 
     /**
+     * Get the next month from the specified year and month
+     *
+     * @param year the year to calculate the next month from
+     * @param month the month to calculate the next month from
+     * @param next_month [out] the DateTime representing the next month
+     */
+    public void next_month (uint year, uint month, out DateTime next_month) {
+        next_month = (new DateTime.local (year, month, 1, 0, 0, 0)).add_months (1);
+    }
+
+    /**
      * Get the date for tomorrow
      *
      * @param tomorrow the output date for tomorrow
