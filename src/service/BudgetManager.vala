@@ -93,6 +93,82 @@ namespace Envelope.Service {
         // cached category list
         private Collection<MonthlyCategory> categories;
 
+        private struct BudgetKey {
+          uint year;
+          uint month;
+        }
+
+        private BidirSortedMap<BudgetKey?, Budget> budgets = new TreeMap<BudgetKey?, Budget> ( (k1, k2) => {
+
+            if (k1.year == k2.year) {
+              if (k1.month < k2.month) {
+                return -1;
+              }
+
+              if (k1.month == k2.month) {
+                return 0;
+              }
+
+              if (k1.month > k2.month) {
+                return 1;
+              }
+            }
+
+            if (k1.year > k2.year) {
+              return 1;
+            }
+
+            return -1;
+        }, (b1, b2) => {
+          return (b1.year == b2.year && b1.month == b2.month);
+        });
+
+        /**
+         * Load the budget corresponding to the specified year and month
+         *
+         * @param year the year of the budget
+         * @param month the month of the budget
+         * @return the specified budget
+         * @throws ServiceError
+         */
+        public Budget get_budget (uint year = -1, uint month = -1) throws ServiceError {
+
+          var y = year;
+          var m = month;
+
+          if (y == -1 || m == -1) {
+            var now = new DateTime.now_local ();
+            y = now.get_year ();
+            m = now.get_month ();
+          }
+
+          BudgetKey key = BudgetKey ();
+          key.year = y;
+          key.month = m;
+
+          if (budgets.has_key (key)) {
+            return budgets.@get (key);
+          }
+
+          try {
+            // load transactions
+            var transactions = dbm.get_transactions_for_month_and_year ((int) y, (int) m);
+
+            // load monthly categories
+            var categories = dbm.load_categories_for_year_month ((int) y, (int) m);
+
+            // create budget
+            var budget = new Budget.with_transactions_categories (y, m, transactions, categories);
+
+            budgets.@set (key, budget);
+
+            return budget;
+          }
+          catch (SQLHeavy.Error err) {
+            throw new ServiceError.DATABASE_ERROR (err.message);
+          }
+        }
+
         /**
          * Get all categories
          *
