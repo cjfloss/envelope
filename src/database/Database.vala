@@ -97,6 +97,13 @@ namespace Envelope.DB {
         private static const string SQL_DELETE_ACCOUNT_TRANSACTIONS = "DELETE FROM `transactions` WHERE `account_id` = :account_id";
         private static const string SQL_GET_UNIQUE_MERCHANTS = "SELECT `label`, COUNT(`label`) as `number` FROM `transactions` GROUP BY `label` ORDER BY `number` DESC, `label` ASC";
         private static const string SQL_LOAD_CATEGORIES = "SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted` FROM `categories` `c` LEFT JOIN `categories_budgets` `cb` ON `cb`.`category_id` = `c`.`id` AND `cb`.`year` = strftime('%Y', 'now') AND `cb`.`month` = strftime('%m', 'now') ORDER BY `c`.`name` ASC";
+        private static const string SQL_LOAD_CATEGORIES_FOR_YEAR_MONTH = """SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted`
+                                                                            FROM `categories` `c`
+                                                                            LEFT JOIN `categories_budgets` `cb`
+                                                                            ON `cb`.`category_id` = `c`.`id`
+                                                                            AND `cb`.`year` = :year
+                                                                            AND `cb`.`month` = :month
+                                                                            ORDER BY `c`.`name` ASC""";
         private static const string SQL_LOAD_CHILD_CATEGORIES = "SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC";
         private static const string SQL_DELETE_CATEOGRY = "DELETE FROM `categories` WHERE `id` = :category_id";
         private static const string SQL_UPDATE_CATEGORY = "UPDATE `categories` SET `name` = :name, `description` = :description, `parent_category_id` = :parent_category_id WHERE `id` = :category_id";
@@ -212,6 +219,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_get_unique_merchants;
 
         private SQLHeavy.Query q_load_categories;
+        private SQLHeavy.Query q_load_categories_for_year_month;
         private SQLHeavy.Query q_load_child_categories;
         private SQLHeavy.Query q_insert_category;
         private SQLHeavy.Query q_delete_category;
@@ -716,6 +724,33 @@ namespace Envelope.DB {
             return list;
         }
 
+        public SortedSet<MonthlyCategory> load_categories_for_year_month (int year, int month) throws SQLHeavy.Error {
+
+          var list = new TreeSet<MonthlyCategory> ();
+
+          q_load_categories_for_year_month.set_int ("year", year);
+          q_load_categories_for_year_month.set_int ("month", month);
+
+          SQLHeavy.QueryResult results = q_load_categories_for_year_month.execute ();
+
+          q_load_categories_for_year_month.clear ();
+
+          while (!results.finished) {
+              MonthlyCategory category;
+              int parent_id;
+
+              query_result_to_category (results, out category, out parent_id);
+
+              // TODO add to parent ???
+
+              list.add (category);
+
+              results.next ();
+          }
+
+          return list;
+        }
+
         public Collection<Transaction> get_current_transactions () throws SQLHeavy.Error {
 
             int month, year;
@@ -724,7 +759,7 @@ namespace Envelope.DB {
             return get_transactions_for_month_and_year (month, year);
         }
 
-        public Collection<Transaction> get_transactions_for_month_and_year (int month, int year) throws SQLHeavy.Error {
+        public Gee.List<Transaction> get_transactions_for_month_and_year (int month, int year) throws SQLHeavy.Error {
 
             var list = new ArrayList<Transaction> ();
 
@@ -955,6 +990,7 @@ namespace Envelope.DB {
             q_insert_account_transaction                = database.prepare (SQL_INSERT_TRANSACTION);
             q_get_unique_merchants                      = database.prepare (SQL_GET_UNIQUE_MERCHANTS);
             q_load_categories                           = database.prepare (SQL_LOAD_CATEGORIES);
+            q_load_categories_for_year_month            = database.prepare (SQL_LOAD_CATEGORIES_FOR_YEAR_MONTH);
             q_load_child_categories                     = database.prepare (SQL_LOAD_CHILD_CATEGORIES);
             q_insert_category                           = database.prepare (SQL_INSERT_CATEGORY);
             q_delete_category                           = database.prepare (SQL_DELETE_CATEOGRY);
