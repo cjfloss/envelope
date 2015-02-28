@@ -142,6 +142,8 @@ namespace Envelope.Service {
             m = now.get_month ();
           }
 
+          debug ("loading budget for %d-%d", (int) y, (int) m);
+
           BudgetKey key = BudgetKey ();
           key.year = y;
           key.month = m;
@@ -152,7 +154,7 @@ namespace Envelope.Service {
 
           try {
             // load transactions
-            var transactions = dbm.get_transactions_for_month_and_year ((int) y, (int) m);
+            var transactions = dbm.get_transactions_for_month_and_year ((int) m, (int) y);
 
             // load monthly categories
             var categories = dbm.load_categories_for_year_month ((int) y, (int) m);
@@ -346,6 +348,34 @@ namespace Envelope.Service {
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
+        }
+
+        public Gee.List<Transaction> compute_category_operations (MonthlyCategory? category, out double inflow, out double outflow) throws ServiceError {
+
+          try {
+              Gee.List<Transaction> transactions = dbm.get_transactions_for_monthly_category (category);
+
+              inflow = 0d;
+              outflow = 0d;
+
+              foreach (Transaction transaction in transactions) {
+                  switch (transaction.direction) {
+                      case Transaction.Direction.INCOMING:
+                          inflow += transaction.amount;
+                          break;
+                      case Transaction.Direction.OUTGOING:
+                          outflow += transaction.amount;
+                          break;
+                      default:
+                          assert_not_reached ();
+                  }
+              }
+
+              return transactions;
+          }
+          catch (SQLHeavy.Error err) {
+              throw new ServiceError.DATABASE_ERROR (err.message);
+          }
         }
 
         private BudgetManager () {
