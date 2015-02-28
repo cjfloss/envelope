@@ -27,6 +27,8 @@ namespace Envelope.Window {
 
         private static const uint TRANSITION_DURATION = 0;
 
+
+
         // window elements
         public Gtk.HeaderBar                header_bar { get; private set; }
         public Gtk.Button                   import_button { get; private set; }
@@ -52,9 +54,11 @@ namespace Envelope.Window {
         public MainWindow () {
             Object ();
 
+            
+
             build_ui ();
-            connect_signals ();
             configure_window ();
+            connect_signals ();
         }
 
         /**
@@ -227,6 +231,8 @@ namespace Envelope.Window {
             }
 
             paned.set_position (saved_state.sidebar_width);
+
+
         }
 
         private void on_account_welcome_screen_add_transaction_selected (Account account) {
@@ -279,12 +285,12 @@ namespace Envelope.Window {
           }
         }
 
-        private void on_sidebar_category_selected (Category? category) {
+        private void on_sidebar_category_selected (MonthlyCategory? category) {
           var transaction_view = TransactionView.get_default ();
 
           try {
               double inflow, outflow;
-              var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
+              var transactions = budget_manager.compute_category_operations (category, out inflow, out outflow);
 
               transaction_view.transactions = transactions;
               transaction_view.with_filter_view = false;
