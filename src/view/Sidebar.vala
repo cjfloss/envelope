@@ -115,7 +115,7 @@ namespace Envelope.View {
         private CategoryProperties popover_category_properties;
 
         public signal void overview_selected ();
-        public signal void category_selected (Category? category);
+        public signal void category_selected (MonthlyCategory? category);
         public signal void list_account_selected (Account account);
         public signal void list_account_name_updated (Account account, string new_name);
         public signal void list_category_name_updated (Category category, string new_name);
@@ -253,6 +253,11 @@ namespace Envelope.View {
             var account_manager = AccountManager.get_default ();
             account_manager.account_created.connect (add_new_account);
             account_manager.account_updated.connect (update_account_item);
+
+            /*Envelope.App.get_default ().main_window.notify["budget"].connect ( (s, p) => {
+              update_categories_section ();
+            });
+            */
 
             treeview.button_press_event.connect (tree_button_press_event_func);
 
@@ -474,7 +479,7 @@ namespace Envelope.View {
                     null, null, Action.SHOW_CATEGORY, (double) budget_manager.state.uncategorized.size, ICON_CATEGORY,
                     false, false, "", null, false);
 
-                foreach (MonthlyCategory category in budget_manager.get_categories ()) {
+                foreach (MonthlyCategory category in Envelope.App.get_default ().budget.categories) {
 
                     double cat_inflow;
                     double cat_outflow;
@@ -988,7 +993,7 @@ namespace Envelope.View {
 
                 Account account;
                 Action action;
-                Category? category;
+                MonthlyCategory? category;
                 TreeCategory tree_category;
                 bool is_header;
                 double inflow;
@@ -1099,13 +1104,13 @@ namespace Envelope.View {
             return account;
         }
 
-        private Category? get_category_iter_by_id (int category_id, out Gtk.TreeIter? iter) {
+        private MonthlyCategory? get_category_iter_by_id (int category_id, out Gtk.TreeIter? iter) {
             Gtk.TreeIter? found_iter = null;
-            Category? category = null;
+            MonthlyCategory? category = null;
 
             store.@foreach ((model, path, fe_iter) => {
 
-                Category val;
+                MonthlyCategory val;
                 model.@get (fe_iter, Column.CATEGORY, out val, -1);
 
                 if (val != null && val.@id == category_id) {
@@ -1128,7 +1133,7 @@ namespace Envelope.View {
             if (store.get_iter_from_string (out iter, path)) {
 
                 Account account;
-                Category category;
+                MonthlyCategory category;
                 TreeCategory tree_category;
 
                 store.@get (iter,
