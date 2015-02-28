@@ -101,7 +101,7 @@ namespace Envelope.DB {
                                                                             FROM `categories` `c`
                                                                             LEFT JOIN `categories_budgets` `cb`
                                                                             ON `cb`.`category_id` = `c`.`id`
-                                                                            AND `cb`.`year` = :year
+                                                                            WHERE `cb`.`year` = :year
                                                                             AND `cb`.`month` = :month
                                                                             ORDER BY `c`.`name` ASC""";
         private static const string SQL_LOAD_CHILD_CATEGORIES = "SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC";
@@ -114,9 +114,17 @@ namespace Envelope.DB {
             LEFT JOIN categories c
             ON c.id = t.category_id
             LEFT JOIN categories_budgets cb
-            ON cb.category_id = t.category_id AND cb.year = :year and cb.month = :month
+            ON cb.category_id = t.category_id
+            AND cb.year = :year
+            AND cb.month = :month
             WHERE date(t.date, 'unixepoch') BETWEEN date(:date, 'start of month') AND date(:date, 'start of month', '+1 month', '-1 days')
             ORDER BY t.date DESC""";
+
+        private static const string SQL_LOAD_TRANSACTIONS_FOR_CATEGORY_YEAR_MONTH = """SELECT *
+          FROM transactions
+          WHERE date(date, 'unixepoch')
+          BETWEEN date(:date, 'start of month') and date(:date, 'start of month', '+1 month', '-1 days')
+          AND category_id = :category_id""";
 
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id";
         private static const string SQL_LOAD_CURRENT_UNCATEGORIZED_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id IS NULL";
@@ -214,6 +222,7 @@ namespace Envelope.DB {
 
         private SQLHeavy.Query q_load_current_transactions;
         private SQLHeavy.Query q_load_current_transactions_for_category;
+        private SQLHeavy.Query q_load_transactions_for_category_year_month;
         private SQLHeavy.Query q_load_current_uncategorized_transactions;
 
         private SQLHeavy.Query q_get_unique_merchants;
@@ -726,14 +735,14 @@ namespace Envelope.DB {
 
         public SortedSet<MonthlyCategory> load_categories_for_year_month (int year, int month) throws SQLHeavy.Error {
 
+          debug ("loading categories for %d-%d", year, month);
+
           var list = new TreeSet<MonthlyCategory> ();
 
           q_load_categories_for_year_month.set_int ("year", year);
           q_load_categories_for_year_month.set_int ("month", month);
 
           SQLHeavy.QueryResult results = q_load_categories_for_year_month.execute ();
-
-          q_load_categories_for_year_month.clear ();
 
           while (!results.finished) {
               MonthlyCategory category;
@@ -747,6 +756,8 @@ namespace Envelope.DB {
 
               results.next ();
           }
+
+          q_load_categories_for_year_month.clear ();
 
           return list;
         }
@@ -787,6 +798,37 @@ namespace Envelope.DB {
             q_load_transactions_for_month_and_year.clear ();
 
             return list;
+        }
+
+        public Gee.List<Transaction> get_transactions_for_monthly_category (MonthlyCategory? category) {
+
+          var list = new ArrayList<Transaction> ();
+
+          if (category == null) {
+            return list;
+          }
+
+          debug ("loading transactions for monthly category %d (%u-%u)", category.@id, category.year, category.month);
+
+          q_load_transactions_for_category_year_month.set_int ("category_id", category.@id);
+          q_load_transactions_for_category_year_month.set_string ("date", "%4d-%02d-01".printf ((int) category.year, (int) category.month));
+
+          SQLHeavy.QueryResult results = q_load_transactions_for_category_year_month.execute ();
+
+          while (!results.finished) {
+            Transaction transaction;
+            query_result_to_transaction (results, out transaction);
+
+            transaction.category = category;
+
+            list.add (transaction);
+
+            results.next ();
+          }
+
+          q_load_transactions_for_category_year_month.clear ();
+
+          return list;
         }
 
         public Gee.List<Transaction> get_current_transactions_for_category (Category? category) throws SQLHeavy.Error {
@@ -1002,6 +1044,7 @@ namespace Envelope.DB {
             q_update_category                           = database.prepare (SQL_UPDATE_CATEGORY);
             q_delete_account                            = database.prepare (SQL_DELETE_ACCOUNT);
             q_load_transactions_for_month_and_year      = database.prepare (SQL_LOAD_TRANSACTIONS_FOR_MONTH);
+            q_load_transactions_for_category_year_month = database.prepare (SQL_LOAD_TRANSACTIONS_FOR_CATEGORY_YEAR_MONTH);
             q_update_category_budgeted_amount           = database.prepare (SQL_UPDATE_CATEGORY_BUDGET);
             q_set_category_budgeted_amount              = database.prepare (SQL_SET_CATEGORY_BUDGET);
             q_check_category_budget_set                 = database.prepare (SQL_CHECK_CATEGORY_BUDGET_SET);
