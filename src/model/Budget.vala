@@ -337,6 +337,11 @@ namespace Envelope {
                     available -= category.amount_budgeted;
                 }
             }
+
+            debug ("compute_flows: transactions(%d), categories(%d), outflow(%.2f), inflow(%.2f), budgeted(%.2f), available(%.2f)",
+              transactions != null ? transactions.size : 0,
+              categories != null ? categories.size : 0,
+              outflow, inflow, budgeted, available);
         }
     }
 }
