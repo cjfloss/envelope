@@ -75,6 +75,8 @@ namespace Envelope {
 
         public MainWindow main_window { get; private set; }
 
+        public Budget budget { get; private set; }
+
         protected override void activate () {
 
             Granite.Services.Logger.initialize (Build.USER_PROGRAM_NAME);
@@ -84,6 +86,10 @@ namespace Envelope {
 
             info ("Revision: %s", Build.VERSION_INFO);
             info ("Report any issues/bugs you might find to %s", bug_url);
+
+            if (budget == null) {
+              budget = Envelope.Service.BudgetManager.get_default ().get_budget ();
+            }
 
             if (main_window == null) {
                 main_window = new MainWindow ();
