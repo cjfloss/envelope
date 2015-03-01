@@ -83,7 +83,7 @@ namespace Envelope.Service {
 
         public signal void budget_changed (BudgetState state);
 
-        public signal void category_added (Category category);
+        public signal void category_added (MonthlyCategory category);
         public signal void category_deleted (Category category);
         public signal void category_renamed (Category category, string old_name);
         public signal void category_budget_changed (MonthlyCategory category);
@@ -200,14 +200,33 @@ namespace Envelope.Service {
          * @param {string} name - the name of the category
          * @return {Category} the new category
          */
-        public Category create_category (string name, double budgeted_amount = 0d) throws ServiceError {
+        public MonthlyCategory create_category (string name, uint year, uint month, double budgeted_amount = 0d) throws ServiceError {
 
             try {
                 MonthlyCategory category = new MonthlyCategory ();
                 category.name = name;
                 category.amount_budgeted = budgeted_amount;
+                category.year = year;
+                category.month = month;
 
-                dbm.create_category (category);
+                Category? cat = dbm.get_category_by_name (name);
+
+                if (cat == null) {
+
+                  debug ("category %s does not exist; creating", name);
+
+                  cat = new Category ();
+                  cat.name = category.name;
+
+                  dbm.create_category (cat);
+
+                  debug ("category %s created! id = %d", name, cat.@id);
+                }
+
+                category.@id = cat.@id;
+
+                dbm.set_category_budgeted_amount (category, (int) year, (int) month);
+
                 categories = null;
                 category_added (category);
 
@@ -303,10 +322,10 @@ namespace Envelope.Service {
         /**
          * Get all transactions not associated with any category
          */
-        public Collection<Transaction> get_uncategorized_transactions () throws ServiceError {
+        public Gee.List<Transaction> get_uncategorized_transactions (int year, int month) throws ServiceError {
 
             try {
-                return dbm.load_uncategorized_transactions ();
+                return dbm.load_uncategorized_transactions (year, month);
             }
             catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
@@ -314,49 +333,24 @@ namespace Envelope.Service {
         }
 
         /**
-         * Get the total inflow and outflow in the current month for the specified category
+         * Get the total inflow and outflow for the specified monthly category
          *
-         * @param {Category} category
-         * @param {double} inflow
-         * @param {double} outflow
+         * @param category
+         * @param inflow
+         * @param outflow
+         * @return the list of transactions for the monthly category
          */
-        public Gee.List<Transaction>  compute_current_category_operations (Category? category, out double inflow, out double outflow) throws ServiceError {
-
-            try {
-                Gee.List<Transaction> transactions = dbm.get_current_transactions_for_category (category);
-
-                debug ("transaction for category %s: %d", category != null ? category.name : "(uncategorized)", transactions.size);
-
-                inflow = 0d;
-                outflow = 0d;
-
-                foreach (Transaction transaction in transactions) {
-                    switch (transaction.direction) {
-                        case Transaction.Direction.INCOMING:
-                            inflow += transaction.amount;
-                            break;
-                        case Transaction.Direction.OUTGOING:
-                            outflow += transaction.amount;
-                            break;
-                        default:
-                            assert_not_reached ();
-                    }
-                }
-
-                return transactions;
-            }
-            catch (SQLHeavy.Error err) {
-                throw new ServiceError.DATABASE_ERROR (err.message);
-            }
-        }
-
         public Gee.List<Transaction> compute_category_operations (MonthlyCategory? category, out double inflow, out double outflow) throws ServiceError {
 
           try {
-              Gee.List<Transaction> transactions = dbm.get_transactions_for_monthly_category (category);
 
               inflow = 0d;
               outflow = 0d;
+
+              var current_budget = Envelope.App.get_default ().budget;
+
+              Gee.List<Transaction> transactions = category != null ?
+                dbm.get_transactions_for_monthly_category (category) : dbm.load_uncategorized_transactions ((int) current_budget.year, (int) current_budget.month);
 
               foreach (Transaction transaction in transactions) {
                   switch (transaction.direction) {

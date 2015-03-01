@@ -169,11 +169,11 @@ namespace Envelope.View {
                     charts_container.remove (widget);
                 });
 
-                foreach (Category category in categories) {
+                foreach (MonthlyCategory category in categories) {
 
                     double inflow;
                     double outflow;
-                    var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
+                    var transactions = budget_manager.compute_category_operations (category, out inflow, out outflow);
 
                     if (!transactions.is_empty) {
 

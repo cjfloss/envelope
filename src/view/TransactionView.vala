@@ -452,14 +452,16 @@ namespace Envelope.View {
                 Gtk.TreeIter iter;
                 if (tree_model_sort.get_iter_from_string (out iter, path)) {
 
-                    var category = CategoryStore.get_default ().get_category_by_name (text);
+                    var budget = Envelope.App.get_default ().budget;
 
-                    if (category == null) {
+                    MonthlyCategory category;
+                    if (!budget.get_category_by_name (text, out category)) {
 
                         info ("creating new category '%s'".printf (text));
                         // we must create a new category
                         try {
-                            category = BudgetManager.get_default ().create_category (text);
+                            category = BudgetManager.get_default ().create_category (text, budget.year, budget.month);
+                            budget.add_category (category);
                         }
                         catch (ServiceError err) {
                             error ("could not create category '%s' (%s)", text, err.message);
@@ -1127,7 +1129,7 @@ namespace Envelope.View {
                         parse_date.get_day (), 0, 0, 0);
 
                     // category
-                    transaction.category = CategoryStore.get_default ().get_category_by_name (category_name);
+                    //transaction.category = CategoryStore.get_default ().get_category_by_name (category_name);
 
                     // update
                     try {

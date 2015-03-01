@@ -83,13 +83,18 @@ namespace Envelope.DB {
         """;
 
         private static const string SQL_CATEGORY_COUNT = "SELECT COUNT(*) AS category_count from categories";
+        private static const string SQL_GET_CATEGORY_BY_NAME = "SELECT * FROM categories WHERE TRIM(UPPER(name)) = :name LIMIT 1";
         private static const string SQL_INSERT_CATEGORY_FOR_NAME = "INSERT INTO `categories` (`name`) VALUES (:name);";
         private static const string SQL_SET_CATEGORY_BUDGET = "INSERT INTO `categories_budgets` (`category_id`, `year`, `month`, `amount_budgeted`) VALUES (:category_id, :year, :month, :amount_budgeted)";
         private static const string SQL_UPDATE_CATEGORY_BUDGET = "UPDATE `categories_budgets` SET `amount_budgeted` = :amount_budgeted WHERE `category_id` = :category_id AND `year` = :year AND `month` = :month";
         private static const string SQL_CHECK_CATEGORY_BUDGET_SET = "SELECT COUNT(*) AS size FROM categories_budgets WHERE category_id = :category_id AND year = :year AND month = :month";
         private static const string SQL_DELETE_TRANSACTION = "DELETE FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_TRANSACTION_BY_ID = "SELECT * FROM `transactions` WHERE `id` = :id";
-        private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = "SELECT * FROM `transactions` WHERE `category_id` IS NULL";
+        private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = """SELECT *
+          FROM `transactions`
+          WHERE `category_id` IS NULL
+          AND date(date, 'unixepoch')
+          BETWEEN date(:date, 'start of month') AND date(:date, 'start of month', '+1 month', '-1 days')""";
         private static const string SQL_RENAME_ACCOUNT = "UPDATE `accounts` SET `number` = :number WHERE `id` = :account_id";
         private static const string SQL_DELETE_ACCOUNT = "DELETE FROM `accounts` WHERE `id` = :account_id";
         private static const string SQL_UPDATE_ACCOUNT_BALANCE = "UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id";
@@ -236,6 +241,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_update_category_budgeted_amount;
         private SQLHeavy.Query q_set_category_budgeted_amount;
         private SQLHeavy.Query q_check_category_budget_set;
+        private SQLHeavy.Query q_get_category_by_name;
 
         // in-memory caches for often-used objects
         private SortedMap<int, Account>           account_cache     = new TreeMap<int, Account> ();
@@ -376,6 +382,23 @@ namespace Envelope.DB {
             return list;
         }
 
+        public Category? get_category_by_name (string name) throws SQLHeavy.Error {
+
+          q_get_category_by_name.set_string ("name", name.strip ().up ());
+
+          SQLHeavy.QueryResult results = q_get_category_by_name.execute ();
+
+          if (!results.finished) {
+            Category category;
+            int parent_id;
+            query_result_to_category (results, out category, out parent_id);
+
+            return category;
+          }
+
+          return null;
+        }
+
         /**
          * Create a new category
          *
@@ -409,7 +432,7 @@ namespace Envelope.DB {
             // add to cache
             category_cache.@set (category.name.up (), category);
 
-            category_created (category);
+            //category_created (category);
         }
 
         /**
@@ -578,11 +601,17 @@ namespace Envelope.DB {
          * @return the list of uncategorized transactions
          * @throws SQLHeavy.Error
          */
-        public Collection<Transaction> load_uncategorized_transactions () throws SQLHeavy.Error {
+        public Gee.List<Transaction> load_uncategorized_transactions (int year, int month) throws SQLHeavy.Error {
 
             var list = new ArrayList<Transaction> ();
 
+            q_load_uncategorized_transactions.set_string ("date", "%4d-%02d-01".printf (year, month));
+
+            debug ("loading uncategorized transactions for %s", "%4d-%02d-01".printf (year, month));
+
             SQLHeavy.QueryResult results = q_load_uncategorized_transactions.execute ();
+
+            q_load_uncategorized_transactions.clear ();
 
             while (!results.finished) {
 
@@ -706,9 +735,9 @@ namespace Envelope.DB {
 
         public Collection<MonthlyCategory> load_categories () throws SQLHeavy.Error {
 
-            if (!category_cache.is_empty) {
-                return category_cache.values as Collection<MonthlyCategory>;
-            }
+            //if (!category_cache.is_empty) {
+            //    return category_cache.values as Collection<MonthlyCategory>;
+            //}
 
             var list = new TreeSet<MonthlyCategory> ();
 
@@ -762,7 +791,7 @@ namespace Envelope.DB {
           return list;
         }
 
-        public Collection<Transaction> get_current_transactions () throws SQLHeavy.Error {
+        public Gee.List<Transaction> get_current_transactions () throws SQLHeavy.Error {
 
             int month, year;
             Envelope.Util.Date.get_year_month (out month, out year);
@@ -941,6 +970,8 @@ namespace Envelope.DB {
             var id = results.get_int ("id");
             var name = results.get_string ("name");
             var description = results.get_string ("description");
+
+
             var amount_budgeted = results.get_double ("amount_budgeted");
             var year = results.get_int ("year");
             var month = results.get_int ("month");
@@ -1036,6 +1067,7 @@ namespace Envelope.DB {
             q_load_child_categories                     = database.prepare (SQL_LOAD_CHILD_CATEGORIES);
             q_insert_category                           = database.prepare (SQL_INSERT_CATEGORY);
             q_delete_category                           = database.prepare (SQL_DELETE_CATEOGRY);
+            q_get_category_by_name                      = database.prepare (SQL_GET_CATEGORY_BY_NAME);
             q_load_current_transactions                 = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS);
             q_load_current_transactions_for_category    = database.prepare (SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY);
             q_load_current_uncategorized_transactions   = database.prepare (SQL_LOAD_CURRENT_UNCATEGORIZED_TRANSACTIONS);

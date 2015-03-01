@@ -71,8 +71,10 @@ namespace Envelope.Dialog {
 
         protected override void apply_cb () {
             try {
+                var budget = Envelope.App.get_default ().budget;
+
                 BudgetManager.get_default ()
-                    .create_category (name_entry.text.strip (), parse_currency (amount_entry.text.strip ()));
+                    .create_category (name_entry.text.strip (), budget.year, budget.month, parse_currency (amount_entry.text.strip ()));
             }
             catch (ParseError err) {
                 error ("could not create category %s (%s)", name_entry.text, err.message);

@@ -232,6 +232,25 @@ namespace Envelope {
         }
 
         /**
+         * Check if the budget has the named category
+         *
+         * @return true if category is present, false otherwise
+         */
+        public bool get_category_by_name (string name, out MonthlyCategory? category = null) {
+
+          var key = name.strip ().up ();
+
+          foreach (MonthlyCategory cat in categories) {
+            if (cat.name.up () == key) {
+              category = cat;
+              return true;
+            }
+          }
+
+          return false;
+        }
+
+        /**
          * @see Gee.Comparable<G> : Object
          */
         public int compare_to (Budget budget) {

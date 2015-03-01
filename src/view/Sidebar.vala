@@ -127,7 +127,7 @@ namespace Envelope.View {
                 typeof (string),
                 typeof (Action),
                 typeof (string),
-                typeof (Category),
+                typeof (MonthlyCategory),
                 typeof (string),
                 typeof (TreeCategory),
                 typeof (bool),
@@ -483,7 +483,7 @@ namespace Envelope.View {
 
                     double cat_inflow;
                     double cat_outflow;
-                    budget_manager.compute_current_category_operations (category, out cat_inflow, out cat_outflow);
+                    budget_manager.compute_category_operations (category, out cat_inflow, out cat_outflow);
 
                     add_item (category_iter,
                         category.name,

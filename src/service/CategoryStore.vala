@@ -45,10 +45,16 @@ namespace Envelope.Service {
             try {
                 Collection<MonthlyCategory> categories = BudgetManager.get_default ().get_categories ();
 
+                clear ();
+
                 foreach (MonthlyCategory category in categories) {
 
                     Gtk.TreeIter iter;
                     append (out iter);
+
+                    var tp = category.get_type ();
+
+                    debug ("STORE: ADDING CATEGORY TYPE %s (name = %s)", tp.name (), category.name);
 
                     @set (iter, Column.LABEL, category.name, Column.CATEGORY, category, -1);
                 }
@@ -64,13 +70,13 @@ namespace Envelope.Service {
          * @param name the name of the category to lookup
          * @return the category instance, or null if not found
          */
-        public Category? get_category_by_name (string name) {
+        public MonthlyCategory? get_category_by_name (string name) {
 
-            Category? category = null;
+            MonthlyCategory? category = null;
 
             @foreach ( (model, path, iter) => {
 
-                Category fe_category;
+                MonthlyCategory fe_category;
                 model.@get (iter, Column.CATEGORY, out fe_category, -1);
 
                 if (fe_category != null && fe_category.name.up () == name.strip ().up ()) {
@@ -89,12 +95,12 @@ namespace Envelope.Service {
         * @param id the id of the category to lookup
         * @return the category instance, or null if not found
         */
-        public Category get_category_by_id (int id) {
-            Category? category = null;
+        public MonthlyCategory get_category_by_id (int id) {
+            MonthlyCategory? category = null;
 
             @foreach ( (model, path, iter) => {
 
-                Category fe_category;
+                MonthlyCategory fe_category;
 
                 model.@get (iter, Column.CATEGORY, out fe_category, -1);
 
