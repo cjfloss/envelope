@@ -287,7 +287,7 @@ namespace Envelope.View {
                 budget_state);
 
             overview_outflow_iter = add_item (null,
-                _("Spending this month"),
+                _("Spending"),
                 TreeCategory.OVERVIEW,
                 null,
                 null,
@@ -299,7 +299,7 @@ namespace Envelope.View {
                 _("Money spent in %s").printf (month_label));
 
             overview_inflow_iter = add_item (null,
-                _("Income this month"),
+                _("Income"),
                 TreeCategory.OVERVIEW,
                 null,
                 null,
@@ -442,12 +442,11 @@ namespace Envelope.View {
 
             debug ("update budget section");
 
-            var budget_state = BudgetManager.get_default ().state;
+            var budget = Envelope.App.get_default ().budget;
 
-            store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.inflow), -1);
-            store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.outflow), -1);
-            store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.String.format_currency (budget_state.remaining), -1);
-            store.@set (overview_iter, Column.BUDGET_STATE, budget_state, -1);
+            store.@set (overview_inflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget.inflow), -1);
+            store.@set (overview_outflow_iter, Column.STATE, Envelope.Util.String.format_currency (budget.outflow), -1);
+            store.@set (overview_remaining_iter, Column.STATE, Envelope.Util.String.format_currency (budget.inflow - budget.outflow), -1);
         }
 
         // Find the item in the tree which corresponds to account and update the account instance in the store
@@ -590,23 +589,29 @@ namespace Envelope.View {
             crp.visible = false; // hidden by default
 
             TreeCategory tree_category;
-            BudgetState? budget_state = null;
+            bool is_header;
 
             model.@get (iter,
                 Column.TREE_CATEGORY, out tree_category,
-                Column.BUDGET_STATE, out budget_state, -1);
+                Column.IS_HEADER, out is_header, -1);
 
             switch (tree_category) {
 
                 case TreeCategory.OVERVIEW:
 
-                    if (budget_state != null) {
-                        var percentage = percent ((int) budget_state.outflow, (int) budget_state.inflow);
+                    if (is_header) {
+
+                        var budget = Envelope.App.get_default ().budget;
+                        var percentage = percent ((int) budget.outflow, (int) budget.inflow);
 
                         crp.value = (int) Math.fmin (percentage, 100);
                         crp.visible = true;
                     }
 
+                    break;
+
+                default:
+                    crp.visible = false;
                     break;
             }
         }
