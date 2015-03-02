@@ -80,7 +80,7 @@ namespace Envelope {
         public double budgeted { get; private set; }
 
         /**
-         * Available amouont to budget in the budget's time frame
+         * Available amount to budget in the budget's time frame
          */
         public double available { get; private set; }
 
