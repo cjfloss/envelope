@@ -90,11 +90,14 @@ namespace Envelope.DB {
         private static const string SQL_CHECK_CATEGORY_BUDGET_SET = "SELECT COUNT(*) AS size FROM categories_budgets WHERE category_id = :category_id AND year = :year AND month = :month";
         private static const string SQL_DELETE_TRANSACTION = "DELETE FROM `transactions` WHERE `id` = :id";
         private static const string SQL_GET_TRANSACTION_BY_ID = "SELECT * FROM `transactions` WHERE `id` = :id";
-        private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = """SELECT *
-          FROM `transactions`
-          WHERE `category_id` IS NULL
-          AND date(date, 'unixepoch')
-          BETWEEN date(:date, 'start of month') AND date(:date, 'start of month', '+1 month', '-1 days')""";
+
+        private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = """
+            SELECT *
+            FROM `transactions`
+            WHERE `category_id` IS NULL
+            AND date(date, 'unixepoch')
+            BETWEEN date(:date, 'start of month') AND date(:date, 'start of month', '+1 month', '-1 days')""";
+
         private static const string SQL_RENAME_ACCOUNT = "UPDATE `accounts` SET `number` = :number WHERE `id` = :account_id";
         private static const string SQL_DELETE_ACCOUNT = "DELETE FROM `accounts` WHERE `id` = :account_id";
         private static const string SQL_UPDATE_ACCOUNT_BALANCE = "UPDATE `accounts` SET `balance` = :balance WHERE `id` = :account_id";
@@ -102,20 +105,24 @@ namespace Envelope.DB {
         private static const string SQL_DELETE_ACCOUNT_TRANSACTIONS = "DELETE FROM `transactions` WHERE `account_id` = :account_id";
         private static const string SQL_GET_UNIQUE_MERCHANTS = "SELECT `label`, COUNT(`label`) as `number` FROM `transactions` GROUP BY `label` ORDER BY `number` DESC, `label` ASC";
         private static const string SQL_LOAD_CATEGORIES = "SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted` FROM `categories` `c` LEFT JOIN `categories_budgets` `cb` ON `cb`.`category_id` = `c`.`id` AND `cb`.`year` = strftime('%Y', 'now') AND `cb`.`month` = strftime('%m', 'now') ORDER BY `c`.`name` ASC";
-        private static const string SQL_LOAD_CATEGORIES_FOR_YEAR_MONTH = """SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted`
-                                                                            FROM `categories` `c`
-                                                                            LEFT JOIN `categories_budgets` `cb`
-                                                                            ON `cb`.`category_id` = `c`.`id`
-                                                                            WHERE `cb`.`year` = :year
-                                                                            AND `cb`.`month` = :month
-                                                                            ORDER BY `c`.`name` ASC""";
+
+        private static const string SQL_LOAD_CATEGORIES_FOR_YEAR_MONTH = """
+            SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted`
+            FROM `categories` `c`
+            LEFT JOIN `categories_budgets` `cb`
+            ON `cb`.`category_id` = `c`.`id`
+            WHERE `cb`.`year` = :year
+            AND `cb`.`month` = :month
+            ORDER BY `c`.`name` ASC""";
+
         private static const string SQL_LOAD_CHILD_CATEGORIES = "SELECT * FROM `categories` WHERE `parent_category_id` = :parent_category_id ORDER BY `name` ASC";
         private static const string SQL_DELETE_CATEOGRY = "DELETE FROM `categories` WHERE `id` = :category_id";
         private static const string SQL_UPDATE_CATEGORY = "UPDATE `categories` SET `name` = :name, `description` = :description, `parent_category_id` = :parent_category_id WHERE `id` = :category_id";
         private static const string SQL_CATEGORIZE_ALL_FOR_MERCHANT = "UPDATE `transactions` SET `category_id` = :category_id WHERE `label` = :merchant";
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days')";
 
-        private static const string SQL_LOAD_TRANSACTIONS_FOR_MONTH = """SELECT t.*, c.*, cb.* FROM transactions t
+        private static const string SQL_LOAD_TRANSACTIONS_FOR_MONTH = """
+            SELECT t.*, c.*, cb.* FROM transactions t
             LEFT JOIN categories c
             ON c.id = t.category_id
             LEFT JOIN categories_budgets cb
@@ -125,22 +132,24 @@ namespace Envelope.DB {
             WHERE date(t.date, 'unixepoch') BETWEEN date(:date, 'start of month') AND date(:date, 'start of month', '+1 month', '-1 days')
             ORDER BY t.date DESC""";
 
-        private static const string SQL_LOAD_TRANSACTIONS_FOR_CATEGORY_YEAR_MONTH = """SELECT *
-          FROM transactions
-          WHERE date(date, 'unixepoch')
-          BETWEEN date(:date, 'start of month') and date(:date, 'start of month', '+1 month', '-1 days')
-          AND category_id = :category_id""";
+        private static const string SQL_LOAD_TRANSACTIONS_FOR_CATEGORY_YEAR_MONTH = """
+            SELECT *
+            FROM transactions
+            WHERE date(date, 'unixepoch')
+            BETWEEN date(:date, 'start of month') and date(:date, 'start of month', '+1 month', '-1 days')
+            AND category_id = :category_id""";
 
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = :category_id";
         private static const string SQL_LOAD_CURRENT_UNCATEGORIZED_TRANSACTIONS = "SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id IS NULL";
 
-        private static const string SQL_INSERT_CATEGORY = """INSERT INTO `categories`
+        private static const string SQL_INSERT_CATEGORY = """
+            INSERT INTO `categories`
             (`name`, `description`, `parent_category_id`)
             VALUES
-            (:name, :description, :parent_category_id)
-        """;
+            (:name, :description, :parent_category_id)""";
 
-        private static const string SQL_UPDATE_TRANSACTION = """UPDATE `transactions` SET
+        private static const string SQL_UPDATE_TRANSACTION = """
+            UPDATE `transactions` SET
             label = :label,
             description = :description,
             direction = :direction,
@@ -149,24 +158,22 @@ namespace Envelope.DB {
             category_id = :category_id,
             parent_transaction_id = :parent_transaction_id,
             date = :date
-            WHERE id = :transaction_id
-        """;
+            WHERE id = :transaction_id""";
 
         private static const string SQL_INSERT_TRANSACTION = """
             INSERT INTO `transactions`
             (`label`, `description`, `amount`, `direction`, `account_id`, `parent_transaction_id`, `date`, `category_id`)
             VALUES
-            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date, :category_id)
-        """;
+            (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date, :category_id)""";
 
         private static const string SQL_LOAD_ACCOUNT_BY_ID = "SELECT * FROM `accounts` WHERE `id` = :accountid;";
         private static const string SQL_LOAD_ALL_ACCOUNTS = "SELECT * FROM `accounts` ORDER BY `number`;";
+
         private static const string SQL_INSERT_ACCOUNT = """
             INSERT INTO `accounts`
             (`number`, `description`, `balance`, `type`)
             VALUES
-            (:number, :description, :balance, :type);
-            """;
+            (:number, :description, :balance, :type);""";
 
         /**
          * An account was inserted in the database
@@ -389,6 +396,7 @@ namespace Envelope.DB {
           SQLHeavy.QueryResult results = q_get_category_by_name.execute ();
 
           if (!results.finished) {
+
             Category category;
             int parent_id;
             query_result_to_category (results, out category, out parent_id);
@@ -461,6 +469,8 @@ namespace Envelope.DB {
         }
 
         public void set_category_budgeted_amount (MonthlyCategory category, int year, int month) throws SQLHeavy.Error {
+
+            debug ("set_category_budgeted_amount %d, %d, %d", category.@id, year, month);
 
             q_check_category_budget_set.set_int ("category_id", category.@id);
             q_check_category_budget_set.set_int ("year", year);
@@ -747,7 +757,7 @@ namespace Envelope.DB {
                 MonthlyCategory category;
                 int parent_id;
 
-                query_result_to_category (results, out category, out parent_id);
+                query_result_to_monthly_category (results, out category, out parent_id);
 
                 // TODO add to parent ???
 
@@ -777,7 +787,7 @@ namespace Envelope.DB {
               MonthlyCategory category;
               int parent_id;
 
-              query_result_to_category (results, out category, out parent_id);
+              query_result_to_monthly_category (results, out category, out parent_id);
 
               // TODO add to parent ???
 
@@ -815,7 +825,7 @@ namespace Envelope.DB {
 
                 MonthlyCategory category;
                 int parent_category_id;
-                query_result_to_category (results, out category, out parent_category_id);
+                query_result_to_monthly_category (results, out category, out parent_category_id);
 
                 transaction.category = category.@id != NULL ? category : null;
 
@@ -964,29 +974,41 @@ namespace Envelope.DB {
             merchant = new Merchant (label, count);
         }
 
-        private void query_result_to_category (SQLHeavy.QueryResult results, out MonthlyCategory category, out int parent_id) throws SQLHeavy.Error {
+        private void query_result_to_monthly_category (SQLHeavy.QueryResult results, out MonthlyCategory category, out int parent_id) throws SQLHeavy.Error {
+            assert (!results.finished);
+
+            var id = results.get_int ("id");
+            var name = results.get_string ("name");
+            var description = results.get_string ("description");
+            var amount_budgeted = results.get_double ("amount_budgeted");
+            var year = results.get_int ("year");
+            var month = results.get_int ("month");
+
+            category = new MonthlyCategory ();
+
+            category.amount_budgeted = amount_budgeted;
+            category.year = year;
+            category.month = month;
+            category.@id = id;
+            category.name = name;
+            category.description = description;
+        }
+
+        private void query_result_to_category (SQLHeavy.QueryResult results, out Category category, out int parent_id) throws SQLHeavy.Error {
             assert (!results.finished);
 
             var id = results.get_int ("id");
             var name = results.get_string ("name");
             var description = results.get_string ("description");
 
-
-            var amount_budgeted = results.get_double ("amount_budgeted");
-            var year = results.get_int ("year");
-            var month = results.get_int ("month");
-
             // parent_id is sent to caller to select parent if needed
             parent_id = results.get_int ("parent_category_id");
 
-            category = new MonthlyCategory ();
+            category = new Category ();
 
             category.@id = id;
             category.name = name;
             category.description = description;
-            category.amount_budgeted = amount_budgeted;
-            category.year = year;
-            category.month = month;
         }
 
         private void init_database () {
