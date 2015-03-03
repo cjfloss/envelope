@@ -324,6 +324,13 @@ namespace Envelope.DB {
          */
         public signal void transaction_created (Transaction transaction);
 
+        /**
+         * A transaction was deleted in the database
+         *
+         * @param transaction the transaction which was deleted
+         */
+        public signal void transaction_deleted (Transaction transaction);
+
         // singleton instance
         private static DatabaseManager database_manager_instance = null;
 
@@ -799,14 +806,22 @@ namespace Envelope.DB {
             }
         }
 
-        public void delete_transaction (int transaction_id, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+        public void delete_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+
+            assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
 
             var stmt = db_transaction.prepare (SQL_DELETE_TRANSACTION);
-            stmt.set_int ("id", transaction_id);
+            stmt.set_int ("id", transaction.@id);
 
             stmt.execute ();
-        }
 
+            // fire the transaction_deleted signal once the database transaction is committed
+            db_transaction.resolved.connect ( (status) => {
+                if (status == SQLHeavy.TransactionStatus.COMMITTED) {
+                    transaction_deleted (transaction);
+                }
+            });
+        }
 
         public void update_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
@@ -1175,13 +1190,34 @@ namespace Envelope.DB {
         }
 
         private void connect_signals () {
-            // invalidate merchant cache when a transaction is recorded
             transaction_created.connect (on_transaction_created);
+            transaction_deleted.connect (on_transaction_deleted);
+
+            account_created.connect (on_account_created);
+            account_deleted.connect (on_account_deleted);
         }
 
         private void on_transaction_created (Transaction transaction) {
             if (!merchant_cache.is_empty) {
                 merchant_cache.clear ();
+            }
+        }
+
+        private void on_transaction_deleted (Transaction transaction) {
+            if (!merchant_cache.is_empty) {
+                merchant_cache.clear ();
+            }
+        }
+
+        private void on_account_created (Account account) {
+            if (!account_cache.is_empty) {
+                account_cache.clear ();
+            }
+        }
+
+        private void on_account_deleted (Account account) {
+            if (!account_cache.is_empty) {
+                account_cache.clear ();
             }
         }
 
