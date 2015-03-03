@@ -688,6 +688,9 @@ namespace Envelope.DB {
          * @throws SQLHeavy.Error
          */
         public void update_account_balance (Account account, ref SQLHeavy.Transaction transaction)  throws SQLHeavy.Error {
+
+            assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
+            
             transaction
                 .prepare (SQL_UPDATE_ACCOUNT_BALANCE)
                 .execute ("balance", typeof (double), account.balance, "account_id", typeof (int), account.@id);
@@ -759,6 +762,8 @@ namespace Envelope.DB {
 
         public void insert_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction, SQLHeavy.Query? statement = null) throws SQLHeavy.Error {
 
+            assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
+
             var q = statement != null ? statement : db_transaction.prepare(SQL_INSERT_TRANSACTION);
 
             // optional category id
@@ -798,6 +803,8 @@ namespace Envelope.DB {
          */
         public void insert_transactions (Collection<Transaction> transactions, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
+            assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
+
             var stmt = db_transaction.prepare (SQL_INSERT_TRANSACTION);
 
             // TODO bulk insert
@@ -824,6 +831,8 @@ namespace Envelope.DB {
         }
 
         public void update_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+
+            assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
 
             var stmt = db_transaction.prepare (SQL_UPDATE_TRANSACTION);
 
