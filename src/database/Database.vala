@@ -396,7 +396,7 @@ namespace Envelope.DB {
          *
          * @return list of unique merchants
          */
-        public Collection<Merchant> get_merchants () throws SQLHeavy.Error {
+        public Gee.SortedSet<Merchant> get_merchants () throws SQLHeavy.Error {
 
             if (!merchant_cache.is_empty) {
                 return merchant_cache.values;
