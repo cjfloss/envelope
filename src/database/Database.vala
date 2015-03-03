@@ -1176,9 +1176,13 @@ namespace Envelope.DB {
 
         private void connect_signals () {
             // invalidate merchant cache when a transaction is recorded
-            transaction_created.connect ( (transaction) =>  {
+            transaction_created.connect (on_transaction_created);
+        }
+
+        private void on_transaction_created (Transaction transaction) {
+            if (!merchant_cache.is_empty) {
                 merchant_cache.clear ();
-            });
+            }
         }
 
         /**
