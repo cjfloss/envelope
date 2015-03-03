@@ -72,16 +72,6 @@ namespace Envelope.DB {
             ) WITHOUT ROWID
         """;
 
-        private static const string MONTHLY_BUDGET = """
-            CREATE TABLE IF NOT EXISTS monthly_budgets (
-                `month` INTEGER NOT NULL,
-                `year` INTEGER NOT NULL,
-                `outflow` DOUBLE,
-                `inflow` DOUBLE,
-            PRIMARY KEY (`month`, `year`)
-            ) WITHOUT ROWID
-        """;
-
         private static const string SQL_CATEGORY_COUNT = "SELECT COUNT(*) AS category_count from categories";
         private static const string SQL_GET_CATEGORY_BY_NAME = "SELECT * FROM categories WHERE TRIM(UPPER(name)) = :name LIMIT 1";
         private static const string SQL_INSERT_CATEGORY_FOR_NAME = "INSERT INTO `categories` (`name`) VALUES (:name);";
@@ -1042,7 +1032,6 @@ namespace Envelope.DB {
                 database.execute (ACCOUNTS);
                 database.execute (CATEGORIES);
                 database.execute (MONTHLY_CATEGORIES);
-                database.execute (MONTHLY_BUDGET);
 
                 init_statements ();
             }
