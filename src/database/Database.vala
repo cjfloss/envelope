@@ -1,26 +1,29 @@
 /* Copyright 2014 Nicolas Laplante
-*
-* This file is part of envelope.
-*
-* envelope is free software: you can redistribute it
-* and/or modify it under the terms of the GNU General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* envelope is distributed in the hope that it will be
-* useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-* Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along
-* with envelope. If not, see http://www.gnu.org/licenses/.
-*/
+ *
+ * This file is part of envelope.
+ *
+ * envelope is free software: you can redistribute it
+ * and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * envelope is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with envelope. If not, see http://www.gnu.org/licenses/.
+ */
 
 using Gee;
 
 namespace Envelope.DB {
 
-    class DatabaseManager : Object {
+    /**
+     *
+     */
+    public class DatabaseManager : Object {
 
         // get_int for null fields returns 0
         private static const int NULL = 0;
@@ -73,46 +76,46 @@ namespace Envelope.DB {
         """;
 
         private static const string SQL_CATEGORY_COUNT = """
-            SELECT COUNT(*) AS category_count 
+            SELECT COUNT(*) AS category_count
             FROM categories""";
 
         private static const string SQL_GET_CATEGORY_BY_NAME = """
-            SELECT * 
-            FROM categories 
-            WHERE TRIM(UPPER(name)) = :name 
+            SELECT *
+            FROM categories
+            WHERE TRIM(UPPER(name)) = :name
             LIMIT 1""";
 
         private static const string SQL_INSERT_CATEGORY_FOR_NAME = """
-            INSERT INTO categories 
-                (name) 
+            INSERT INTO categories
+                (name)
                 VALUES (:name);""";
 
         private static const string SQL_SET_CATEGORY_BUDGET = """
-            INSERT INTO categories_budgets 
-                (category_id, year, month, amount_budgeted) 
+            INSERT INTO categories_budgets
+                (category_id, year, month, amount_budgeted)
             VALUES (:category_id, :year, :month, :amount_budgeted)""";
 
         private static const string SQL_UPDATE_CATEGORY_BUDGET = """
-            UPDATE categories_budgets 
-            SET amount_budgeted = :amount_budgeted 
-            WHERE category_id = :category_id 
-                AND year = :year 
+            UPDATE categories_budgets
+            SET amount_budgeted = :amount_budgeted
+            WHERE category_id = :category_id
+                AND year = :year
                 AND month = :month""";
 
         private static const string SQL_CHECK_CATEGORY_BUDGET_SET = """
-            SELECT COUNT(*) AS size 
-            FROM categories_budgets 
-            WHERE category_id = :category_id 
-                AND year = :year 
+            SELECT COUNT(*) AS size
+            FROM categories_budgets
+            WHERE category_id = :category_id
+                AND year = :year
                 AND month = :month""";
 
         private static const string SQL_DELETE_TRANSACTION = """
-            DELETE FROM transactions 
+            DELETE FROM transactions
             WHERE id = :id""";
 
         private static const string SQL_GET_TRANSACTION_BY_ID = """
-            SELECT * 
-            FROM transactions 
+            SELECT *
+            FROM transactions
             WHERE id = :id""";
 
         private static const string SQL_GET_UNCATEGORIZED_TRANSACTIONS = """
@@ -120,58 +123,58 @@ namespace Envelope.DB {
             FROM transactions
             WHERE category_id IS NULL
                 AND date(date, 'unixepoch')
-                    BETWEEN date(:date, 'start of month') 
+                    BETWEEN date(:date, 'start of month')
                         AND date(:date, 'start of month', '+1 month', '-1 days')""";
 
         private static const string SQL_RENAME_ACCOUNT = """
-            UPDATE accounts 
-            SET number = :number 
+            UPDATE accounts
+            SET number = :number
             WHERE id = :account_id""";
 
         private static const string SQL_DELETE_ACCOUNT = """
-            DELETE FROM accounts 
+            DELETE FROM accounts
             WHERE id = :account_id""";
 
         private static const string SQL_UPDATE_ACCOUNT_BALANCE = """
-            UPDATE accounts 
-            SET balance = :balance 
+            UPDATE accounts
+            SET balance = :balance
             WHERE id = :account_id""";
 
         private static const string SQL_LOAD_ACCOUNT_TRANSACTIONS = """
-            SELECT * 
-            FROM transactions 
-            WHERE account_id = :account_id 
+            SELECT *
+            FROM transactions
+            WHERE account_id = :account_id
             ORDER BY date DESC""";
 
         private static const string SQL_DELETE_ACCOUNT_TRANSACTIONS = """
-            DELETE FROM transactions 
+            DELETE FROM transactions
             WHERE account_id = :account_id""";
 
         private static const string SQL_GET_UNIQUE_MERCHANTS = """
-            SELECT label, 
-                COUNT(label) as number 
-            FROM transactions 
-            GROUP BY label 
-            ORDER BY number DESC, 
+            SELECT label,
+                COUNT(label) as number
+            FROM transactions
+            GROUP BY label
+            ORDER BY number DESC,
                 label ASC""";
 
         private static const string SQL_LOAD_CATEGORIES = """
-            SELECT c.*, 
-                cb.year, 
-                cb.month, 
-                cb.amount_budgeted 
-            FROM categories c 
-            LEFT JOIN categories_budgets cb 
-            ON cb.category_id = c.id 
-                AND cb.year = strftime('%Y', 'now') 
-                AND cb.month = strftime('%m', 'now') 
+            SELECT c.*,
+                cb.year,
+                cb.month,
+                cb.amount_budgeted
+            FROM categories c
+            LEFT JOIN categories_budgets cb
+            ON cb.category_id = c.id
+                AND cb.year = strftime('%Y', 'now')
+                AND cb.month = strftime('%m', 'now')
             ORDER BY c.name ASC""";
 
 
         private static const string SQL_LOAD_CATEGORIES_FOR_YEAR_MONTH = """
-            SELECT c.*, 
-                cb.year, 
-                cb.month, 
+            SELECT c.*,
+                cb.year,
+                cb.month,
                 cb.amount_budgeted
             FROM categories c
             LEFT JOIN categories_budgets cb
@@ -181,38 +184,38 @@ namespace Envelope.DB {
             ORDER BY c.name ASC""";
 
         private static const string SQL_LOAD_CHILD_CATEGORIES = """
-            SELECT * 
-            FROM categories 
-            WHERE parent_category_id = :parent_category_id 
+            SELECT *
+            FROM categories
+            WHERE parent_category_id = :parent_category_id
             ORDER BY name ASC""";
 
         private static const string SQL_DELETE_CATEOGRY = """
-            DELETE FROM categories 
+            DELETE FROM categories
             WHERE id = :category_id""";
 
         private static const string SQL_UPDATE_CATEGORY = """
-            UPDATE categories 
-            SET name = :name, 
-                description = :description, 
-                parent_category_id = :parent_category_id 
+            UPDATE categories
+            SET name = :name,
+                description = :description,
+                parent_category_id = :parent_category_id
             WHERE id = :category_id""";
 
         private static const string SQL_CATEGORIZE_ALL_FOR_MERCHANT = """
-            UPDATE transactions 
-            SET category_id = :category_id 
+            UPDATE transactions
+            SET category_id = :category_id
             WHERE label = :merchant""";
 
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS = """
-            SELECT * 
-            FROM transactions 
-            WHERE date(date, 'unixepoch') 
-                BETWEEN date('now', 'start of month') 
+            SELECT *
+            FROM transactions
+            WHERE date(date, 'unixepoch')
+                BETWEEN date('now', 'start of month')
                     AND date('now', 'start of month', '+1 month', '-1 days')""";
 
         private static const string SQL_LOAD_TRANSACTIONS_FOR_MONTH = """
-            SELECT t.*, 
-                c.*, 
-                cb.* 
+            SELECT t.*,
+                c.*,
+                cb.*
             FROM transactions t
             LEFT JOIN categories c
                 ON c.id = t.category_id
@@ -220,8 +223,8 @@ namespace Envelope.DB {
                 ON cb.category_id = t.category_id
                     AND cb.year = :year
                     AND cb.month = :month
-            WHERE date(t.date, 'unixepoch') 
-                BETWEEN date(:date, 'start of month') 
+            WHERE date(t.date, 'unixepoch')
+                BETWEEN date(:date, 'start of month')
                     AND date(:date, 'start of month', '+1 month', '-1 days')
             ORDER BY t.date DESC""";
 
@@ -229,24 +232,24 @@ namespace Envelope.DB {
             SELECT *
             FROM transactions
             WHERE date(date, 'unixepoch')
-                BETWEEN date(:date, 'start of month') 
+                BETWEEN date(:date, 'start of month')
                     AND date(:date, 'start of month', '+1 month', '-1 days')
                 AND category_id = :category_id""";
 
         private static const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = """
-            SELECT * 
-            FROM transactions 
-            WHERE date(date, 'unixepoch') 
-                BETWEEN date('now', 'start of month') 
-                    AND date('now', 'start of month', '+1 month', '-1 days') 
+            SELECT *
+            FROM transactions
+            WHERE date(date, 'unixepoch')
+                BETWEEN date('now', 'start of month')
+                    AND date('now', 'start of month', '+1 month', '-1 days')
                 AND category_id = :category_id""";
 
         private static const string SQL_LOAD_CURRENT_UNCATEGORIZED_TRANSACTIONS = """
-            SELECT * 
-            FROM transactions 
-            WHERE date(date, 'unixepoch') 
-                BETWEEN date('now', 'start of month') 
-                    AND date('now', 'start of month', '+1 month', '-1 days') 
+            SELECT *
+            FROM transactions
+            WHERE date(date, 'unixepoch')
+                BETWEEN date('now', 'start of month')
+                    AND date('now', 'start of month', '+1 month', '-1 days')
                 AND category_id IS NULL""";
 
         private static const string SQL_INSERT_CATEGORY = """
@@ -256,7 +259,7 @@ namespace Envelope.DB {
             (:name, :description, :parent_category_id)""";
 
         private static const string SQL_UPDATE_TRANSACTION = """
-            UPDATE transactions 
+            UPDATE transactions
             SET label = :label,
                 description = :description,
                 direction = :direction,
@@ -274,14 +277,14 @@ namespace Envelope.DB {
                 (:label, :description, :amount, :direction, :account_id, :parent_transaction_id, :date, :category_id)""";
 
         private static const string SQL_LOAD_ACCOUNT_BY_ID = """
-            SELECT * 
-            FROM accounts 
-            WHERE id = :accountid;";
+            SELECT *
+            FROM accounts
+            WHERE id = :accountid""";
 
         private static const string SQL_LOAD_ALL_ACCOUNTS = """
-            SELECT * 
-            FROM accounts 
-            ORDER BY number;""";
+            SELECT *
+            FROM accounts
+            ORDER BY number""";
 
         private static const string SQL_INSERT_ACCOUNT = """
             INSERT INTO accounts
@@ -372,9 +375,9 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_get_category_by_name;
 
         // in-memory caches for often-used objects
-        private SortedMap<int, Account>           account_cache     = new TreeMap<int, Account> ();
-        private SortedMap<string, Category>       category_cache    = new TreeMap<string, Category> ();
-        private SortedMap<string, Merchant>       merchant_cache    = new TreeMap<string, Merchant> ();
+        private SortedMap<int, Account>     account_cache   = new TreeMap<int, Account> ();
+        private SortedMap<string, Category> category_cache  = new TreeMap<string, Category> ();
+        private SortedMap<string, Merchant> merchant_cache  = new TreeMap<string, Merchant> ();
 
         /**
          * Obtain a reference to the singleton instance of the DatabaseManager
@@ -403,10 +406,10 @@ namespace Envelope.DB {
          *
          * @return list of unique merchants
          */
-        public Gee.SortedSet<Merchant> get_merchants () throws SQLHeavy.Error {
+        public SortedSet<Merchant> get_merchants () throws SQLHeavy.Error {
 
             if (!merchant_cache.is_empty) {
-                return merchant_cache.values;
+                return merchant_cache.values as SortedSet<Merchant>;
             }
 
             var merchants = new TreeSet<Merchant> ();
@@ -687,10 +690,10 @@ namespace Envelope.DB {
          * @param transaction the database transaction to use
          * @throws SQLHeavy.Error
          */
-        public void update_account_balance (Account account, ref SQLHeavy.Transaction transaction)  throws SQLHeavy.Error {
+        public void update_account_balance (Account account, SQLHeavy.Transaction transaction)  throws SQLHeavy.Error {
 
-            assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
-            
+            assert (transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
+
             transaction
                 .prepare (SQL_UPDATE_ACCOUNT_BALANCE)
                 .execute ("balance", typeof (double), account.balance, "account_id", typeof (int), account.@id);
@@ -760,7 +763,7 @@ namespace Envelope.DB {
             return list;
         }
 
-        public void insert_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction, SQLHeavy.Query? statement = null) throws SQLHeavy.Error {
+        public void insert_transaction (Transaction transaction, SQLHeavy.Transaction db_transaction, SQLHeavy.Query? statement = null) throws SQLHeavy.Error {
 
             assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
 
@@ -801,7 +804,7 @@ namespace Envelope.DB {
         /**
          * Insert multiple transactions
          */
-        public void insert_transactions (Collection<Transaction> transactions, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+        public void insert_transactions (Collection<Transaction> transactions, SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
             assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
 
@@ -809,11 +812,11 @@ namespace Envelope.DB {
 
             // TODO bulk insert
             foreach (Transaction t in transactions) {
-                insert_transaction (t, ref db_transaction, stmt);
+                insert_transaction (t, db_transaction, stmt);
             }
         }
 
-        public void delete_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+        public void delete_transaction (Transaction transaction, SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
             assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
 
@@ -830,7 +833,7 @@ namespace Envelope.DB {
             });
         }
 
-        public void update_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
+        public void update_transaction (Transaction transaction, SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
 
             assert (db_transaction.status == SQLHeavy.TransactionStatus.UNRESOLVED);
 
