@@ -947,7 +947,7 @@ namespace Envelope.View {
 
                             account.balance = amount;
 
-                            AccountManager.get_default ().update_account_balance (ref account);
+                            AccountManager.get_default ().update_account_balance (account);
 
                             break;
 

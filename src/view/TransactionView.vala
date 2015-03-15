@@ -1003,7 +1003,7 @@ namespace Envelope.View {
             debug ("removing transaction with date %s", transaction.date.to_string ());
 
             try {
-                AccountManager.get_default ().remove_transaction (ref transaction);
+                AccountManager.get_default ().remove_transaction (transaction);
 
                 Gtk.TreeIter transaction_iter;
                 get_transaction_iter_from_sort_iter (out transaction_iter, iter);
@@ -1065,8 +1065,7 @@ namespace Envelope.View {
                 Category? category = CategoryStore.get_default ().get_category_by_name (t_category);
 
                 try {
-                    var acct_ref = Sidebar.get_default ().selected_account;
-                    AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, category,  null);
+                    AccountManager.get_default ().record_transaction (Sidebar.get_default ().selected_account, date, t_label, t_description, amount, category,  null);
                 } catch (ServiceError err) {
                     error (err.message);
                 }

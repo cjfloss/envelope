@@ -146,10 +146,10 @@ namespace Envelope.Service {
             }
         }
 
-        public void update_account_balance (ref Account account) throws ServiceError {
+        public void update_account_balance (Account account) throws ServiceError {
             try {
                 var db_transaction = dbm.start_transaction ();
-                dbm.update_account_balance (account, ref db_transaction);
+                dbm.update_account_balance (account, db_transaction);
                 db_transaction.commit ();
             }
             catch (SQLHeavy.Error err) {
@@ -166,7 +166,7 @@ namespace Envelope.Service {
             }
         }
 
-        public Transaction record_transaction (ref Account account, DateTime date, string label, string description, double amount, Category? category, Transaction? parent = null) throws ServiceError {
+        public Transaction record_transaction (Account account, DateTime date, string label, string description, double amount, Category? category, Transaction? parent = null) throws ServiceError {
 
             var old_balance = account.balance;
 
@@ -188,10 +188,10 @@ namespace Envelope.Service {
 
                 var db_transaction = dbm.start_transaction ();
 
-                dbm.insert_transaction (transaction, ref db_transaction);
+                dbm.insert_transaction (transaction, db_transaction);
 
                 adjust_balance (account, transaction);
-                dbm.update_account_balance (account, ref db_transaction);
+                dbm.update_account_balance (account, db_transaction);
 
                 db_transaction.commit ();
 
@@ -225,7 +225,7 @@ namespace Envelope.Service {
                 var db_transaction = dbm.start_transaction ();
 
                 // update transaction
-                dbm.update_transaction (transaction, ref db_transaction);
+                dbm.update_transaction (transaction, db_transaction);
 
                 // first cancel old transaction
                 adjust_balance (transaction.account, current_transaction, true);
@@ -233,7 +233,7 @@ namespace Envelope.Service {
                 // update account balance
                 adjust_balance (transaction.account, transaction);
 
-                dbm.update_account_balance (transaction.account, ref db_transaction);
+                dbm.update_account_balance (transaction.account, db_transaction);
 
                 db_transaction.commit ();
 
@@ -249,15 +249,15 @@ namespace Envelope.Service {
         /**
          * Remove a transaction from the database, adjusting the affected account's balance
          */
-        public void remove_transaction (ref Transaction transaction) throws ServiceError {
+        public void remove_transaction (Transaction transaction) throws ServiceError {
 
             try {
                 var db_transaction = dbm.start_transaction ();
 
-                dbm.delete_transaction (transaction.@id, ref db_transaction);
+                dbm.delete_transaction (transaction, db_transaction);
 
                 adjust_balance (transaction.account, transaction, true);
-                dbm.update_account_balance (transaction.account, ref db_transaction);
+                dbm.update_account_balance (transaction.account, db_transaction);
 
                 db_transaction.commit ();
 
@@ -276,7 +276,7 @@ namespace Envelope.Service {
         /**
          * Imports transactions into this account. Will do its best to discard duplicates.
          */
-        public int import_transactions_from_file (ref Account account, File file) throws ImporterError, ServiceError {
+        public int import_transactions_from_file (Account account, File file) throws ImporterError, ServiceError {
 
             var path = file.get_path ();
 
@@ -334,8 +334,8 @@ namespace Envelope.Service {
 
                     var db_transaction = dbm.start_transaction ();
 
-                    dbm.insert_transactions (transactions, ref db_transaction);
-                    dbm.update_account_balance (account, ref db_transaction);
+                    dbm.insert_transactions (transactions, db_transaction);
+                    dbm.update_account_balance (account, db_transaction);
 
                     db_transaction.commit ();
 
