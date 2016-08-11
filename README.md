@@ -1,3 +1,6 @@
+# On hold
+This project is looking for a new maintainer.
+
 # Envelope
 
 Personal budget application for the Elementary OS desktop. It
