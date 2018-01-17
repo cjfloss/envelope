@@ -162,8 +162,13 @@ namespace Envelope.View {
 
         private void ok_clicked () {
 
-            category.name = category_name_entry.text.strip ();
-            category.amount_budgeted = Envelope.Util.String.parse_currency (budgeted_amount_entry.text);
+            try {
+                category.name = category_name_entry.text.strip ();
+                category.amount_budgeted = Envelope.Util.String.parse_currency (budgeted_amount_entry.text);
+            }
+            catch (Envelope.Util.String.ParseError err) {
+                assert_not_reached ();
+            }
 
             try {
                 bm.set_current_budgeted_amount (category);
