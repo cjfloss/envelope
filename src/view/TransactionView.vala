@@ -619,7 +619,7 @@ namespace Envelope.View {
             treeview.append_column (category_column);
 
             var out_column = new Gtk.TreeViewColumn ();
-            out_column.set_title (_("Outflow (%s)").printf (Envelope.Util.String.get_currency_symbol ()));
+            out_column.set_title (_("Outflow (%s)").printf (Envelope.Util.String.get_currency_symbol ().to_string()));
             out_column.max_width = -1;
             out_column.min_width = 80;
             out_column.pack_start (renderer_out, true);
@@ -632,7 +632,7 @@ namespace Envelope.View {
             treeview.append_column (out_column);
 
             var in_column = new Gtk.TreeViewColumn ();
-            in_column.set_title (_("Inflow (%s)").printf (Envelope.Util.String.get_currency_symbol ()));
+            in_column.set_title (_("Inflow (%s)").printf (Envelope.Util.String.get_currency_symbol ().to_string()));
             in_column.max_width = -1;
             in_column.min_width = 80;
             in_column.pack_start (renderer_in, true);
