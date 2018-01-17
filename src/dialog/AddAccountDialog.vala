@@ -34,7 +34,7 @@ namespace Envelope.Dialog {
             connect_signals ();
         }
 
-        [Deprecated (replacement = "AccountManager.accout_created")]
+        [Version (deprecated = true, deprecated_since = "", replacement = "AccountManager.accout_created")]
         public signal void account_created (Account account);
 
         private void create_account () {
