@@ -53,12 +53,9 @@ namespace Envelope.Widget {
 
             current_path = path;
 
-            Cairo.RectangleInt pos;
-            bool set_top = determine_position (cell_area, out pos);
-
-            popover.pointing_to = pos;
+            popover.pointing_to = cell_area;
             popover.relative_to = widget;
-            popover.set_position (set_top ? Gtk.PositionType.TOP : Gtk.PositionType.BOTTOM);
+            popover.set_position (Gtk.PositionType.BOTTOM);
 
             return return_value;
         }
@@ -110,17 +107,6 @@ namespace Envelope.Widget {
 
         private void real_dismiss () {
             popover.hide ();
-        }
-
-        private bool determine_position (Gdk.Rectangle area, out Cairo.RectangleInt position) {
-            position = Cairo.RectangleInt ();
-
-            position.width = area.width;
-            position.height = area.height;
-            position.y = area.y/* + area.height + 2*/;
-            position.x = area.x;
-
-            return false;
         }
     }
 }
