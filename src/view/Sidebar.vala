@@ -42,7 +42,7 @@ namespace Envelope.View {
         private const string ICON_OUTFLOW    = "go-up-symbolic";
         private const string ICON_INFLOW     = "go-down-symbolic";
         private const string ICON_REMAINING  = "view-refresh-symbolic";
-        private const string ICON_CATEGORY   = "applications-other";
+        private const string ICON_CATEGORY   = "mail-message-new-symbolic";
         private const string ICON_ACTION_ADD = "tab-new-symbolic";
 
         private enum Action {
