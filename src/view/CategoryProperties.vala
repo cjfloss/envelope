@@ -78,7 +78,7 @@ namespace Envelope.View {
 
             // title
             var title_label = new Gtk.Label (_("Edit category"));
-            Granite.Widgets.Utils.apply_text_style_to_label (Granite.TextStyle.H3, title_label);
+            title_label.get_style_context ().add_class (Granite.STYLE_CLASS_H3_LABEL);
             attach_next_to (title_label, null, Gtk.PositionType.TOP, 3, 1);
 
             // category name text entry

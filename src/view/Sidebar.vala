@@ -167,7 +167,7 @@ namespace Envelope.View {
             // style
             var style_context = treeview.get_style_context ();
             style_context.add_class (Gtk.STYLE_CLASS_SIDEBAR);
-            style_context.add_class (Granite.StyleClass.SOURCE_LIST);
+            style_context.add_class (Granite.STYLE_CLASS_SOURCE_LIST);
 
             // selection
             var selection = treeview.get_selection ();

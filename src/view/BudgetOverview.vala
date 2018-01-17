@@ -96,7 +96,7 @@ namespace Envelope.View {
             pack_start (summary_container);
 
             var summary_title = new Gtk.Label(_("Your budget right now:"));
-            set_class (summary_title, Granite.StyleClass.H1_TEXT);
+            set_class (summary_title, Granite.STYLE_CLASS_H1_LABEL);
             //Granite.Widgets.Utils.set_theming (summary_title, STYLE_CLASS_OVERVIEW_TITLE, "overview-title", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             summary_container.pack_start (summary_title);
 
@@ -108,7 +108,7 @@ namespace Envelope.View {
             in_out_box.pack_start (inflow_box);
 
             var inflow_label = new Gtk.Label (_("Inflow:"));
-            set_class (inflow_label, Granite.StyleClass.H2_TEXT);
+            set_class (inflow_label, Granite.STYLE_CLASS_H2_LABEL);
             //Granite.Widgets.Utils.set_theming (inflow_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             inflow_box.pack_start (inflow_label, false);
 
@@ -120,7 +120,7 @@ namespace Envelope.View {
             in_out_box.pack_start (outflow_box);
 
             var outflow_label = new Gtk.Label (_("Outflow:"));
-            set_class (outflow_label, Granite.StyleClass.H2_TEXT);
+            set_class (outflow_label, Granite.STYLE_CLASS_H2_LABEL);
             //Granite.Widgets.Utils.set_theming (outflow_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             outflow_box.pack_start (outflow_label, false);
 
@@ -132,7 +132,7 @@ namespace Envelope.View {
             in_out_box.pack_start (remaining_box);
 
             var remaining_label = new Gtk.Label (_("Remaining this month:"));
-            set_class (remaining_label, Granite.StyleClass.H2_TEXT);
+            set_class (remaining_label, Granite.STYLE_CLASS_H2_LABEL);
             //Granite.Widgets.Utils.set_theming (remaining_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             remaining_box.pack_start (remaining_label, false);
 
@@ -178,7 +178,7 @@ namespace Envelope.View {
                     if (!transactions.is_empty) {
 
                         var category_label = new Gtk.Label (category.name);
-                        set_class (category_label, Granite.StyleClass.H2_TEXT);
+                        set_class (category_label, Granite.STYLE_CLASS_H2_LABEL);
                         category_label.xalign = 1.0f;
 
                         var category_summary_str = "";
@@ -206,7 +206,7 @@ namespace Envelope.View {
 
 
                         var category_summary = new Gtk.Label (category_summary_str);
-                        set_class (category_summary, Granite.StyleClass.H3_TEXT);
+                        set_class (category_summary, Granite.STYLE_CLASS_H3_LABEL);
                         category_summary.xalign = 0.0f;
 
                         charts_container.attach_next_to (category_label, null, Gtk.PositionType.BOTTOM, 1, 1);
