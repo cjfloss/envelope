@@ -64,7 +64,7 @@ namespace Envelope.View {
 
             build_ui ();
             connect_signals ();
-            
+
             filter_view_instance = this;
         }
 
@@ -117,19 +117,19 @@ namespace Envelope.View {
                     case FilterType.THIS_MONTH:
                         btn_this_month.active = true;
                         break;
-                        
+
                     case FilterType.LAST_MONTH:
                         btn_last_month.active = true;
                         break;
-                    
+
                     case FilterType.FUTURE:
                         btn_future.active = true;
                         break ;
-                        
+
                     case FilterType.MANUAL:
                         btn_manual.active = true;
                         break;
-                        
+
                     default:
                         assert_not_reached ();
                 }

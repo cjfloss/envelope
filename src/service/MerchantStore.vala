@@ -33,7 +33,7 @@ namespace Envelope.Service {
             return merchant_store_instance;
         }
 
-        public static const int COLUMN = 0;
+        public const int COLUMN = 0;
 
         private MerchantStore () {
             Object ();

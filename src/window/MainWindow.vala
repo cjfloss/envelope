@@ -25,7 +25,7 @@ namespace Envelope.Window {
 
     public class MainWindow : Gtk.ApplicationWindow {
 
-        private static const uint TRANSITION_DURATION = 0;
+        private const uint TRANSITION_DURATION = 0;
 
         // window elements
         public Gtk.HeaderBar                header_bar { get; private set; }

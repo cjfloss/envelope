@@ -36,14 +36,14 @@ namespace Envelope.View {
             return sidebar_instance;
         }
 
-        private static const int COLUMN_COUNT = 15;
+        private const int COLUMN_COUNT = 15;
 
-        private static const string ICON_ACCOUNT    = "text-spreadsheet";
-        private static const string ICON_OUTFLOW    = "go-up-symbolic";
-        private static const string ICON_INFLOW     = "go-down-symbolic";
-        private static const string ICON_REMAINING  = "view-refresh-symbolic";
-        private static const string ICON_CATEGORY   = "applications-mail";
-        private static const string ICON_ACTION_ADD = "tab-new-symbolic";
+        private const string ICON_ACCOUNT    = "text-spreadsheet";
+        private const string ICON_OUTFLOW    = "go-up-symbolic";
+        private const string ICON_INFLOW     = "go-down-symbolic";
+        private const string ICON_REMAINING  = "view-refresh-symbolic";
+        private const string ICON_CATEGORY   = "applications-other";
+        private const string ICON_ACTION_ADD = "tab-new-symbolic";
 
         private enum Action {
             NONE,
@@ -77,9 +77,9 @@ namespace Envelope.View {
             CATEGORIES
         }
 
-        private static const string COLOR_SUBZERO = "#A62626";
-        private static const string COLOR_ZERO = "#4e9a06";
-        private static const int CELL_FONT_WEIGHT_HEADER = 900;
+        private const string COLOR_SUBZERO = "#A62626";
+        private const string COLOR_ZERO = "#4e9a06";
+        private const int CELL_FONT_WEIGHT_HEADER = 900;
 
         private Gtk.TreeView treeview;
         private Gtk.TreeStore store;

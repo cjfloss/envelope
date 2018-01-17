@@ -52,9 +52,9 @@ namespace Envelope.View {
             EDITING
         }
 
-        private static const int COLUMN_COUNT = 9;
-        private static const string CELL_COLOR_INCOMING = "#4e9a06";
-        private static const string CELL_COLOR_OUTGOING = "#A62626";
+        private const int COLUMN_COUNT = 9;
+        private const string CELL_COLOR_INCOMING = "#4e9a06";
+        private const string CELL_COLOR_OUTGOING = "#A62626";
         private static string CELL_DATE_FORMAT = "%x"; // preferred format according to locale
 
         private Gtk.TreeView treeview;

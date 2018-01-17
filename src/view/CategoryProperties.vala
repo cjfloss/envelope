@@ -23,7 +23,7 @@ namespace Envelope.View {
 
     public class CategoryProperties : CellRendererUpdatable {
 
-        private static const int ENTRY_WIDTH = 15;
+        private const int ENTRY_WIDTH = 15;
 
         public MonthlyCategory category { get; set; }
         public double inflow { get; set; }

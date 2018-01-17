@@ -26,13 +26,13 @@ namespace Envelope.View {
 
     private static BudgetOverview budget_overview_instance = null;
 
-    private static const string STYLE_CLASS_INFLOW = ".inflow { font-weight: 900; font-size: 18px; color: #4e9a06; }";
-    private static const string STYLE_CLASS_OUTFLOW = ".outflow { font-weight: 900; font-size: 18px; color: #A62626; }";
+    private const string STYLE_CLASS_INFLOW = ".inflow { font-weight: 900; font-size: 18px; color: #4e9a06; }";
+    private const string STYLE_CLASS_OUTFLOW = ".outflow { font-weight: 900; font-size: 18px; color: #A62626; }";
 
 
     public class BudgetOverview : Gtk.Box {
 
-        private static const string STYLESHEET_BUDGET_OVERVIEW = """
+        private const string STYLESHEET_BUDGET_OVERVIEW = """
         EnvelopeViewBudgetOverview {
             background-color: @base_color;
         }

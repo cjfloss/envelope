@@ -1,6 +1,6 @@
 namespace Envelope.Util.String {
 
-    public static const string ELLIPSIS = "\u2026";
+    public const string ELLIPSIS = "\u2026";
     private static char* currency_symbol = null;
 
     public errordomain ParseError {
