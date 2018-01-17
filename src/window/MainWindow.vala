@@ -88,7 +88,7 @@ namespace Envelope.Window {
 
             var menu_icon = new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR);
             app_menu.set_image (menu_icon);
-            settings_menu.append (_("Export..."), null);
+            settings_menu.append (_("Export\u2026"), null);
             menu_popover = new Gtk.Popover.from_model (app_menu, settings_menu);
             app_menu.popover = menu_popover;
 
