@@ -62,7 +62,7 @@ namespace Envelope.Window {
          */
         public void show_notification (string text) {
             overlay_bar.hide ();
-            overlay_bar.status = text;
+            overlay_bar.label = text;
 
             overlay_bar.show ();
 
