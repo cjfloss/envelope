@@ -11,8 +11,3 @@ Type=Application
 Categories=Utility;
 X-GNOME-Gettext-Domain=envelope
 X-GNOME-UsesNotifications=true;
-Actions=AboutDialog;
-
-[Desktop Action AboutDialog]
-Exec=envelope --about
-Name=About Envelope
