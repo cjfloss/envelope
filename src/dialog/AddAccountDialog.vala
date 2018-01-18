@@ -19,9 +19,7 @@
 using Envelope.Service;
 
 namespace Envelope.Dialog {
-
     public class AddAccountDialog : Gtk.Dialog {
-
         private Account.Type current_account_type = Account.Type.CHECKING;
 
         private Gtk.Entry number_entry;
@@ -39,7 +37,6 @@ namespace Envelope.Dialog {
 
         private void create_account () {
             try {
-
                 var account = AccountManager.get_default ().create_account (number_entry.text,
                                                                             desc_entry.text,
                                                                             double.parse (balance_entry.text),
@@ -47,11 +44,9 @@ namespace Envelope.Dialog {
 
                 // show notification
                 Envelope.App.toast (_("Account %s has been created").printf(account.number));
-            }
-            catch (ServiceError err) {
+            } catch (ServiceError err) {
                 error ("error while creating account (%s)".printf (err.message));
-            }
-            catch (AccountError err) {
+            } catch (AccountError err) {
                 error ("error while creating account (%s)".printf (err.message));
             }
         }
@@ -65,7 +60,6 @@ namespace Envelope.Dialog {
                 case Gtk.ResponseType.CLOSE:
                     destroy ();
                     break;
-
                 case Gtk.ResponseType.APPLY:
                     create_account ();
                     destroy ();
@@ -74,7 +68,6 @@ namespace Envelope.Dialog {
         }
 
         private void build_ui () {
-
             title = "Add an account";
             border_width = 20;
 
@@ -124,7 +117,6 @@ namespace Envelope.Dialog {
             type_choice.active = 0;
 
             type_choice.changed.connect ( () => {
-
                 type_choice.get_active_iter (out type_list_store_iter);
 
                 int account_type;

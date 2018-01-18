@@ -17,7 +17,6 @@
 */
 
 namespace Envelope.Service {
-
     public errordomain ServiceError {
         DATABASE_ERROR,
         IMPORT_ERROR,

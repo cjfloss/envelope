@@ -17,9 +17,7 @@
 */
 
 namespace Envelope.Widget {
-
     public class CellRendererDatePicker : AbstractPopoverCellRenderer {
-
         private static string date_format = "%x";
 
         public Gtk.Calendar calendar { get; private set; }
@@ -35,7 +33,6 @@ namespace Envelope.Widget {
                                             Gdk.Rectangle background_area,
                                             Gdk.Rectangle cell_area,
                                             Gtk.CellRendererState flags) {
-
             base.start_editing (event, widget, path, background_area, cell_area, flags);
             popover.show ();
 
@@ -43,7 +40,6 @@ namespace Envelope.Widget {
         }
 
         protected override void build_ui () {
-
             calendar = new Gtk.Calendar ();
             popover.add (calendar);
 
@@ -55,7 +51,6 @@ namespace Envelope.Widget {
         }
 
         private void select_date () {
-
             popover.hide ();
 
             date_selected = true;

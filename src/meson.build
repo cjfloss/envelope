@@ -1,17 +1,17 @@
 app_name = meson.project_name()
 short_name = 'envelope'
-
-GIT_BRANCH = run_command('git', 'rev-parse', '--abbrev-ref', 'HEAD')
-GIT_COMMIT_HASH = run_command('git','log', '-1', '--format=%h')
-
 version = '0.0.0'
-git_branch = GIT_BRANCH.stdout().strip()
-git_commit_hash = GIT_COMMIT_HASH.stdout().strip()
-version_info = 'git-' + git_branch + '-' + git_commit_hash
 release_name = 'alpha'
+
 prefix = get_option('prefix')
 datadir = join_paths(prefix, get_option('datadir'))
 pkg_datadir = join_paths(datadir, short_name)
+
+GIT_BRANCH = run_command('git', 'rev-parse', '--abbrev-ref', 'HEAD')
+GIT_COMMIT_HASH = run_command('git','log', '-1', '--format=%h')
+git_branch = GIT_BRANCH.stdout().strip()
+git_commit_hash = GIT_COMMIT_HASH.stdout().strip()
+version_info = 'git-' + git_branch + '-' + git_commit_hash
 
 config = configuration_data()
 config.set('app_name', app_name)
@@ -72,7 +72,7 @@ executable(
     'widget/CellRendererPopoverContainer.vala',
 
     'window/MainWindow.vala',
-    ['Envelope.vala',build_config],
+    ['Envelope.vala', build_config],
 
     dependencies : [
         dependency('glib-2.0', version :'>=2.29.0'),

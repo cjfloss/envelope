@@ -19,9 +19,7 @@
 using Gee;
 
 namespace Envelope {
-
     public class Transaction : Object, Comparable<Transaction> {
-
         public enum Direction {
             INCOMING,
             OUTGOING;

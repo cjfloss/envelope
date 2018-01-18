@@ -17,11 +17,9 @@
 */
 
 namespace Envelope.Service.Settings {
-
     private static SavedState saved_state_instance = null;
 
     public class SavedState : Granite.Services.Settings {
-
         public bool maximized { get; set; default = false; }
 
         public int window_width { get; set; }

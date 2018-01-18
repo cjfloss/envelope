@@ -17,9 +17,7 @@
 */
 
 namespace Envelope.Widget {
-
     public class CellRendererCategoryPicker : AbstractPopoverCellRenderer {
-
         public string merchant_name { get; set; }
         public string category_name { get; set; }
         public bool apply_to_all { get; private set; }
@@ -41,7 +39,6 @@ namespace Envelope.Widget {
                                        Gdk.Rectangle background_area,
                                        Gdk.Rectangle cell_area,
                                        Gtk.CellRendererState flags) {
-
             base.start_editing (event, widget, path, background_area, cell_area, flags);
 
             check_button.label = _("Apply to all %s").printf (merchant_name);
@@ -70,7 +67,6 @@ namespace Envelope.Widget {
         }
 
         protected override void build_ui () {
-
             var grid = new Gtk.Grid ();
 
             grid.column_spacing = 10;
@@ -100,7 +96,6 @@ namespace Envelope.Widget {
         }
 
         protected override void connect_signals () {
-
             cancel_button.clicked.connect ( () => {
                 check_button.active = false;
                 popover.hide ();
@@ -117,5 +112,4 @@ namespace Envelope.Widget {
             });
         }
     }
-
 }

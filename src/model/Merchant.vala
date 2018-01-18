@@ -19,9 +19,7 @@
 using Gee;
 
 namespace Envelope {
-
     public class Merchant : Object, Comparable<Merchant> {
-
         public string label { get; private set; }
         public int occurences { get; private set; }
 

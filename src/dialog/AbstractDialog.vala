@@ -1,8 +1,6 @@
 
 namespace Envelope.Dialog {
-
     public abstract class AbstractOkCancelDialog : Gtk.Dialog {
-
         protected Gtk.Button ok_button { get; private set; }
         protected Gtk.Button cancel_button { get; private set; }
 
@@ -27,17 +25,18 @@ namespace Envelope.Dialog {
         // connect signals on Cancel and OK buttons. Don't forget to call base.connect_signals () if you
         // override this method.
         protected virtual void connect_signals () {
-
             response.connect ((source, response_id) => {
                 switch (response_id) {
                     case Gtk.ResponseType.APPLY:
-                    apply_cb ();
-                    destroy ();
+                        apply_cb ();
+                        destroy ();
+
                     break;
 
                     case Gtk.ResponseType.CLOSE:
-                    cancel_cb ();
-                    destroy ();
+                        cancel_cb ();
+                        destroy ();
+
                     break;
                 }
             });
@@ -58,5 +57,4 @@ namespace Envelope.Dialog {
          */
         protected abstract void cancel_cb ();
     }
-
 }

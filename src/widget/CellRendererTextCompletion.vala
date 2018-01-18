@@ -17,9 +17,7 @@
 */
 
 namespace Envelope.Widget {
-
     public class CellRendererTextCompletion : Gtk.CellRendererText {
-
         public Gtk.ListStore store { get; set; }
         public int text_column { get; set; }
 
@@ -50,7 +48,6 @@ namespace Envelope.Widget {
                                                                 Gdk.Rectangle background_area,
                                                                 Gdk.Rectangle cell_area,
                                                                 Gtk.CellRendererState flags) {
-
             assert (editable);
 
             // create new completion every time, since the backing store might

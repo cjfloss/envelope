@@ -1,7 +1,7 @@
 <div>
     <h1 align="center">Envelope</h1>
     <p align="center">
-      <img src="https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png" alt="screenshot">
+        <img src="https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png" alt="screenshot">
     </p>
     <h2 align="center">Personal budget application for the elementary OS desktop</h2>
 </div>
@@ -10,7 +10,8 @@
 
 ## Introduction
 
-Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system). You designate spending categories (envelopes) and distribute your monthly income into them.
+Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system).
+You designate spending categories (envelopes) and distribute your monthly income into them.
 
 Envelope lets you configure accounts where you record all your transactions. You then assign each of them to a category.
 

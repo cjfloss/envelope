@@ -23,15 +23,12 @@ using Envelope.Service;
 using Gee;
 
 namespace Envelope.View {
-
     private static BudgetOverview budget_overview_instance = null;
 
     private const string STYLE_CLASS_INFLOW = ".inflow { font-weight: 900; font-size: 18px; color: #4e9a06; }";
     private const string STYLE_CLASS_OUTFLOW = ".outflow { font-weight: 900; font-size: 18px; color: #A62626; }";
 
-
     public class BudgetOverview : Gtk.Box {
-
         private const string STYLESHEET_BUDGET_OVERVIEW = """
         EnvelopeViewBudgetOverview {
             background-color: @base_color;
@@ -73,7 +70,6 @@ namespace Envelope.View {
         }
 
         private void build_ui () {
-
             homogeneous = false;
 
             Granite.Widgets.Utils.set_theming (this, STYLESHEET_BUDGET_OVERVIEW, null, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -85,7 +81,6 @@ namespace Envelope.View {
         }
 
         private void build_summary_ui () {
-
             // Top spacer
             pack_start (new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0), true, true, 0);
 
@@ -142,7 +137,6 @@ namespace Envelope.View {
         }
 
         private void build_charts_ui () {
-
             charts_container = new Gtk.Grid ();
             charts_container.row_spacing = 10;
             charts_container.column_spacing = 10;
@@ -157,7 +151,6 @@ namespace Envelope.View {
         }
 
         private void generate_operations_summary () {
-
             debug ("generating operations summary");
 
             var budget_manager = BudgetManager.get_default ();
@@ -170,13 +163,11 @@ namespace Envelope.View {
                 });
 
                 foreach (Category category in categories) {
-
                     double inflow;
                     double outflow;
                     var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
 
                     if (!transactions.is_empty) {
-
                         var category_label = new Gtk.Label (category.name);
                         set_class (category_label, Granite.STYLE_CLASS_H2_LABEL);
                         category_label.xalign = 1.0f;
@@ -194,8 +185,7 @@ namespace Envelope.View {
                         if (outflow != 0) {
                             if (inflow_set) {
                                 category_summary_str += ", %s spent".printf (Envelope.Util.String.format_currency (outflow));
-                            }
-                            else {
+                            } else {
                                 category_summary_str += "%s spent".printf (Envelope.Util.String.format_currency (outflow));
                             }
 
@@ -203,7 +193,6 @@ namespace Envelope.View {
                         }
 
                         category_summary_str += " in %d operation%s".printf (transactions.size, transactions.size > 1 ? "s" : "");
-
 
                         var category_summary = new Gtk.Label (category_summary_str);
                         set_class (category_summary, Granite.STYLE_CLASS_H3_LABEL);
@@ -215,8 +204,7 @@ namespace Envelope.View {
                 }
 
                 charts_container.show_all ();
-            }
-            catch (ServiceError err) {
+            } catch (ServiceError err) {
                 error ("could not build budget overview (%s)", err.message);
             }
         }

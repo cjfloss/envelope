@@ -17,9 +17,7 @@
 */
 
 namespace Envelope.View {
-
     public class FilterView : Gtk.Box {
-
         private static FilterView filter_view_instance = null;
 
         public static new FilterView get_default () {
@@ -69,7 +67,6 @@ namespace Envelope.View {
         }
 
         private void build_ui () {
-
             debug ("build filter ui");
 
             set_spacing (5);
@@ -109,7 +106,6 @@ namespace Envelope.View {
         }
 
         private void connect_signals () {
-
             debug ("connect filter view signals");
 
             notify["filter-type"].connect ( (s, p) => {
@@ -117,19 +113,15 @@ namespace Envelope.View {
                     case FilterType.THIS_MONTH:
                         btn_this_month.active = true;
                         break;
-
                     case FilterType.LAST_MONTH:
                         btn_last_month.active = true;
                         break;
-
                     case FilterType.FUTURE:
                         btn_future.active = true;
-                        break ;
-
+                        break;
                     case FilterType.MANUAL:
                         btn_manual.active = true;
                         break;
-
                     default:
                         assert_not_reached ();
                 }
@@ -158,7 +150,6 @@ namespace Envelope.View {
 
             btn_manual.toggled.connect ( () => {
                 if (btn_manual.get_active ()) {
-
                     filter_type = FilterType.MANUAL;
 
                     from_date.sensitive = true;
@@ -167,8 +158,7 @@ namespace Envelope.View {
                     if (from_date.date != null && to_date.date != null) {
                         fire_date_filter_changed_signal ();
                     }
-                }
-                else {
+                } else {
                     from_date.sensitive = false;
                     to_date.sensitive = false;
                 }
@@ -188,45 +178,33 @@ namespace Envelope.View {
         }
 
         private void compute_dates (out DateTime? from, out DateTime? to) {
-
             int month, year;
             Envelope.Util.Date.get_year_month (out year, out month);
 
             switch (filter_type) {
                 case FilterType.THIS_MONTH:
-
                     Envelope.Util.Date.get_month_boundaries (year, month, out from, out to);
                     break;
-
                 case FilterType.LAST_MONTH:
-
                     int last_month, last_year;
                     Envelope.Util.Date.months_ago (1, out last_year, out last_month);
 
                     Envelope.Util.Date.get_month_boundaries (last_year, last_month, out from, out to);
                     break;
-
                 case FilterType.FUTURE:
-
                     Envelope.Util.Date.tomorrow (out from);
                     to = null;
-
                     break;
-
                 case FilterType.MANUAL:
-
                     from = from_date.date;
                     to = to_date.date;
-
                     break;
-
                 default:
                     assert_not_reached ();
             }
         }
 
         private void fire_date_filter_changed_signal () {
-
             DateTime d_from, d_to;
 
             compute_dates (out d_from, out d_to);
@@ -236,6 +214,5 @@ namespace Envelope.View {
 
             date_filter_changed ();
         }
-
     }
 }

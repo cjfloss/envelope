@@ -1,5 +1,4 @@
 namespace Envelope.Util.Date {
-
     /**
      * Get start and end dates for the specified month and year
      *
@@ -34,7 +33,6 @@ namespace Envelope.Util.Date {
      * @param year the output year number
      */
     public void months_ago (int ago, out int month, out int year) {
-
         var months_ago = new DateTime.now_local ().add_months (-ago);
 
         month = months_ago.get_month ();

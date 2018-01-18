@@ -19,11 +19,9 @@
 using Gee;
 
 namespace Envelope.Service {
-
     private static QIFImporter qif_importer_instance = null;
 
     public class QIFImporter : Object, Importer {
-
         private QIFImporter () {
             Object ();
             qif_importer_instance = this;
@@ -100,7 +98,6 @@ namespace Envelope.Service {
          * @throws ImporterError
          */
         public ArrayList<Transaction> import (string path) throws ServiceError, ImporterError {
-
             ArrayList<Transaction> list = new ArrayList<Transaction> ();
 
             var file = File.new_for_path (path);
@@ -110,7 +107,6 @@ namespace Envelope.Service {
             }
 
             try {
-
                 var input_stream = file.read ();
                 var stream = new DataInputStream (input_stream);
 
@@ -125,9 +121,7 @@ namespace Envelope.Service {
                     line = stream.read_line ();
 
                     if (line != null && line.length > 0) {
-
                         if (!parse_line (line.strip (), ref transaction)) {
-
                             // transaction is complete; create a real Transaction object from the
                             // struct and add it to the list
                             Transaction trans;
@@ -146,8 +140,7 @@ namespace Envelope.Service {
                         }
                     }
                 } while (line != null);
-            }
-            catch (Error err) {
+            } catch (Error err) {
                 throw new ServiceError.IO (err.message);
             }
 
@@ -157,7 +150,6 @@ namespace Envelope.Service {
         }
 
         private bool parse_line (string line, ref QIFTransaction transaction) {
-
             assert (line.length > 0);
 
             char type = line.@get (0);
@@ -178,47 +170,37 @@ namespace Envelope.Service {
                     transaction.split = true;
                     transaction.category = payload;
                     break;
-
                 case LINE_TYPE_SPLIT_MEMO:
                     transaction.split = true;
                     transaction.memo = payload;
                     break;
-
                 case LINE_TYPE_SPLIT_AMOUNT:
                     transaction.split = true;
                     transaction.amount = double.parse (payload);
                     break;
-
                 case LINE_TYPE_SPLIT_PERCENT:
                     transaction.split = true;
                     transaction.split_percentage = double.parse (payload);
                     break;
-
                 case LINE_TYPE_DATE:
                     transaction.date = payload;
                     break;
-
                 case LINE_TYPE_AMOUNT:
                     transaction.amount = double.parse (payload);
                     break;
-
                 case LINE_TYPE_MEMO:
                     transaction.memo = payload;
                     break;
-
                 case LINE_TYPE_CLEARED:
                     transaction.clear_status = payload;
                     break;
-
                 case LINE_TYPE_PAYEE:
                     transaction.payee = payload;
                     break;
-
                 case LINE_TYPE_CATEGORY:
                     transaction.category = payload;
                     break;
-
-                 default:
+                default:
                     debug ("type %s ignored".printf (type.to_string ()));
                     break;
             }

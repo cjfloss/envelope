@@ -22,9 +22,7 @@ using Envelope.Service;
 using Envelope.Service.Settings;
 
 namespace Envelope.Window {
-
     public class MainWindow : Gtk.ApplicationWindow {
-
         private const uint TRANSITION_DURATION = 0;
 
         // window elements
@@ -73,7 +71,6 @@ namespace Envelope.Window {
         }
 
         private void build_ui () {
-
             overlay = new Gtk.Overlay ();
             this.add (overlay);
 
@@ -128,7 +125,6 @@ namespace Envelope.Window {
             search_entry_completion.set_text_column (MerchantStore.COLUMN);
             search_entry_completion.popup_completion = true;
             search_entry_completion.set_match_func ( (completion, key, iter) => {
-
                 if (key.length == 0) {
                     return false;
                 }
@@ -152,14 +148,11 @@ namespace Envelope.Window {
             try {
                 accounts = AccountManager.get_default ().get_accounts ();
                 sidebar.accounts = accounts;
-            }
-            catch (ServiceError err) {
+            } catch (ServiceError err) {
                 error ("could not load accounts (%s)", err.message);
             }
 
             sidebar.update_view ();
-
-
 
             // If we have accounts, show the transaction view
             // otherwise show welcome screen
@@ -198,7 +191,6 @@ namespace Envelope.Window {
         }
 
         private void configure_window () {
-
             // configure window
             width_request = 1200;
             height_request = 800;
@@ -210,8 +202,7 @@ namespace Envelope.Window {
 
             if (saved_state.maximized) {
                 get_window ().maximize ();
-            }
-            else if (saved_state.window_width != -1 && saved_state.window_height != -1) {
+            } else if (saved_state.window_width != -1 && saved_state.window_height != -1) {
                 set_default_size (saved_state.window_width, saved_state.window_height);
             }
 
@@ -220,8 +211,7 @@ namespace Envelope.Window {
             if (saved_state.selected_account_id != -1) {
                 // TODO check if account still exists
                 sidebar.select_account_by_id (saved_state.selected_account_id);
-            }
-            else if (saved_state.selected_category_id != -1) {
+            } else if (saved_state.selected_category_id != -1) {
                 // TODO check if category still exists
                 sidebar.select_category_by_id (saved_state.selected_category_id);
             }
@@ -237,85 +227,78 @@ namespace Envelope.Window {
         }
 
         private void on_sidebar_list_account_name_updated (Account account, string new_name) {
+            if (account.number != new_name) {
 
-          if (account.number != new_name) {
-
-              try {
-                  AccountManager.get_default ().rename_account (account, new_name);
-              }
-              catch (Error err) {
-                  if (err is ServiceError.DATABASE_ERROR) {
-                      error ("error renaming account (%s)", err.message);
-                  }
-                  else if (err is AccountError.ALREADY_EXISTS) {
-                      // TODO show error
-                  }
-              }
-          }
+                try {
+                    AccountManager.get_default ().rename_account (account, new_name);
+                } catch (Error err) {
+                    if (err is ServiceError.DATABASE_ERROR) {
+                        error ("error renaming account (%s)", err.message);
+                    } else if (err is AccountError.ALREADY_EXISTS) {
+                        // TODO show error
+                    }
+                }
+            }
         }
 
         private void on_sidebar_list_category_name_updated (Category category, string new_name) {
-          string old_name = category.name;
+            string old_name = category.name;
 
-          if (category.name != new_name) {
-              try {
-                category.name = new_name;
-                  budget_manager.update_category (category);
-              }
-              catch (ServiceError err) {
-                category.name = old_name;
-                  if (err is ServiceError.DATABASE_ERROR) {
-                      error ("could not update category (%s)", err.message);
-                  }
-              }
-          }
+            if (category.name != new_name) {
+                try {
+                    category.name = new_name;
+                    budget_manager.update_category (category);
+                } catch (ServiceError err) {
+                    category.name = old_name;
+                    if (err is ServiceError.DATABASE_ERROR) {
+                        error ("could not update category (%s)", err.message);
+                    }
+                }
+            }
         }
 
         private void on_sidebar_overview_selected () {
-          var budget_overview = BudgetOverview.get_default ();
+            var budget_overview = BudgetOverview.get_default ();
 
-          if (paned.get_child2 () != budget_overview) {
-              set_content_view (budget_overview);
-          }
+            if (paned.get_child2 () != budget_overview) {
+                set_content_view (budget_overview);
+            }
         }
 
         private void on_sidebar_category_selected (Category? category) {
-          var transaction_view = TransactionView.get_default ();
+            var transaction_view = TransactionView.get_default ();
 
-          try {
-              double inflow, outflow;
-              var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
+            try {
+                double inflow, outflow;
+                var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
 
-              transaction_view.transactions = transactions;
-              transaction_view.with_filter_view = false;
-              transaction_view.with_add_transaction_view = false;
+                transaction_view.transactions = transactions;
+                transaction_view.with_filter_view = false;
+                transaction_view.with_add_transaction_view = false;
 
-              if (paned.get_child2 () != transaction_view) {
-                  set_content_view (transaction_view);
-              }
+                if (paned.get_child2 () != transaction_view) {
+                    set_content_view (transaction_view);
+                }
 
-              header_bar.title = category != null ? category.name : _("Uncategorized");
-              header_bar.subtitle = new DateTime.now_local ().format ("%B %Y");
-              header_bar.has_subtitle = true;
+                header_bar.title = category != null ? category.name : _("Uncategorized");
+                header_bar.subtitle = new DateTime.now_local ().format ("%B %Y");
+                header_bar.has_subtitle = true;
 
-              if (category != null) {
-                search_entry.placeholder_text = _("Search in %s".printf (category.name));
-              }
-              else {  // uncategorized
-                search_entry.placeholder_text = _("Search uncategorized");
-              }
+                if (category != null) {
+                    search_entry.placeholder_text = _("Search in %s".printf (category.name));
+                } else {  // uncategorized
+                    search_entry.placeholder_text = _("Search uncategorized");
+                }
 
-              var saved_state = SavedState.get_default ();
-              saved_state.selected_category_id = category != null ? category.@id : -1;
-              saved_state.selected_account_id = -1;
-          }
-          catch (ServiceError err) {
-              error ("could not load transactions for category %s (%s)", category.name, err.message);
-          }
+                var saved_state = SavedState.get_default ();
+                saved_state.selected_category_id = category != null ? category.@id : -1;
+                saved_state.selected_account_id = -1;
+            } catch (ServiceError err) {
+                error ("could not load transactions for category %s (%s)", category.name, err.message);
+            }
         }
 
         private void connect_signals () {
-
             delete_event.connect (on_quit);
 
             sidebar.list_account_selected.connect (on_sidebar_account_selected);
@@ -336,7 +319,6 @@ namespace Envelope.Window {
             main_view_changed.connect ( (window, widget) => {
                 // check if we need to show the transaction search entry
                 if (widget is TransactionView) {
-
                     import_button.show ();
                     add_transaction_button.show ();
                     search_entry.show ();
@@ -345,8 +327,7 @@ namespace Envelope.Window {
                     if (paned.get_child1 () == null) {
                         paned.pack1 (Sidebar.get_default (), true, false);
                     }
-                }
-                else if (widget is AccountWelcomeScreen) {
+                } else if (widget is AccountWelcomeScreen) {
                     header_bar.title = null;
                     import_button.show ();
                     add_transaction_button.show ();
@@ -354,11 +335,9 @@ namespace Envelope.Window {
                     if (paned.get_child1 () == null) {
                         paned.pack1 (Sidebar.get_default (), true, false);
                     }
-                }
-                else if (widget is BudgetOverview) {
+                } else if (widget is BudgetOverview) {
                     header_bar.title = null;
-                }
-                else {
+                } else {
                     import_button.hide();
                     add_transaction_button.hide ();
                     search_entry.hide ();
@@ -404,8 +383,7 @@ namespace Envelope.Window {
         private void determine_initial_content_view (Gee.Collection<Account> accounts, out Gtk.Widget widget) {
             if (accounts.size > 0) {
                 widget = BudgetOverview.get_default ();
-            }
-            else {
+            } else {
                 widget = Welcome.get_default ();
             }
 
@@ -413,8 +391,7 @@ namespace Envelope.Window {
                 if (paned.get_child1 () == null) {
                     paned.pack1 (sidebar, true, false);
                 }
-            }
-            else {
+            } else {
                 search_entry.hide ();
                 import_button.hide ();
                 add_transaction_button.hide ();
@@ -422,7 +399,6 @@ namespace Envelope.Window {
         }
 
         private void determine_account_content_view (Account account, out Gtk.Widget widget, out string window_title) {
-
             try {
                 var transactions = AccountManager.get_default ().load_account_transactions (account);
                 account.transactions = transactions;
@@ -431,14 +407,12 @@ namespace Envelope.Window {
                     widget = AccountWelcomeScreen.get_default ();
                     (widget as AccountWelcomeScreen).account = account;
                     window_title = null;
-                }
-                else {
+                } else {
                     widget = TransactionView.get_default ();
                     (widget as TransactionView).transactions = account.transactions;
                     window_title = _("Transactions in %s").printf (account.number);
                 }
-            }
-            catch (ServiceError err) {
+            } catch (ServiceError err) {
                 error ("could not load account transactions (%s)", err.message);
             }
         }
@@ -468,11 +442,9 @@ namespace Envelope.Window {
         }
 
         private void set_content_view (Gtk.Widget widget) {
-
             var child = paned.get_child2 ();
 
             if (child != null) {
-
                 paned.remove (child);
 
                 if (child != widget) {

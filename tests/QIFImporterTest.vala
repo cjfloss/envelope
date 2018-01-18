@@ -2,18 +2,15 @@ using Envelope.Service;
 using Gee;
 
 namespace Envelope.Tests.Service.Importer.QIF {
-
     public void test_import_success () {
         try {
             ArrayList<Transaction>? transactions = QIFImporter.get_default ().import (test_data_path ("sample.qif"));
 
             assert_nonnull (transactions);
             assert_true (transactions.size == 29);
-        }
-        catch (ServiceError err) {
+        } catch (ServiceError err) {
             Test.fail ();
-        }
-        catch (ImporterError err) {
+        } catch (ImporterError err) {
             Test.fail ();
         }
     }
@@ -22,11 +19,9 @@ namespace Envelope.Tests.Service.Importer.QIF {
         try {
             ArrayList<Transaction>? transactions = QIFImporter.get_default ().import (test_data_path ("enoent"));
             Test.fail ();
-        }
-        catch (ServiceError err) {
+        } catch (ServiceError err) {
             assert (err is ServiceError.ENOENT);
-        }
-        catch (ImporterError err) {
+        } catch (ImporterError err) {
             Test.fail ();
         }
     }
@@ -37,7 +32,6 @@ namespace Envelope.Tests.Service.Importer.QIF {
 }
 
 void main (string[] args) {
-
     Test.init (ref args);
 
     Test.add_func ("/envelope/service/importer/qif/success",

@@ -19,9 +19,7 @@
 using Gee;
 
 namespace Envelope.DB {
-
     class DatabaseManager : Object {
-
         // get_int for null fields returns 0
         private const int NULL = 0;
 
@@ -253,7 +251,6 @@ namespace Envelope.DB {
          * @return list of unique merchants
          */
         public Collection<Merchant> get_merchants () throws SQLHeavy.Error {
-
             if (!merchant_cache.is_empty) {
                 return merchant_cache.values;
             }
@@ -287,7 +284,6 @@ namespace Envelope.DB {
          * @throws SQLHeavy.Error
          */
         public Account? load_account (int account_id) throws SQLHeavy.Error {
-
             if (account_cache.has_key (account_id)) {
                 return account_cache.@get (account_id);
             }
@@ -297,7 +293,6 @@ namespace Envelope.DB {
             SQLHeavy.QueryResult results = q_load_account.execute ();
 
             if (!results.finished) {
-
                 Account account;
                 query_result_to_account (results, out account);
                 q_load_account.clear ();
@@ -317,7 +312,6 @@ namespace Envelope.DB {
          * @throws SQLHeavy.Error
          */
         public void delete_account (Account account) throws SQLHeavy.Error {
-
             q_delete_account.set_int ("account_id", account.@id);
             q_delete_account.execute ();
             q_delete_account.clear ();
@@ -334,7 +328,6 @@ namespace Envelope.DB {
          * @return the list of accounts
          */
         public Collection<Account> load_all_accounts () throws SQLHeavy.Error {
-
             if (!account_cache.is_empty) {
                 return account_cache.values;
             }
@@ -344,7 +337,6 @@ namespace Envelope.DB {
             SQLHeavy.QueryResult results = q_load_all_accounts.execute ();
 
             while (!results.finished) {
-
                 Account account;
                 query_result_to_account (results, out account);
 
@@ -366,20 +358,17 @@ namespace Envelope.DB {
          * @throws SQLHeavy.Error
          */
         public void create_category (Category category) throws SQLHeavy.Error {
-
             q_insert_category.set_string ("name", category.name);
 
             if (category.description != null) {
                 q_insert_category.set_string ("description", category.description);
-            }
-            else {
+            } else {
                 q_insert_category.set_null ("description");
             }
 
             if (category.parent != null) {
                 q_insert_category.set_int ("parent_category_id", category.parent.@id);
-            }
-            else {
+            } else {
                 q_insert_category.set_null ("parent_category_id");
             }
 
@@ -401,7 +390,6 @@ namespace Envelope.DB {
          * @param category the category to update
          */
         public void update_category (Category category) throws SQLHeavy.Error {
-
             q_update_category.set_int ("category_id", category.@id);
             q_update_category.set_string ("name", category.name);
             q_update_category.set_string ("description", category.description);
@@ -409,8 +397,7 @@ namespace Envelope.DB {
 
             if (category.parent != null) {
                 q_update_category.set_int ("parent_category_id", category.parent.@id);
-            }
-            else {
+            } else {
                 q_update_category.set_null ("parent_category_id");
             }
 
@@ -421,7 +408,6 @@ namespace Envelope.DB {
         }
 
         public void set_category_budgeted_amount (MonthlyCategory category, int year, int month) throws SQLHeavy.Error {
-
             q_check_category_budget_set.set_int ("category_id", category.@id);
             q_check_category_budget_set.set_int ("year", year);
             q_check_category_budget_set.set_int ("month", month);
@@ -439,14 +425,12 @@ namespace Envelope.DB {
                 q_set_category_budgeted_amount.set_double ("amount_budgeted", category.amount_budgeted);
                 q_set_category_budgeted_amount.execute ();
                 q_set_category_budgeted_amount.clear ();
-            }
-            else {
+            } else {
                 update_category_budgeted_amount (category, year, month);
             }
         }
 
         public void update_category_budgeted_amount (MonthlyCategory category, int year, int month) throws SQLHeavy.Error {
-
             q_update_category_budgeted_amount.set_int ("category_id", category.@id);
             q_update_category_budgeted_amount.set_double ("amount_budgeted", category.amount_budgeted);
             q_update_category_budgeted_amount.set_int ("year", year);
@@ -477,7 +461,6 @@ namespace Envelope.DB {
          * @throws SQLHeavy.Error
          */
         public void create_account (Account account) throws SQLHeavy.Error {
-
             var id = q_insert_account.execute_insert (
                 "number", typeof (string), account.number,
                 "description", typeof (string), account.description,
@@ -533,7 +516,6 @@ namespace Envelope.DB {
          * @throws SQLHeavy.Error
          */
         public Gee.List<Transaction> load_account_transactions (Account account) throws SQLHeavy.Error {
-
             var list = new ArrayList<Transaction> ();
 
             q_load_account_transactions.set_int ("account_id", account.@id);
@@ -562,13 +544,11 @@ namespace Envelope.DB {
          * @throws SQLHeavy.Error
          */
         public Collection<Transaction> load_uncategorized_transactions () throws SQLHeavy.Error {
-
             var list = new ArrayList<Transaction> ();
 
             SQLHeavy.QueryResult results = q_load_uncategorized_transactions.execute ();
 
             while (!results.finished) {
-
                 Transaction transaction;
                 query_result_to_transaction (results, out transaction);
 
@@ -581,22 +561,19 @@ namespace Envelope.DB {
         }
 
         public void insert_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction, SQLHeavy.Query? statement = null) throws SQLHeavy.Error {
-
             var q = statement != null ? statement : db_transaction.prepare(SQL_INSERT_TRANSACTION);
 
             // optional category id
             if (transaction.category != null) {
                 q.set_int ("category_id", transaction.category.@id);
-            }
-            else {
+            } else {
                 q.set_null ("category_id");
             }
 
             // optional parent transaction id
             if (transaction.parent != null) {
                 q.set_int ("parent_transaction_id", transaction.parent.@id);
-            }
-            else {
+            } else {
                 q.set_null ("parent_transaction_id");
             }
 
@@ -620,7 +597,6 @@ namespace Envelope.DB {
          * Insert multiple transactions
          */
         public void insert_transactions (Collection<Transaction> transactions, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
-
             var stmt = db_transaction.prepare (SQL_INSERT_TRANSACTION);
 
             // TODO bulk insert
@@ -630,7 +606,6 @@ namespace Envelope.DB {
         }
 
         public void delete_transaction (int transaction_id, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
-
             var stmt = db_transaction.prepare (SQL_DELETE_TRANSACTION);
             stmt.set_int ("id", transaction_id);
 
@@ -639,7 +614,6 @@ namespace Envelope.DB {
 
 
         public void update_transaction (Transaction transaction, ref SQLHeavy.Transaction db_transaction) throws SQLHeavy.Error {
-
             var stmt = db_transaction.prepare (SQL_UPDATE_TRANSACTION);
 
             // required fields
@@ -654,15 +628,13 @@ namespace Envelope.DB {
             // optional fields
             if (transaction.category != null) {
                 stmt.set_int ("category_id", transaction.category.@id);
-            }
-            else {
+            } else {
                 stmt.set_null ("category_id");
             }
 
             if (transaction.parent != null) {
                 stmt.set_int ("parent_transaction_id", transaction.parent.@id);
-            }
-            else {
+            } else {
                 stmt.set_null ("parent_transaction_id");
             }
 
@@ -670,7 +642,6 @@ namespace Envelope.DB {
         }
 
         public Transaction? get_transaction_by_id (int id) throws SQLHeavy.Error {
-
             // TODO make statement global
             var stmt = database.prepare (SQL_GET_TRANSACTION_BY_ID);
             stmt.set_int ("id", id);
@@ -688,7 +659,6 @@ namespace Envelope.DB {
         }
 
         public Collection<MonthlyCategory> load_categories () throws SQLHeavy.Error {
-
             if (!category_cache.is_empty) {
                 return category_cache.values as Collection<MonthlyCategory>;
             }
@@ -717,7 +687,6 @@ namespace Envelope.DB {
         }
 
         public Collection<Transaction> get_current_transactions () throws SQLHeavy.Error {
-
             int month, year;
             Envelope.Util.Date.get_year_month (out month, out year);
 
@@ -725,7 +694,6 @@ namespace Envelope.DB {
         }
 
         public Collection<Transaction> get_transactions_for_month_and_year (int month, int year) throws SQLHeavy.Error {
-
             var list = new ArrayList<Transaction> ();
 
             q_load_transactions_for_month_and_year.set_int ("month", month);
@@ -755,7 +723,6 @@ namespace Envelope.DB {
         }
 
         public Gee.List<Transaction> get_current_transactions_for_category (Category? category) throws SQLHeavy.Error {
-
             var list = new ArrayList<Transaction> ();
 
             SQLHeavy.Query query;
@@ -763,8 +730,7 @@ namespace Envelope.DB {
             if (category != null) {
                 query = q_load_current_transactions_for_category;
                 query.set_int ("category_id", category.@id);
-            }
-            else {
+            } else {
                 query = q_load_current_uncategorized_transactions;
             }
 
@@ -801,7 +767,6 @@ namespace Envelope.DB {
         }
 
         private void query_result_to_account (SQLHeavy.QueryResult results, out Account account) throws SQLHeavy.Error {
-
             assert (!results.finished);
 
             var id = results.get_int ("id");
@@ -820,7 +785,6 @@ namespace Envelope.DB {
         }
 
         private void query_result_to_transaction (SQLHeavy.QueryResult results, out Transaction transaction, Category? category = null) throws SQLHeavy.Error {
-
             assert (!results.finished);
 
             var id = results.get_int ("id");
@@ -843,8 +807,7 @@ namespace Envelope.DB {
 
             if (category != null) {
                 transaction.category = category;
-            }
-            else if (category_id != 0) {
+            } else if (category_id != 0) {
                 transaction.category = Envelope.Service.CategoryStore.get_default ().get_category_by_id (category_id);
             }
         }
@@ -882,7 +845,6 @@ namespace Envelope.DB {
         }
 
         private void init_database () {
-
             var app_path = Granite.Services.Paths.user_data_folder;
 
             Granite.Services.Paths.ensure_directory_exists (app_path);
@@ -901,8 +863,7 @@ namespace Envelope.DB {
                 database.sql_executed.connect (debug_sql);
 
                 database.synchronous = SQLHeavy.SynchronousMode.OFF;
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 error ("Failure creating database instance (%s)", err.message);
             }
 
@@ -915,16 +876,14 @@ namespace Envelope.DB {
                 database.execute (MONTHLY_BUDGET);
 
                 init_statements ();
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 error ("error occured during database setup (%s)", err.message);
             }
 
             // check if there are categories. If not, then create the default ones
             try {
                 check_create_categories ();
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 error ("could not initialize default categories (%s)".printf (err.message));
             }
 
@@ -980,7 +939,6 @@ namespace Envelope.DB {
             var category_count = result.get_int ("category_count");
 
             if (category_count == 0) {
-
                 var db_transaction = start_transaction ();
 
                 // create default categories

@@ -46,7 +46,6 @@ namespace Envelope.View {
                         break;
                     default:
                         assert_not_reached ();
-
                 }
             });
         }

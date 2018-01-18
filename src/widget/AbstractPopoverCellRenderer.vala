@@ -17,13 +17,11 @@
 */
 
 namespace Envelope.Widget {
-
     /**
      * This is the base class for all cell renderers showing content in a
      * Gtk.Popover.
      */
     public abstract class AbstractPopoverCellRenderer : CellRendererTextCompletion {
-
         public Gtk.Widget relative_to { get; set; }
         public Gtk.Popover popover { get; private set; }
 
@@ -48,7 +46,6 @@ namespace Envelope.Widget {
                                         Gdk.Rectangle background_area,
                                         Gdk.Rectangle cell_area,
                                         Gtk.CellRendererState flags) {
-
             unowned Gtk.CellEditable? return_value = base.start_editing (event, widget, path, background_area, cell_area, flags);
 
             current_path = path;
@@ -74,7 +71,6 @@ namespace Envelope.Widget {
         }
 
         private void connect_real_signals () {
-
             // close popover when treeview's model changes
             Gtk.TreeView treeview = relative_to as Gtk.TreeView;
 

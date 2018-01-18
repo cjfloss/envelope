@@ -19,9 +19,7 @@
 using Envelope.Service;
 
 namespace Envelope.Widget {
-
     public class CellRendererPopoverContainer : AbstractPopoverCellRenderer {
-
         public CellRendererUpdatable? content { get; set; }
 
         public CellRendererPopoverContainer (Gtk.Widget relative_to) {
@@ -34,7 +32,6 @@ namespace Envelope.Widget {
                                                                 Gdk.Rectangle background_area,
                                                                 Gdk.Rectangle cell_area,
                                                                 Gtk.CellRendererState flags) {
-
             unowned Gtk.CellEditable? return_value = base.start_editing (event, widget, path, background_area, cell_area, flags);
 
             if (content == null) {

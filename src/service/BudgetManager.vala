@@ -20,12 +20,10 @@ using Gee;
 using Envelope.DB;
 
 namespace Envelope.Service {
-
     /**
      * Data structure representing a budget state
      */
     public struct BudgetState {
-
         public DateTime from;
         public DateTime to;
 
@@ -38,7 +36,6 @@ namespace Envelope.Service {
         public Collection<MonthlyCategory> categories;
 
         public double budgeted_outflow { get {
-
             double amount = 0d;
 
             foreach (MonthlyCategory category in categories) {
@@ -61,17 +58,13 @@ namespace Envelope.Service {
     private static BudgetManager budget_manager_instance = null;
 
     public class BudgetManager : Object {
-
         public static BudgetManager get_default () {
-
             if (budget_manager_instance == null) {
-
                 budget_manager_instance = new BudgetManager ();
 
                 try {
                     budget_manager_instance.compute_current_state ();
-                }
-                catch (ServiceError err) {
+                } catch (ServiceError err) {
                     error ("could not initialize budget state (%s)", err.message);
                 }
             }
@@ -99,7 +92,6 @@ namespace Envelope.Service {
          * @return {Gee.ArrayList<Category>} list of categories
          */
         public Collection<MonthlyCategory> get_categories () throws ServiceError {
-
             if (categories != null && !categories.is_empty) {
                 return categories;
             }
@@ -110,8 +102,7 @@ namespace Envelope.Service {
                 debug ("loaded %d categorie(s)".printf (categories.size));
 
                 return categories;
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -123,7 +114,6 @@ namespace Envelope.Service {
          * @return {Category} the new category
          */
         public Category create_category (string name, double budgeted_amount = 0d) throws ServiceError {
-
             try {
                 MonthlyCategory category = new MonthlyCategory ();
                 category.name = name;
@@ -134,36 +124,31 @@ namespace Envelope.Service {
                 category_added (category);
 
                 return category;
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
 
         public void delete_category (Category category) throws ServiceError {
-
             return_if_fail (category.@id != null);
 
             try {
                 dbm.delete_category (category); // delete from database
                 categories = null;              // invalidate categories cache
                 category_deleted (category);    // fire the category_deleted signal
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
 
         public void update_category (Category category) throws ServiceError {
-
             return_if_fail (category.@id != null);
 
             try {
                 dbm.update_category (category);             // update in database
                 categories = null;                          // invalidate categories cache
                 compute_state_and_fire_changed_event ();    // re-compute budget state and fire state_changed
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -176,21 +161,18 @@ namespace Envelope.Service {
             try {
                 dbm.set_category_budgeted_amount (category, year, month);
                 category_budget_changed (category);
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
 
         public void categorize_all_for_merchant (string merchant_name, Category category) throws ServiceError {
-
             return_if_fail (category.@id != null);
 
             try {
                 dbm.categorize_for_merchant (merchant_name, category);  // set category for all transactions having the same merchant
                 compute_state_and_fire_changed_event ();                // re-compute budget state and fire state_changed
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -199,11 +181,9 @@ namespace Envelope.Service {
          * Get the transactions for the current month
          */
         public Collection<Transaction> get_current_transactions () throws ServiceError {
-
             try {
                 return dbm.get_current_transactions ();
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -216,8 +196,7 @@ namespace Envelope.Service {
         public Collection<Transaction> get_transactions_for_month (int year, int month) throws ServiceError {
             try {
                 return dbm.get_transactions_for_month_and_year (month, year);
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -226,11 +205,9 @@ namespace Envelope.Service {
          * Get all transactions not associated with any category
          */
         public Collection<Transaction> get_uncategorized_transactions () throws ServiceError {
-
             try {
                 return dbm.load_uncategorized_transactions ();
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -243,7 +220,6 @@ namespace Envelope.Service {
          * @param {double} outflow
          */
         public Gee.List<Transaction>  compute_current_category_operations (Category? category, out double inflow, out double outflow) throws ServiceError {
-
             try {
                 Gee.List<Transaction> transactions = dbm.get_current_transactions_for_category (category);
 
@@ -266,8 +242,7 @@ namespace Envelope.Service {
                 }
 
                 return transactions;
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -305,7 +280,6 @@ namespace Envelope.Service {
          * Compute the budget state for the current month
          */
         private void compute_current_state () throws ServiceError {
-
             // get current month and year
             int month, year;
             Envelope.Util.Date.get_year_month (out month, out year);
@@ -322,7 +296,6 @@ namespace Envelope.Service {
          * Compute the budget state for the specified year and month
          */
         private void compute_state_for_month (int month, int year, out BudgetState budget_state) throws ServiceError {
-
             DateTime from;
             DateTime to;
             Envelope.Util.Date.get_month_boundaries (month, year, out from, out to);
@@ -334,16 +307,13 @@ namespace Envelope.Service {
             Collection<Transaction> uncategorized = new ArrayList<Transaction> ();
 
             foreach (Transaction t in transactions) {
-
                 switch (t.direction) {
                     case Transaction.Direction.INCOMING:
                         inflow += t.amount;
                         break;
-
                     case Transaction.Direction.OUTGOING:
                         outflow += t.amount;
                         break;
-
                     default:
                         assert_not_reached ();
                 }
@@ -367,14 +337,12 @@ namespace Envelope.Service {
          * Compute the budget state and fire the budget_changed signal with it
          */
         private void compute_state_and_fire_changed_event () {
-
             debug ("compute_state_and_fire_changed_event");
 
             try {
                 compute_current_state ();
                 budget_changed (state);
-            }
-            catch (ServiceError err) {
+            } catch (ServiceError err) {
                 error ("could not compute budget state (%s)", err.message);
             }
         }
@@ -383,7 +351,6 @@ namespace Envelope.Service {
          * Check if a month transition is needed
          */
         private bool should_handle_month_transition () throws ServiceError {
-
             // get the max() value of month, year from the monthly_budgets table
 
             // if the max month, year == this month - 1, then we need to do a month transition
@@ -398,7 +365,6 @@ namespace Envelope.Service {
          * as next month's budgeted amount for that category
          */
         private void manage_month_transition () throws ServiceError {
-
             // first, get transactions from the previous month
 
             // for each of them, compute in/out flow for its category (if present)

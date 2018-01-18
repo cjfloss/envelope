@@ -20,9 +20,7 @@ using Gee;
 using Envelope.Service;
 
 namespace Envelope {
-
     public class Budget : Object {
-
         private static Budget budget_instance = null;
 
         public static new Budget get_default () {

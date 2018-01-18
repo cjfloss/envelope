@@ -19,9 +19,7 @@
 using Gee;
 
 namespace Envelope {
-
     public class Category : Object, Comparable<Category> {
-
         public string name { get; set; }
         public string? description { get; set; }
         public int? @id { get; set; }

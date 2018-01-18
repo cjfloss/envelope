@@ -17,9 +17,7 @@
 */
 
 namespace Envelope.View {
-
     public class AccountWelcomeScreen : Granite.Widgets.Welcome {
-
         private static AccountWelcomeScreen account_welcome_screen_instance = null;
 
         public static new AccountWelcomeScreen get_default () {
@@ -65,13 +63,11 @@ namespace Envelope.View {
                 case Action.ADD_TRANSACTION:
                     add_transaction_selected (account);
                     break;
-
                 case Action.IMPORT_TRANSACTIONS:
                     var view = TransactionView.get_default();
                     view.transactions = account.transactions;
                     view.show_import_dialog ();
                     break;
-
                 default:
                     assert_not_reached ();
             }

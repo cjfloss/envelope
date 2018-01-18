@@ -20,9 +20,7 @@ using Envelope.Service;
 using Envelope.Util.String;
 
 namespace Envelope.Dialog {
-
     public class AddCategoryDialog : AbstractOkCancelDialog {
-
         private Gtk.Entry name_entry;
         private Gtk.Entry amount_entry;
 
@@ -31,7 +29,6 @@ namespace Envelope.Dialog {
         }
 
         protected override Gtk.Widget build_content () {
-
             ok_button.sensitive = false;
 
             var grid = new Gtk.Grid ();
@@ -73,11 +70,9 @@ namespace Envelope.Dialog {
             try {
                 BudgetManager.get_default ()
                     .create_category (name_entry.text.strip (), parse_currency (amount_entry.text.strip ()));
-            }
-            catch (ParseError err) {
+            } catch (ParseError err) {
                 error ("could not create category %s (%s)", name_entry.text, err.message);
-            }
-            catch (ServiceError err) {
+            } catch (ServiceError err) {
                 error ("could not create category %s (%s)", name_entry.text, err.message);
             }
         }

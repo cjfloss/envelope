@@ -1,5 +1,4 @@
 namespace Envelope.Util.String {
-
     public const string ELLIPSIS = "\u2026";
     private static char* currency_symbol = null;
 
@@ -12,7 +11,6 @@ namespace Envelope.Util.String {
     }
 
     public static string format_currency (double amount, bool currency_symbol = true) {
-
         string format = currency_symbol ? "%11n" : "%!11n";
 
         char[] buffer = new char[double.DTOSTR_BUF_SIZE];
@@ -33,7 +31,6 @@ namespace Envelope.Util.String {
     }
 
     public static double parse_currency (string amount) throws ParseError {
-
         if (regex_parse_currency == null) {
             initialize_currency_regex ();
         }
@@ -44,8 +41,7 @@ namespace Envelope.Util.String {
         string sanitized = amount;
         try {
             sanitized = regex_parse_currency.replace_literal(amount, -1, 0, "");
-        }
-        catch (RegexError err) {
+        } catch (RegexError err) {
             error ("error occured while sanitizing input string '%s' (%s))", amount, err.message);
         }
 
@@ -60,15 +56,13 @@ namespace Envelope.Util.String {
 
     // initializer for the currency regexp
     private static void initialize_currency_regex () {
-
         Monetary.lconv *locale_info = Monetary.localeconv ();
 
         try {
             debug ("decimal point: %c", *(locale_info->decimal_point));
 
             regex_parse_currency = new Regex ("[^0-9\\%c\\-]*".printf (*(locale_info->decimal_point)));
-        }
-        catch (RegexError err) {
+        } catch (RegexError err) {
             error (err.message);
         }
     }

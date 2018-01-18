@@ -17,7 +17,6 @@
 */
 
 namespace Envelope.Widget {
-
     /**
      * The CellRendererUpdatable class is meant to be used inside a CellRendererPopoverContainer.
      * It allows to use multiple UIs inside a single CellRendererPopoverContainer. This can
@@ -27,7 +26,6 @@ namespace Envelope.Widget {
      * In Envelope, it is used to show a popover on categories in the sidebar.
      */
     public abstract class CellRendererUpdatable : Gtk.Grid {
-
         /**
          * Updates the UI of this instance
          */

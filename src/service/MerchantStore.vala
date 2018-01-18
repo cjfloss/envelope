@@ -20,9 +20,7 @@ using Envelope.DB;
 using Gee;
 
 namespace Envelope.Service {
-
     public class MerchantStore : Gtk.ListStore {
-
         private static MerchantStore merchant_store_instance = null;
 
         public static new unowned MerchantStore get_default () {
@@ -45,8 +43,7 @@ namespace Envelope.Service {
             clear ();
             try {
                 load_merchants ();
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 warning ("could not load merchants; transaction search autocompletion won't work (%s)".printf (err.message));
             }
         }
@@ -59,9 +56,7 @@ namespace Envelope.Service {
             Collection<Merchant> merchants = DatabaseManager.get_default ().get_merchants ();
 
             if (!merchants.is_empty) {
-
                 foreach (Merchant m in merchants) {
-
                     Gtk.TreeIter iter;
                     append (out iter);
 

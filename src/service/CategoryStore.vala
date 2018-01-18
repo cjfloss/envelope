@@ -20,11 +20,9 @@ using Envelope.Service;
 using Gee;
 
 namespace Envelope.Service {
-
     private static CategoryStore category_store_instance = null;
 
     public class CategoryStore : Gtk.ListStore {
-
         public static new unowned CategoryStore get_default () {
             if (category_store_instance == null) {
                 category_store_instance = new CategoryStore ();
@@ -52,8 +50,7 @@ namespace Envelope.Service {
 
                     @set (iter, Column.LABEL, category.name, Column.CATEGORY, category, -1);
                 }
-            }
-            catch (ServiceError err) {
+            } catch (ServiceError err) {
                 warning ("could not load categories; autocompletion won't work (%s)", err.message);
             }
         }
@@ -65,11 +62,9 @@ namespace Envelope.Service {
          * @return the category instance, or null if not found
          */
         public Category? get_category_by_name (string name) {
-
             Category? category = null;
 
             @foreach ( (model, path, iter) => {
-
                 Category fe_category;
                 model.@get (iter, Column.CATEGORY, out fe_category, -1);
 
@@ -93,7 +88,6 @@ namespace Envelope.Service {
             Category? category = null;
 
             @foreach ( (model, path, iter) => {
-
                 Category fe_category;
 
                 model.@get (iter, Column.CATEGORY, out fe_category, -1);
@@ -121,7 +115,6 @@ namespace Envelope.Service {
         }
 
         private void connect_signals () {
-
             var budget_manager = BudgetManager.get_default ();
 
             budget_manager.category_added.connect ( (category) => {

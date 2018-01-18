@@ -20,7 +20,6 @@ using Gee;
 using Envelope.DB;
 
 namespace Envelope.Service {
-
     public errordomain AccountError {
         ALREADY_EXISTS
     }
@@ -28,7 +27,6 @@ namespace Envelope.Service {
     private static AccountManager account_manager_instance = null;
 
     public class AccountManager : Object {
-
         public static new unowned AccountManager get_default () {
             if (account_manager_instance == null) {
                 account_manager_instance = new AccountManager ();
@@ -54,24 +52,19 @@ namespace Envelope.Service {
         public signal void transaction_deleted      (Transaction transaction);
 
         public Collection<Account> get_accounts () throws ServiceError {
-
             try {
                 return dbm.load_all_accounts ();
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
 
         public bool get_account_by_id (int account_id, out Account? account) throws ServiceError {
-
-
             // load from database
             try {
                 account = dbm.load_account (account_id);
                 return account != null;
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -87,7 +80,6 @@ namespace Envelope.Service {
                                        string? description,
                                        double balance,
                                        Account.Type account_type) throws AccountError, ServiceError {
-
             var account = new Account ();
 
             account.number = number;
@@ -100,8 +92,7 @@ namespace Envelope.Service {
                 account_created (account);
 
                 return account;
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 if (err is SQLHeavy.Error.CONSTRAINT) {
                     throw new AccountError.ALREADY_EXISTS ("account number already exists");
                 }
@@ -111,12 +102,10 @@ namespace Envelope.Service {
         }
 
         public void delete_account (Account account) throws ServiceError {
-
             try {
                 dbm.delete_account (account);
                 account_deleted (account);
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -136,8 +125,7 @@ namespace Envelope.Service {
 
                 // fire signal
                 account_updated (account);
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 if (err is SQLHeavy.Error.CONSTRAINT) {
                     throw new AccountError.ALREADY_EXISTS ("account number already exists");
                 }
@@ -151,8 +139,7 @@ namespace Envelope.Service {
                 var db_transaction = dbm.start_transaction ();
                 dbm.update_account_balance (account, ref db_transaction);
                 db_transaction.commit ();
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -160,18 +147,15 @@ namespace Envelope.Service {
         public Gee.List<Transaction> load_account_transactions (Account account) throws ServiceError {
             try {
                 return dbm.load_account_transactions (account);
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
 
         public Transaction record_transaction (ref Account account, DateTime date, string label, string description, double amount, Category? category, Transaction? parent = null) throws ServiceError {
-
             var old_balance = account.balance;
 
             try {
-
                 Transaction transaction = new Transaction ();
 
                 transaction.label = label;
@@ -202,20 +186,16 @@ namespace Envelope.Service {
                 account_updated (account);
 
                 return transaction;
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 account.balance = old_balance;
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
 
         public void update_transaction (Transaction transaction) throws ServiceError {
-
-
             var old_balance = transaction.account.balance;
 
             try {
-
                 // load transaction as it is before update to correctly recalculate account balance
                 var current_transaction = dbm.get_transaction_by_id (transaction.@id);
 
@@ -239,8 +219,7 @@ namespace Envelope.Service {
 
                 transaction_updated (transaction);
                 account_updated (transaction.account);
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 transaction.account.balance = old_balance;
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
@@ -250,7 +229,6 @@ namespace Envelope.Service {
          * Remove a transaction from the database, adjusting the affected account's balance
          */
         public void remove_transaction (ref Transaction transaction) throws ServiceError {
-
             try {
                 var db_transaction = dbm.start_transaction ();
 
@@ -267,8 +245,7 @@ namespace Envelope.Service {
 
                 transaction_deleted (transaction);
                 account_updated (transaction.account);
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -277,7 +254,6 @@ namespace Envelope.Service {
          * Imports transactions into this account. Will do its best to discard duplicates.
          */
         public int import_transactions_from_file (ref Account account, File file) throws ImporterError, ServiceError {
-
             var path = file.get_path ();
 
             if (!file.query_exists ()) {
@@ -294,7 +270,6 @@ namespace Envelope.Service {
                 case "QIF":
                     importer = QIFImporter.get_default ();
                     break;
-
                 default:
                     throw new ImporterError.UNSUPPORTED ("file is of unknown format");
             }
@@ -306,20 +281,16 @@ namespace Envelope.Service {
                 var transactions = importer.import (path);
 
                 if (transactions != null && !transactions.is_empty) {
-
                     double balance_delta = 0d;
 
                     foreach (Transaction t in transactions) {
-
                         switch (t.direction) {
                             case Transaction.Direction.INCOMING:
                                 balance_delta += t.amount;
                                 break;
-
                             case Transaction.Direction.OUTGOING:
                                 balance_delta -= t.amount;
                                 break;
-
                             default:
                                 assert_not_reached ();
                         }
@@ -350,12 +321,10 @@ namespace Envelope.Service {
                 }
 
                 return 0;
-            }
-            catch (SQLHeavy.Error err) {
+            } catch (SQLHeavy.Error err) {
                 account.balance = balance_before_import;
                 throw new ServiceError.DATABASE_ERROR (err.message);
-            }
-            catch (ImporterError err) {
+            } catch (ImporterError err) {
                 account.balance = balance_before_import;
                 throw err;
             }
@@ -370,31 +339,23 @@ namespace Envelope.Service {
          * @return the new account's balance
          */
         private static double adjust_balance (Account account, Transaction transaction, bool cancel = false) {
-
             switch (transaction.direction) {
-
                 case Transaction.Direction.INCOMING:
-
                     if (cancel) {
                         account.balance -= transaction.amount;
-                    }
-                    else {
+                    } else {
                         account.balance += transaction.amount;
                     }
 
                     break;
-
                 case Transaction.Direction.OUTGOING:
-
                     if (cancel) {
                         account.balance += transaction.amount;
-                    }
-                    else {
+                    } else {
                         account.balance -= transaction.amount;
                     }
 
                     break;
-
                 default:
                     assert_not_reached ();
             }
@@ -402,5 +363,4 @@ namespace Envelope.Service {
             return account.balance;
         }
     }
-
 }

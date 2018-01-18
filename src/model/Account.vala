@@ -19,9 +19,7 @@
 using Gee;
 
 namespace Envelope {
-
     public class Account : Object, Comparable<Account> {
-
         public enum Type {
             CHECKING,
             SAVINGS;
@@ -30,10 +28,8 @@ namespace Envelope {
                 switch (type_int) {
                     case 0:
                         return CHECKING;
-
                     case 1:
                         return SAVINGS;
-
                     default:
                         assert_not_reached ();
                 }
@@ -70,7 +66,6 @@ namespace Envelope {
                 case Transaction.Direction.INCOMING:
                     balance += transaction.amount;
                     break;
-
                 case Transaction.Direction.OUTGOING:
                     balance -= transaction.amount;
                     break;
@@ -82,12 +77,11 @@ namespace Envelope {
         public void delete_transaction (Transaction transaction) {
             switch (transaction.direction) {
                 case Transaction.Direction.INCOMING:
-                balance += transaction.amount;
-                break;
-
+                    balance += transaction.amount;
+                    break;
                 case Transaction.Direction.OUTGOING:
-                balance -= transaction.amount;
-                break;
+                    balance -= transaction.amount;
+                    break;
             }
 
             // TODO remove from list

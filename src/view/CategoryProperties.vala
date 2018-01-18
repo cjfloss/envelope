@@ -20,9 +20,7 @@ using Envelope.Widget;
 using Envelope.Service;
 
 namespace Envelope.View {
-
     public class CategoryProperties : CellRendererUpdatable {
-
         private const int ENTRY_WIDTH = 15;
 
         public MonthlyCategory category { get; set; }
@@ -71,7 +69,6 @@ namespace Envelope.View {
         }
 
         private void build_ui () {
-
             column_spacing = 10;
             row_spacing = 10;
             //column_homogeneous = true;
@@ -161,20 +158,17 @@ namespace Envelope.View {
         }
 
         private void ok_clicked () {
-
             try {
                 category.name = category_name_entry.text.strip ();
                 category.amount_budgeted = Envelope.Util.String.parse_currency (budgeted_amount_entry.text);
-            }
-            catch (Envelope.Util.String.ParseError err) {
+            } catch (Envelope.Util.String.ParseError err) {
                 assert_not_reached ();
             }
 
             try {
                 bm.set_current_budgeted_amount (category);
                 bm.update_category (category);
-            }
-            catch (ServiceError err) {
+            } catch (ServiceError err) {
                 error ("could not update category (%s)", err.message);
             }
 

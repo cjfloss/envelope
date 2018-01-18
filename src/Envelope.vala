@@ -19,11 +19,9 @@
 using Envelope.Window;
 
 namespace Envelope {
-
     private static App application_instance = null;
 
     public class App : Granite.Application {
-
         public const int TOAST_TIMEOUT = 3000;
 
         construct {
@@ -66,7 +64,6 @@ namespace Envelope {
         public MainWindow main_window { get; private set; }
 
         protected override void activate () {
-
             Granite.Services.Logger.initialize (Build.APP_NAME);
             Granite.Services.Logger.DisplayLevel = DEBUG ? Granite.Services.LogLevel.DEBUG : Granite.Services.LogLevel.INFO;
 

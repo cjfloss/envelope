@@ -20,9 +20,7 @@ using Envelope.Service;
 using Envelope.View;
 
 namespace Envelope.Dialog {
-
     public class ImportTransactionsDialog : Gtk.FileChooserDialog {
-
         public ImportTransactionsDialog () {
             Object (title: _("Import transactions from file"),
                 parent: Envelope.App.get_default ().main_window,
@@ -32,7 +30,6 @@ namespace Envelope.Dialog {
         }
 
         private void build_ui () {
-
             add_button ("_Cancel", Gtk.ResponseType.CANCEL);
             add_button ("_Open", Gtk.ResponseType.ACCEPT);
 
@@ -43,8 +40,7 @@ namespace Envelope.Dialog {
 
             try {
                 set_current_folder_file (Granite.Services.Paths.home_folder);
-            }
-            catch (Error err) {
+            } catch (Error err) {
                 warning ("could not point chooser to home folder (%s)".printf (err.message));
             }
 
@@ -56,18 +52,14 @@ namespace Envelope.Dialog {
 
         // call this instead of run ()
         public void execute () {
-
             var response = run ();
 
             switch (response) {
-
                 case Gtk.ResponseType.ACCEPT:
                 case Gtk.ResponseType.OK:
-
                     close ();
 
                     try {
-
                         var account_ref = Sidebar.get_default ().selected_account;
 
                         int size = AccountManager.get_default ().import_transactions_from_file (ref account_ref, get_file ());
@@ -76,21 +68,16 @@ namespace Envelope.Dialog {
 
                         // refresh search autocompletion
                         MerchantStore.get_default ().reload ();
-                    }
-                    catch (ServiceError err) {
+                    } catch (ServiceError err) {
+                        error (err.message);
+                    } catch (ImporterError err) {
                         error (err.message);
                     }
-                    catch (ImporterError err) {
-                        error (err.message);
-                    }
-
                     break;
-
                 case Gtk.ResponseType.CANCEL:
                 case Gtk.ResponseType.CLOSE:
                     close ();
                     break;
-
                 default:
                     assert_not_reached ();
             }

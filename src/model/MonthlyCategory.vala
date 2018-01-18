@@ -23,7 +23,6 @@ namespace Envelope {
      * A category subclass which has a budgeted amount for a specific month in history
      */
     public class MonthlyCategory : Category {
-
         // year and month for this category's budget
         public uint month { get; set; }
         public uint year { get; set; }
@@ -35,7 +34,6 @@ namespace Envelope {
          * Creates a new MonthlyCategory for the current month
          */
         public MonthlyCategory () {
-
             Object ();
 
             uint o_month, o_year;
@@ -49,7 +47,6 @@ namespace Envelope {
          * Creates a new MonthlyCategory for the specified year and month
          */
         public MonthlyCategory.for_month (uint year, uint month) {
-
             Object ();
 
             this.month = month;
