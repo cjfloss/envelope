@@ -48,7 +48,7 @@ namespace Envelope.Service.Settings {
         }
 
         private SavedState () {
-            base ("org.envelope.settings");
+            base ("com.github.cjfloss.envelope.settings");
         }
     }
 }
