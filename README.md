@@ -4,7 +4,7 @@
 
 <p align="center">Personal budget application for the elementary OS desktop.</p>
 
-![Screenshot](https://raw.githubusercontent.com/cjfloss/envelope/data/screenshots/05.png)
+![Screenshot](https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png)
 
 ## Introduction
 
