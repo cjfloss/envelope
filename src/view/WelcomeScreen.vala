@@ -27,8 +27,6 @@ namespace Envelope.View {
                     "You have not configured any account yet");
             welcome.append ("list-add-symbolic", _("Add an account"),
                     _("You have not configured any account yet"));
-            welcome.append ("list-remove-symbolic", _("test an account"),
-                    _("You have not configured any account yet"));
 
             add (welcome);
 
