@@ -1,10 +1,10 @@
 # Envelope
 
-Personal budget application for the elementary OS desktop.
-
-http://cjfloss.github.io/envelope
-
 [![Build Status](https://travis-ci.org/cjfloss/envelope.svg)](https://travis-ci.org/cjfloss/envelope)
+
+<p align="center">Personal budget application for the elementary OS desktop.</p>
+
+![Screenshot](https://raw.githubusercontent.com/cjfloss/envelope/data/screenshots/05.png)
 
 ## Introduction
 
