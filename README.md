@@ -1,22 +1,16 @@
-# On hold
-This project is looking for a new maintainer.
-
 # Envelope
 
-Personal budget application for the Elementary OS desktop. It
-is written in Vala and uses the [Granite](https://launchpad.net/granite) framework.
+Personal budget application for the elementary OS desktop.
 
-http://nlaplante.github.io/envelope
+http://cjfloss.github.io/envelope
 
-[![Build Status](https://travis-ci.org/nlaplante/envelope.svg)](https://travis-ci.org/nlaplante/envelope)
+[![Build Status](https://travis-ci.org/cjfloss/envelope.svg)](https://travis-ci.org/cjfloss/envelope)
 
 ## Introduction
 
 Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system). You designate spending categories (envelopes) and distribute your monthly income into them.
 
 Envelope lets you configure accounts where you record all your transactions. You then assign each of them to a category.
-
-In Elementary OS, Envelope is known as *Budget*.
 
 ## Features
 
@@ -26,22 +20,9 @@ In Elementary OS, Envelope is known as *Budget*.
 
 ## Installation
 
-### Elementary OS
-
-Envelope is available as a daily build package in **ppa:nicolas-laplante/envelope-daily**. Just add the ppa and install envelope like this:
-
-```sh
-$ sudo add-apt-repository ppa:nicolas-laplante/envelope-daily
-$ sudo apt-get update
-$ sudo apt-get install envelope
-```
-
-### Other systems
-
-There ain't no binary package distribution except for Elementary OS yet. To use Envelope now, you'll have to build it from sources.
-
 #### Dependencies
-* cmake
+* meson
+* ninja
 * Vala >=0.23.2
 * glib >=2.29.0
 * gio-2.0
@@ -52,21 +33,14 @@ There ain't no binary package distribution except for Elementary OS yet. To use 
 
 #### Building from sources
 ```sh
-$ git clone https://github.com/nlaplante/envelope
+$ git clone https://github.com/cjfloss/envelope.git
 $ cd envelope
-$ mkdir build
-$ cd build
-$ cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug ..
-$ make
+$ meson build \&\& cd build
+$ ninja
 ```
-From there you can either use the binary in `build/src/envelope` or install it:
+From there you can either use the binary in `src/com.github.cjfloss.envelope` or install it:
 ```sh
-$ sudo make install
-```
-
-You can also run the unit tests:
-```sh
-$ tests/envelope-tests
+$ sudo ninja install
 ```
 
 ## Contributing
