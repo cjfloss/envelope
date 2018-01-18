@@ -29,28 +29,18 @@ namespace Envelope {
         construct {
             // App info
             build_data_dir = Build.DATADIR;
-            build_pkg_data_dir = Build.PKGDATADIR;
+            build_pkg_data_dir = Build.PKG_DATADIR;
             build_release_name = Build.RELEASE_NAME;
             build_version = Build.VERSION;
             build_version_info = Build.VERSION_INFO;
 
-            program_name = _(Build.USER_PROGRAM_NAME);
-            exec_name = Build.EXEC_NAME;
+            program_name = _(Build.APP_NAME);
+            exec_name = Build.APP_NAME;
 
-            app_copyright = "2014-2015";
-            application_id = "org.envelope";
+            application_id = Build.APP_NAME;
             app_icon = "accessories-calculator";
-            app_launcher = "envelope.desktop";
-            app_years = "2014-2015";
-
-            main_url = "https://nlaplante.github.io/envelope";
-            bug_url = "https://github.com/nlaplante/envelope/issues";
-            help_url = "https://github.com/nlaplante/envelope/wiki";
-            translate_url = "https://github.com/nlaplante/envelope";
-
-            about_authors = {"Nicolas Laplante <nicolas.laplante@gmail.com>"};
-            about_comments = "";
-            about_license_type = Gtk.License.GPL_3_0;
+            app_launcher = Build.APP_NAME + ".desktop";
+            bug_url = "https://github.com/cjfloss/envelope";
 
             application_instance = this;
         }
@@ -77,10 +67,10 @@ namespace Envelope {
 
         protected override void activate () {
 
-            Granite.Services.Logger.initialize (Build.USER_PROGRAM_NAME);
+            Granite.Services.Logger.initialize (Build.APP_NAME);
             Granite.Services.Logger.DisplayLevel = DEBUG ? Granite.Services.LogLevel.DEBUG : Granite.Services.LogLevel.INFO;
 
-            Granite.Services.Paths.initialize (Build.PROGRAM_NAME, Build.PKGDATADIR);
+            Granite.Services.Paths.initialize (Build.APP_NAME, Build.PKG_DATADIR);
 
             info ("Revision: %s", Build.VERSION_INFO);
             info ("Report any issues/bugs you might find to %s", bug_url);
@@ -98,7 +88,7 @@ namespace Envelope {
         }
 
         public string get_name () {
-            return Build.USER_PROGRAM_NAME;
+            return Build.APP_NAME;
         }
     }
 }
