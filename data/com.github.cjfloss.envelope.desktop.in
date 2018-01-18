@@ -9,5 +9,5 @@ Terminal=false
 StartupNotify=true
 Type=Application
 Categories=Utility;
-X-GNOME-Gettext-Domain=envelope
+X-GNOME-Gettext-Domain=com.github.cjfloss.envelope
 X-GNOME-UsesNotifications=true;
