@@ -1,10 +1,12 @@
-# Envelope
+<div>
+  <h1 align="center">Envelope</h1>
+  <h2 align="center">Personal budget application for the elementary OS desktop</h2>
+</div>
+<p align="center">
+<img src="https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png" alt="screenshot">
+</p>
 
 [![Build Status](https://travis-ci.org/cjfloss/envelope.svg)](https://travis-ci.org/cjfloss/envelope)
-
-<p align="center">Personal budget application for the elementary OS desktop.</p>
-
-![Screenshot](https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png)
 
 ## Introduction
 
@@ -16,7 +18,7 @@ Envelope lets you configure accounts where you record all your transactions. You
 
 * Envelope system budget workflow
 * Import transactions from QIF/OFX files
-* Integrates with the Elementary OS desktop
+* Integrates with the elementary OS desktop
 
 ## Installation
 
@@ -35,7 +37,7 @@ Envelope lets you configure accounts where you record all your transactions. You
 ```sh
 $ git clone https://github.com/cjfloss/envelope.git
 $ cd envelope
-$ meson build \&\& cd build
+$ meson build && cd build
 $ ninja
 ```
 From there you can either use the binary in `src/com.github.cjfloss.envelope` or install it:
