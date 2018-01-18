@@ -1,9 +1,10 @@
 # Authors
 
 * Nicolas Laplante <nicolas.laplante@gmail.com>
-* Cleiton Floss <cleitonfloss@gmail.com>
 
 # Maintainers:
+
+* Cleiton Floss <cleitonfloss@gmail.com>
 
 # Designers:
 

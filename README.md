@@ -15,6 +15,8 @@ You designate spending categories (envelopes) and distribute your monthly income
 
 Envelope lets you configure accounts where you record all your transactions. You then assign each of them to a category.
 
+Developed by [Nicolas Laplante](https://github.com/nlaplante)
+
 ## Features
 
 * Envelope system budget workflow
