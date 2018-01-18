@@ -19,10 +19,37 @@
 using Envelope.Dialog;
 
 namespace Envelope.View {
-
     private static Welcome welcome_instance = null;
 
-    public class Welcome : Granite.Widgets.Welcome {
+    public class Welcome : Gtk.Grid {
+        construct {
+            var welcome = new Granite.Widgets.Welcome ("Get your budget going",
+                    "You have not configured any account yet");
+            welcome.append ("list-add-symbolic", _("Add an account"),
+                    _("You have not configured any account yet"));
+            welcome.append ("list-remove-symbolic", _("test an account"),
+                    _("You have not configured any account yet"));
+
+            add (welcome);
+
+            welcome.activated.connect ((index) => {
+                switch (index) {
+                    case 0:
+                        var dialog = new AddAccountDialog ();
+
+                        dialog.account_created.connect ((account) => {
+                            dialog.destroy ();
+                        });
+
+                        dialog.show_all ();
+
+                        break;
+                    default:
+                        assert_not_reached ();
+
+                }
+            });
+        }
 
         public static new unowned Welcome get_default () {
             if (welcome_instance == null) {
@@ -30,37 +57,6 @@ namespace Envelope.View {
             }
 
             return welcome_instance;
-        }
-
-        public Welcome () {
-            base (_("Get your budget going"), _("You have not configured any account yet"));
-            build_ui ();
-            connect_signals ();
-        }
-
-        private void build_ui () {
-            append ("add", _("Add an account"), _("Set up an account to record your transactions"));
-        }
-
-        private void connect_signals () {
-            activated.connect (item_activated);
-        }
-
-        private void item_activated (int index ) {
-            switch (index) {
-                case 0:
-                    var dialog = new AddAccountDialog ();
-
-                    dialog.account_created.connect ((account) => {
-                        dialog.destroy ();
-                    });
-
-                    dialog.show_all ();
-                    break;
-
-                default:
-                    assert_not_reached ();
-            }
         }
     }
 }
