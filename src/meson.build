@@ -1,4 +1,5 @@
 app_name = meson.project_name()
+short_name = 'envelope'
 
 GIT_BRANCH = run_command('git', 'rev-parse', '--abbrev-ref', 'HEAD')
 GIT_COMMIT_HASH = run_command('git','log', '-1', '--format=%h')
