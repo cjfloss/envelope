@@ -1,10 +1,10 @@
 <div>
-  <h1 align="center">Envelope</h1>
-  <h2 align="center">Personal budget application for the elementary OS desktop</h2>
+    <h1 align="center">Envelope</h1>
+    <p align="center">
+      <img src="https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png" alt="screenshot">
+    </p>
+    <h2 align="center">Personal budget application for the elementary OS desktop</h2>
 </div>
-<p align="center">
-<img src="https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png" alt="screenshot">
-</p>
 
 [![Build Status](https://travis-ci.org/cjfloss/envelope.svg)](https://travis-ci.org/cjfloss/envelope)
 
