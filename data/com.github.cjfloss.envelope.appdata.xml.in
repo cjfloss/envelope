@@ -1,14 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2017 Your Name <you@email.com> -->
+<!-- Copyright 2018 Cleiton Floss <cleitonfloss@gmail.com> -->
 <component type="desktop">
-  <id>com.github.yourusername.yourrepositoryname.desktop</id>
+  <id>com.github.cjfloss.envelope.desktop</id>
   <metadata_license>CC0</metadata_license>
-  <name>Your App's Name</name>
-  <summary>A Catchy Tagline</summary>
+  <project_license>GPL-3.0+</project_license>
+  <name>Envelope</name>
+  <summary>Personal budget application for the Elementary OS desktop</summary>
+
   <description>
-    <p>A quick summary of your app's main selling points and features. Just a couple sentences per paragraph is best.</p>
+    <p>Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system).</p>
+    <p>You designate spending categories (envelopes) and distribute your monthly income into them.</p>
+    <p>Envelope lets you configure accounts where you record all your transactions. You then assign each of them to a category.</p>
+    <p>Originaly made by Nicolas Laplante<br/></p>
+    <p>Features</p>
+    <ul>
+      <li>Envelope system budget workflow</li>
+      <li>Import transactions from QIF/OFX files</li>
+      <li>Integrates with the Elementary OS desktop</li>
+    </ul>
   </description>
-  
+
+  <provides>
+    <binary>com.github.cjfloss.envelope</binary>
+  </provides>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/cjfloss/envelope/img/screenshot/1.png</image>
+    </screenshot>
+  </screenshots>
+
+  <developer_name>Cleiton Floss</developer_name>
+  <url type="homepage">https://github.com/cjfloss/envelope</url>
+  <url type="bugtracker">https://github.com/cjfloss/envelope/issues</url>
+  <url type="help">https://github.com/cjfloss/envelope/issues</url>
+  <update_contact>https://github.com/cjfloss/envelope/issues</update_contact>
+
   <custom>
      <value key="x-appcenter-color-primary">#603461</value>
      <value key="x-appcenter-color-primary-text">rgb(255, 255, 255)</value>
