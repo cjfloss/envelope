@@ -8,7 +8,7 @@
     <value value="3" nick="manual" />
   </enum>
 
-  <schema path="/org/envelope/settings/" id="org.envelope.settings" gettext-domain="envelope">
+  <schema path="/com/github/cjfloss/envelope/settings/" id="com.github.cjfloss.envelope.settings" gettext-domain="com.github.cjfloss.envelope.settings">
 
     <key type="b" name="maximized">
       <default>false</default>
