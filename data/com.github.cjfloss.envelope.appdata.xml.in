@@ -49,8 +49,8 @@
     <update_contact>https://github.com/cjfloss/envelope/issues</update_contact>
 
     <custom>
-        <value key="x-appcenter-color-primary">#603461</value>
+        <value key="x-appcenter-color-primary">#226324</value>
         <value key="x-appcenter-color-primary-text">rgb(255, 255, 255)</value>
-        <value key="x-appcenter-suggested-price">5</value>
+        <value key="x-appcenter-suggested-price">0</value>
     </custom>
 </component>
