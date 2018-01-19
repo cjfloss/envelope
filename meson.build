@@ -4,4 +4,5 @@ add_global_arguments('-DGETTEXT_PACKAGE="' + meson.project_name() + '"',language
 
 subdir('src')
 subdir('data')
+subdir('po')
 subdir('tests')
