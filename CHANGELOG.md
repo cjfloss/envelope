@@ -1,3 +1,43 @@
+#  (2018-01-18)
+
+## Bug Fixes
+
+- **WelcomeScreen** remove junk code
+  ([b016cb0](https://github.com/cjfloss/envelope/commit/b016cb04c1497f791eedc3347698ab0f76ab1b5d))
+- **MainWindow**
+   - use overlay_bar.label not status
+   ([c987842](https://github.com/cjfloss/envelope/commit/c9878423ef75f0d22665fb4d5f35e6adebf2d33e)
+   - Use Ellipsis instead of three dots
+   ([1021ef7](https://github.com/cjfloss/envelope/commit/1021ef7dbca43b8f13605bce4fa7abbc750fbe9a))
+- **AbstractPopoverCellRenderer** Remove determine position method
+   ([29ff103](https://github.com/cjfloss/envelope/commit/29ff1039816e8753f3ee571f79b3805f398b4d58))
+- **Widgets** Add suitable method to override
+   ([ae06550](https://github.com/cjfloss/envelope/commit/ae06550b24cb8734bd2f34af82a46bf5d0ea53ee))
+- **CategoryProperties** Add try-catch to Handle error
+   ([46c3d76](https://github.com/cjfloss/envelope/commit/46c3d76a9f315747c7d1929610ff0a3eabee464e))
+- **TransactionView** Convert Title to string
+   ([92bcf43](https://github.com/cjfloss/envelope/commit/92bcf432ffef65eed1bf1620d290b7441efddb7b))
+- **Granite.TextStyle** Replace deprecated usage modes
+   ([fef4db4](https://github.com/cjfloss/envelope/commit/fef4db4352ba45bcc37a4e4075cf6d80eb4b042f))
+- **Compilation Warnings**
+   - Use new format indicate deprecated functions
+   ([dcfe4e5](https://github.com/cjfloss/envelope/commit/dcfe4e55ae3cd4c508246d1f1148e5125e45322c))
+   - Remove modifier 'static' from constants
+   ([9bd1228](https://github.com/cjfloss/envelope/commit/9bd122814a570fd0768aa0745e5f327d0acd53cc))
+
+## Features
+
+- **il8n** add internationalization files
+  ([402ecad](https://github.com/cjfloss/envelope/commit/402ecad58ae3e58520f024fbc2caa109c884e35e))
+- **Desktop File**
+   - Update Gettext domain
+   ([46d3015](https://github.com/cjfloss/envelope/commit/46d3015097653406b7a4a7428931cfaac48a19b5))
+   - Remove Desktop Action
+   ([bc6fb4d](https://github.com/cjfloss/envelope/commit/bc6fb4d909e18f3d81bcd4cc929639ca475b9222))
+   - Update executable
+   ([439bbab](https://github.com/cjfloss/envelope/commit/439bbab0c3975ff7ef0a5cfdcee7af1c30ed004a))
+
+
 #  (2015-02-22)
 
 ## Bug Fixes
@@ -8,7 +48,7 @@
 - **Header bar:** remove export button
  ([431dc7a6](https://github.com/nlaplante/envelope/commit/431dc7a6986586450e7b9ca503f4e9abd194a949),
   [#43](https://github.com/nlaplante/envelope/issues/43))
-  
+
 #  (2015-02-18)
 
 ## Bug Fixes
