@@ -13,7 +13,7 @@ i18n.merge_file (
     output : app_name + '.desktop',
     install : true,
     install_dir : join_paths (get_option ('datadir'), 'applications'),
-    po_dir : join_paths (meson.source_root (), 'po', 'extra'),
+    po_dir : join_paths (meson.source_root (), 'po'),
     type : 'desktop'
 )
 
@@ -23,7 +23,7 @@ i18n.merge_file (
     output : app_name + '.appdata.xml',
     install : true,
     install_dir : join_paths (get_option ('datadir'), 'metainfo'),
-    po_dir : join_paths (meson.source_root (), 'po', 'extra')
+    po_dir : join_paths (meson.source_root (), 'po')
 )
 
 test (
