@@ -1,11 +1,10 @@
 app_name = meson.project_name()
-short_name = 'envelope'
 version = '0.0.0'
 release_name = 'alpha'
 
 prefix = get_option('prefix')
 datadir = join_paths(prefix, get_option('datadir'))
-pkg_datadir = join_paths(datadir, short_name)
+pkg_datadir = join_paths(datadir, app_name)
 
 GIT_BRANCH = run_command('git', 'rev-parse', '--abbrev-ref', 'HEAD')
 GIT_COMMIT_HASH = run_command('git','log', '-1', '--format=%h')
