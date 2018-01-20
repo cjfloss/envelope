@@ -9,10 +9,10 @@ Build-Depends: meson,
                libgtk-3-dev (>= 3.12.0),
                libgee-0.8-dev,
                libsqlheavy-dev (>= 0.1.1-2)
-Standards-Version: 3.9.6
-Homepage: https://github.com/cjfloss/envelope
 
+Standards-Version: 3.9.3
 Package: com.github.cjfloss.envelope
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
+Pre-Depends: dpkg (>= 1.15.6)
 Description: Personal budget manager for elementary OS.
