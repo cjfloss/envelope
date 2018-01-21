@@ -1,13 +1,13 @@
 [Desktop Entry]
 Name=Envelope
 Comment=Manage your budget
-Keywords=budget;money;
+Keywords=Budget;Money;
 GenericName=Personal budget manager
 Exec=com.github.cjfloss.envelope
-Icon=accessories-calculator
+Icon=com.github.cjfloss.envelope
 Terminal=false
 StartupNotify=true
 Type=Application
-Categories=Utility;
+Categories=Office;Utility;Finance;
 X-GNOME-Gettext-Domain=com.github.cjfloss.envelope
 X-GNOME-UsesNotifications=true;
