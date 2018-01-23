@@ -552,7 +552,7 @@ namespace Envelope.View {
             var merchant_column = new Gtk.TreeViewColumn ();
             merchant_column.set_title (_("Merchant"));
             merchant_column.max_width = -1;
-            merchant_column.min_width = 150;
+            merchant_column.min_width = 165;
             merchant_column.pack_start (renderer_label, true);
             merchant_column.resizable = true;
             merchant_column.reorderable = true;
@@ -578,7 +578,7 @@ namespace Envelope.View {
             var out_column = new Gtk.TreeViewColumn ();
             out_column.set_title (_("Outflow (%s)").printf (Envelope.Util.String.get_currency_symbol ().to_string()));
             out_column.max_width = -1;
-            out_column.min_width = 80;
+            out_column.min_width = 165;
             out_column.pack_start (renderer_out, true);
             out_column.resizable = true;
             out_column.reorderable = true;
@@ -591,7 +591,7 @@ namespace Envelope.View {
             var in_column = new Gtk.TreeViewColumn ();
             in_column.set_title (_("Inflow (%s)").printf (Envelope.Util.String.get_currency_symbol ().to_string()));
             in_column.max_width = -1;
-            in_column.min_width = 80;
+            in_column.min_width = 165;
             in_column.pack_start (renderer_in, true);
             in_column.resizable = true;
             in_column.reorderable = true;
@@ -604,6 +604,7 @@ namespace Envelope.View {
             var memo_column = new Gtk.TreeViewColumn ();
             memo_column.set_title (_("Memo"));
             memo_column.max_width = -1;
+            memo_column.min_width = 165;
             memo_column.pack_start (renderer_memo, true);
             memo_column.resizable = true;
             memo_column.reorderable = true;
