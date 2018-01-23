@@ -224,6 +224,8 @@ namespace Envelope.Window {
 
           set_content_view (transaction_view);
           transaction_view.transactions = account.transactions;
+
+          TransactionView.get_default ().btn_add_transactions_clicked ();
         }
 
         private void on_sidebar_list_account_name_updated (Account account, string new_name) {
