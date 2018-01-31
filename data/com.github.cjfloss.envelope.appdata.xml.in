@@ -5,7 +5,7 @@
     <metadata_license>CC0</metadata_license>
     <project_license>GPL-3.0+</project_license>
     <name>Envelope</name>
-    <summary>Personal budget application for the Elementary OS desktop</summary>
+    <summary>Personal budgeting tool</summary>
 
     <description>
         <p>Envelope helps you maintain your personal budget by using the tried-and-true envelope system.</p>
@@ -16,7 +16,6 @@
         <ul>
             <li>Envelope system budget workflow</li>
             <li>Import transactions from QIF/OFX files</li>
-            <li>Integrates with the Elementary OS desktop</li>
         </ul>
     </description>
 
