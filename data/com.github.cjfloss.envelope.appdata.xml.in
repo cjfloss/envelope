@@ -5,12 +5,12 @@
     <metadata_license>CC0</metadata_license>
     <project_license>GPL-3.0+</project_license>
     <name>Envelope</name>
-    <summary>Personal budgeting tool</summary>
+    <summary>Personal budget manager</summary>
 
     <description>
-        <p>Envelope helps you maintain your personal budget by using the tried-and-true envelope system.</p>
-        <p>You designate spending categories (envelopes) and distribute your monthly income into them.</p>
-        <p>Envelope lets you configure accounts where you record all your transactions. You then assign each of them to a category.</p>
+        <p>Maintain your personal budget by using the tried-and-true envelope system.</p>
+        <p>Designate spending categories (envelopes) and distribute your monthly income into them.</p>
+        <p>Configure accounts where you record all your transactions, then assign each of them to a category.</p>
         <p>Originaly made by Nicolas Laplante<br/></p>
         <p>Features</p>
         <ul>
