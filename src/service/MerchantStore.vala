@@ -35,7 +35,7 @@ namespace Envelope.Service {
 
         private MerchantStore () {
             Object ();
-            build_store ();
+            set_column_types ({typeof (string), typeof (int)});
             reload ();
         }
 
@@ -46,10 +46,6 @@ namespace Envelope.Service {
             } catch (SQLHeavy.Error err) {
                 warning ("could not load merchants; transaction search autocompletion won't work (%s)".printf (err.message));
             }
-        }
-
-        private void build_store () {
-            set_column_types ({typeof (string), typeof (int)});
         }
 
         private void load_merchants () throws SQLHeavy.Error {
