@@ -407,7 +407,10 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     get_transaction_iter_from_sort_iter (out store_iter, iter);
 
-                    transactions_store.@set (store_iter, Column.MERCHANT, text, -1);
+                    string merchant;
+                    transactions_store.@get (store_iter, Column.MERCHANT, out merchant, -1);
+
+                    transactions_store.@set (store_iter, Column.MERCHANT, text == "" ? merchant : text, -1);
                 }
             });
 
