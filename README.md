@@ -15,8 +15,6 @@ You designate spending categories (envelopes) and distribute your monthly income
 
 Envelope lets you configure accounts where you record all your transactions. You then assign each of them to a category.
 
-Developed by [Nicolas Laplante](https://github.com/nlaplante)
-
 ## Features
 
 * Envelope system budget workflow
@@ -40,7 +38,7 @@ Developed by [Nicolas Laplante](https://github.com/nlaplante)
 ```sh
 $ git clone https://github.com/cjfloss/envelope.git
 $ cd envelope
-$ meson build && cd build
+$ meson build --prefix=/usr && cd build
 $ ninja
 ```
 From there you can either use the binary in `src/com.github.cjfloss.envelope` or install it:
