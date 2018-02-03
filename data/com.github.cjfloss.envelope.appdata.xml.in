@@ -11,11 +11,11 @@
         <p>Maintain your personal budget by using the tried-and-true envelope system.</p>
         <p>Designate spending categories (envelopes) and distribute your monthly income into them.</p>
         <p>Configure accounts where you record all your transactions, then assign each of them to a category.</p>
-        <p>Originaly made by Nicolas Laplante<br/></p>
+        <p>Originaly made by Nicolas Laplante.<br/></p>
         <p>Features</p>
         <ul>
             <li>Envelope system budget workflow</li>
-            <li>Import transactions from QIF/OFX files</li>
+            <li>Import transactions from QIF files</li>
         </ul>
     </description>
 
