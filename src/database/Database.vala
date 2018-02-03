@@ -255,25 +255,20 @@ namespace Envelope.DB {
                 return merchant_cache.values;
             }
 
-            var merchants = new TreeSet<Merchant> ();
-
             SQLHeavy.QueryResult results = q_get_unique_merchants.execute ();
 
             while (!results.finished) {
                 Merchant merchant;
                 query_result_to_merchant (results, out merchant);
 
-                merchants.add (merchant);
-
-                // add to cache too
                 merchant_cache.@set (merchant.label, merchant);
 
                 results.next ();
             }
 
-            debug ("%d unique merchants", merchants.size);
+            debug ("%d unique merchants", merchant_cache.size);
 
-            return merchants;
+            return merchant_cache.values;
         }
 
         /**
