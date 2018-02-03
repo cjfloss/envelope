@@ -5,7 +5,7 @@ release_name = 'beta'
 prefix = get_option('prefix')
 datadir = join_paths(prefix, get_option('datadir'))
 pkg_datadir = join_paths(datadir, app_name)
-if find_program('git', required : false) == true
+if find_program('git', required : false).found()
     GIT_BRANCH = run_command('git', 'rev-parse', '--abbrev-ref', 'HEAD')
     GIT_COMMIT_HASH = run_command('git','log', '-1', '--format=%h')
     git_branch = GIT_BRANCH.stdout().strip()
