@@ -1119,8 +1119,8 @@ namespace Envelope.View {
 
         private void remove_category (Gtk.TreeIter iter, Category category) {
             try {
-                BudgetManager.get_default ().delete_category (category);
                 store.remove (ref iter);
+                BudgetManager.get_default ().delete_category (category);
 
                 Envelope.App.toast (_("Category %s removed".printf (category.name)));
             } catch (ServiceError err) {
@@ -1130,8 +1130,8 @@ namespace Envelope.View {
 
         private void remove_account (Gtk.TreeIter iter, Account account) {
             try {
-                AccountManager.get_default ().delete_account (account);
                 store.remove (ref iter);
+                AccountManager.get_default ().delete_account (account);
 
                 Envelope.App.toast (_("Account %s removed".printf (account.number)));
             } catch (ServiceError err) {
