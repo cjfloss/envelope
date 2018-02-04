@@ -16,9 +16,9 @@
 
 ## Introduction
 
-Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system).
-Designate spending categories (envelopes) and distribute your monthly income into them.
-Configure accounts where you record all your transactions, then assign each of them to a category.
+Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system).<br/>
+Designate spending categories (envelopes) and distribute your monthly income into them.<br/>
+Configure accounts where you record all your transactions, then assign each of them to a category.<br/>
 
 ## Features
 
