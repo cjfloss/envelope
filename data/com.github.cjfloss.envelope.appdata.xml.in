@@ -11,7 +11,7 @@
         <p>Maintain your personal budget by using the tried-and-true envelope system.</p>
         <p>Designate spending categories (envelopes) and distribute your monthly income into them.</p>
         <p>Configure accounts where you record all your transactions, then assign each of them to a category.</p>
-        <p>Originaly made by Nicolas Laplante.<br/></p>
+        <p>Originaly made by Nicolas Laplante.</p>
         <p>Features</p>
         <ul>
             <li>Envelope system budget workflow</li>
@@ -25,6 +25,9 @@
 
     <screenshots>
         <screenshot type="default">
+            <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png</image>
+        </screenshot>
+        <screenshot type="default">
             <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/01.png</image>
         </screenshot>
         <screenshot type="default">
@@ -36,9 +39,6 @@
         <screenshot type="default">
             <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/04.png</image>
         </screenshot>
-        <screenshot type="default">
-            <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png</image>
-        </screenshot>
     </screenshots>
 
     <developer_name>Cleiton Floss</developer_name>
@@ -46,6 +46,37 @@
     <url type="bugtracker">https://github.com/cjfloss/envelope/issues</url>
     <url type="help">https://github.com/cjfloss/envelope/issues</url>
     <update_contact>https://github.com/cjfloss/envelope/issues</update_contact>
+
+    <releases>
+        <release version="0.0.2" date="2018-02-03" urgency="high">
+            <description>
+                <p>Fixed some glitches</p>
+                <ul>
+                    <li>Fix crash while removing category</li>
+                    <li>Fix information loss on editing</li>
+                    <li>Add AppData changelog</li>
+                    <li>Update app branding</li>
+                </ul>
+            ​</description>
+        </releases>
+        ​<release version="0.0.1" date="2018-01-22" urgency="low">
+            <description>
+                <p>First release: Testing</p>
+                <p>Basic functionalities</p>
+                <ul>
+                    <li>Add account</li>
+                    <li>Add transactions</li>
+                    <li>Import QIF files</li>
+                </ul>
+            ​</description>
+        ​</release>
+    ​</releases>
+
+    <categories>
+        <category>Office</category>
+        <category>Utility</category>
+        <category>Finance</category>
+    </categories>
 
     <custom>
         <value key="x-appcenter-color-primary">#226324</value>
