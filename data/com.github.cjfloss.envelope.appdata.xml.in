@@ -58,7 +58,7 @@
                     <li>Update app branding</li>
                 </ul>
             ​</description>
-        </releases>
+        </release>
         ​<release version="0.0.1" date="2018-01-22" urgency="low">
             <description>
                 <p>First release: Testing</p>
