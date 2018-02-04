@@ -1,19 +1,24 @@
 <div>
-    <h1 align="center">Envelope</h1>
-    <p align="center">
-        <img src="https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png" alt="screenshot">
-    </p>
-    <h2 align="center">Personal budget application for the elementary OS desktop</h2>
+  <h1 align="center">Envelope</h1>
+  <h3 align="center">Personal budget manager</h3>
+  <p align="center">Designed for <a href="https://elementary.io"> elementary OS</p>
 </div>
+<p align="center">
+  <a href="https://appcenter.elementary.io/com.github.cjfloss.envelope">
+    <img src="https://appcenter.elementary.io/badge.svg" alt="Get it on AppCenter">
+  </a>
+</p>
+<p align="center">
+  <img src="data/screenshots/05.png" alt="screenshot" />
+</p>
 
 [![Build Status](https://travis-ci.org/cjfloss/envelope.svg)](https://travis-ci.org/cjfloss/envelope)
 
 ## Introduction
 
 Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system).
-You designate spending categories (envelopes) and distribute your monthly income into them.
-
-Envelope lets you configure accounts where you record all your transactions. You then assign each of them to a category.
+Designate spending categories (envelopes) and distribute your monthly income into them.
+Configure accounts where you record all your transactions, then assign each of them to a category.
 
 ## Features
 
@@ -49,6 +54,12 @@ $ sudo ninja install
 ## Contributing
 
 Want to help? Just fork this repository, pick an issue and start hacking. Just follow the coding style and document your changes.
+
+You can donate to me via
+* `Bitcoin: 15zE9cUoe7m2zHjQFCYpHPG7moFB51ncTN`
+* `Dash: XhhutrX3rzQDcFY6cFDUdDo9ZDPngrv9Tk`
+* `Ethereum: 0xE77D57EA81E1c8Ad394366FfB32A2F556073A147`
+* `Monero: 48PJP6rEXdKfAUTHqiBa367taCAuphZiTjgbme99kDvEbkKoPKuN3WMWb2dhraFs3S11oChRasDba2Xth7VbaFke5ZPxbzK`
 
 ### Commit messages
 
