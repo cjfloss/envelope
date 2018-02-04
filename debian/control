@@ -15,4 +15,4 @@ Package: com.github.cjfloss.envelope
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Pre-Depends: dpkg (>= 1.15.6)
-Description: Personal budget manager for elementary OS.
+Description: Personal budget manager.
