@@ -1,5 +1,5 @@
 app_name = meson.project_name()
-version = '0.0.0'
+version = '0.0.2'
 release_name = 'beta'
 
 prefix = get_option('prefix')
