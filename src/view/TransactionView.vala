@@ -317,11 +317,6 @@ namespace Envelope.View {
             infobar.message_type = Gtk.MessageType.WARNING;
             infobar.get_content_area ().add (new Gtk.Label(_("No results.")));
 
-            // TEMP FIX add top border to info bar. Hard coded for now. Need to get the color value from the .warning class in gtk css
-            Granite.Widgets.Utils.set_theming (infobar, "GtkInfoBar { border-top-color: #c09e42; border-top-width: 1px; border-top-style: solid; }",
-                null,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-
             infobar.hide ();
             add (infobar);
         }
