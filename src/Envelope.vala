@@ -36,9 +36,7 @@ namespace Envelope {
             exec_name = Build.APP_NAME;
 
             application_id = Build.APP_NAME;
-            app_icon = "accessories-calculator";
             app_launcher = Build.APP_NAME + ".desktop";
-            bug_url = "https://github.com/cjfloss/envelope";
 
             application_instance = this;
         }
@@ -70,7 +68,7 @@ namespace Envelope {
             Granite.Services.Paths.initialize (Build.APP_NAME, Build.PKG_DATADIR);
 
             info ("Revision: %s", Build.VERSION_INFO);
-            info ("Report any issues/bugs you might find to %s", bug_url);
+            info ("Report any issues/bugs you might find to %s", "https://github.com/cjfloss/envelope");
 
             if (main_window == null) {
                 main_window = new MainWindow ();
