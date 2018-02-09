@@ -219,7 +219,7 @@ namespace Envelope.DB {
         private SQLHeavy.Query q_check_category_budget_set;
 
         // in-memory caches for often-used objects
-        private SortedMap<int, Account>           account_cache     = new TreeMap<int, Account> ();
+        //private SortedMap<int, Account>           account_cache     = new TreeMap<int, Account> ();
         private SortedMap<string, Category>       category_cache    = new TreeMap<string, Category> ();
         private SortedMap<string, Merchant>       merchant_cache    = new TreeMap<string, Merchant> ();
 
@@ -279,9 +279,9 @@ namespace Envelope.DB {
          * @throws SQLHeavy.Error
          */
         public Account? load_account (int account_id) throws SQLHeavy.Error {
-            if (account_cache.has_key (account_id)) {
-                return account_cache.@get (account_id);
-            }
+            // if (account_cache.has_key (account_id)) {
+            //     return account_cache.@get (account_id);
+            // }
 
             q_load_account.set_int ("accountid", account_id);
 
@@ -292,7 +292,7 @@ namespace Envelope.DB {
                 query_result_to_account (results, out account);
                 q_load_account.clear ();
 
-                account_cache.@set (account.@id, account);
+                // account_cache.@set (account.@id, account);
 
                 return account;
             }
@@ -312,9 +312,9 @@ namespace Envelope.DB {
             q_delete_account.clear ();
 
             // delete from cache
-            if (account_cache.has_key (account.@id)) {
-                account_cache.unset (account.@id);
-            }
+            // if (account_cache.has_key (account.@id)) {
+            //     account_cache.unset (account.@id);
+            // }
         }
 
         /**
@@ -339,7 +339,7 @@ namespace Envelope.DB {
                 list.add (account);
 
                 // add to cache too
-                account_cache.@set (account.@id, account);
+                //account_cache.@set (account.@id, account);
 
                 results.next ();
             }
@@ -466,7 +466,7 @@ namespace Envelope.DB {
 
             account.@id = (int) id;
 
-            account_cache.@set (account.@id, account);
+            // account_cache.@set (account.@id, account);
 
             account_created (account);
         }
@@ -485,7 +485,7 @@ namespace Envelope.DB {
             q_rename_account.clear ();
 
             // update cache
-            account_cache.@set (account.@id, account);
+            // account_cache.@set (account.@id, account);
         }
 
         /**
@@ -501,7 +501,7 @@ namespace Envelope.DB {
                 .execute ("balance", typeof (double), account.balance, "account_id", typeof (int), account.@id);
 
             // update cache
-            account_cache.@set (account.@id, account);
+            // account_cache.@set (account.@id, account);
         }
 
         /**
