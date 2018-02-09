@@ -323,9 +323,10 @@ namespace Envelope.DB {
          * @return the list of accounts
          */
         public Collection<Account> load_all_accounts () throws SQLHeavy.Error {
-            if (!account_cache.is_empty) {
-                return account_cache.values;
-            }
+            // if (!account_cache.is_empty) {
+            //     message ("LOAD RETURNED");
+            //     return account_cache.values;
+            // }
 
             var list = new TreeSet<Account> ();
 
