@@ -26,64 +26,30 @@ namespace Envelope.Dialog {
         private Gtk.Entry desc_entry;
         private Gtk.Entry balance_entry;
         private Gtk.ComboBox type_choice;
+        private Gtk.Button create_button;
+        private Gtk.Button cancel_button;
 
-        public AddAccountDialog () {
-            build_ui ();
-            connect_signals ();
+        public AddAccountDialog (Gtk.Window parent) {
+            Object (transient_for: parent);
         }
 
-        [Version (deprecated = true, deprecated_since = "", replacement = "AccountManager.accout_created")]
-        public signal void account_created (Account account);
-
-        private void create_account () {
-            try {
-                var account = AccountManager.get_default ().create_account (number_entry.text,
-                                                                            desc_entry.text,
-                                                                            double.parse (balance_entry.text),
-                                                                            current_account_type);
-
-                // show notification
-                Envelope.App.toast (_("Account %s has been created").printf(account.number));
-            } catch (ServiceError err) {
-                error ("error while creating account (%s)".printf (err.message));
-            } catch (AccountError err) {
-                error ("error while creating account (%s)".printf (err.message));
-            }
-        }
-
-        private void connect_signals () {
-            response.connect (on_response);
-        }
-
-        private void on_response (Gtk.Dialog source, int response_id) {
-            switch (response_id) {
-                case Gtk.ResponseType.CLOSE:
-                    destroy ();
-                    break;
-                case Gtk.ResponseType.APPLY:
-                    create_account ();
-                    destroy ();
-                    break;
-            }
-        }
-
-        private void build_ui () {
+        construct {
             title = "Add an account";
-            border_width = 20;
-
-            // Add buttons
-            add_button (_("Cancel"), Gtk.ResponseType.CLOSE);
-            add_button (_("Ok"), Gtk.ResponseType.APPLY);
-
-            Gtk.Box content = get_content_area () as Gtk.Box;
-            content.spacing = 20;
+            deletable = false;
+            modal = true;
+            resizable= false;
+            width_request = 300;
+            window_position = Gtk.WindowPosition.CENTER_ON_PARENT;
 
             var grid = new Gtk.Grid ();
-            grid.row_spacing = 10;
-            grid.column_spacing = 20;
-            content.add (grid);
+            get_content_area ().add (grid);
 
-            grid.show_all ();
+            grid.margin_start = grid.margin_end = 12;
+            grid.orientation = Gtk.Orientation.VERTICAL;
+            grid.row_spacing = 12;
+            grid.column_spacing = 12;
+            grid.valign = Gtk.Align.CENTER;
+            grid.vexpand = true;
 
             var number_label = new Gtk.Label ("Label:");
             number_label.xalign = 1f;
@@ -92,6 +58,11 @@ namespace Envelope.Dialog {
             number_entry = new Gtk.Entry ();
             number_entry.placeholder_text = _("Eg.: account number");
             number_entry.expand = true;
+            number_entry.key_release_event.connect (() => {
+                number_entry.get_text () == "" ?
+                    create_button.sensitive = false :
+                    create_button.sensitive = true;
+            });
             grid.attach(number_entry, 1, 1, 1, 1);
 
             var type_label = new Gtk.Label ("Type:");
@@ -102,9 +73,11 @@ namespace Envelope.Dialog {
             Gtk.TreeIter type_list_store_iter;
 
             type_list_store.append (out type_list_store_iter);
-            type_list_store.set (type_list_store_iter, 0, _("Checking"), 1, Account.Type.CHECKING);
+            type_list_store.set (type_list_store_iter, 0,
+                                _("Checking"), 1, Account.Type.CHECKING);
             type_list_store.append (out type_list_store_iter);
-            type_list_store.set (type_list_store_iter, 0, _("Savings"), 1, Account.Type.SAVINGS);
+            type_list_store.set (type_list_store_iter, 0,
+                                _("Savings"), 1, Account.Type.SAVINGS);
 
             type_choice = new Gtk.ComboBox.with_model (type_list_store);
             type_choice.expand = true;
@@ -142,7 +115,50 @@ namespace Envelope.Dialog {
             desc_entry.expand = true;
             desc_entry.placeholder_text = _("Optional");
             grid.attach (desc_entry, 1, 4, 1, 1);
+            grid.show_all ();
+
+            create_button = new Gtk.Button.with_label (_("Create Account"));
+            cancel_button = new Gtk.Button.with_label (_("Cancel"));
+
+            create_button.sensitive = false;
+            create_button.get_style_context ()
+                        .add_class (Gtk.STYLE_CLASS_SUGGESTED_ACTION);
+
+            cancel_button.clicked.connect (() => {
+                this.destroy ();
+            });
+
+            create_button.clicked.connect (() => {
+                this.create_account ();
+                this.destroy ();
+            });
+
+            var action_area = (Gtk.Container) get_action_area ();
+            action_area.margin = 6;
+            action_area.margin_top = 14;
+            action_area.add (cancel_button);
+            action_area.add (create_button);
+            action_area.show_all ();
         }
 
+        [Version (deprecated = true, deprecated_since = "", replacement = "AccountManager.accout_created")]
+        public signal void account_created (Account account);
+
+        private void create_account () {
+            try {
+                var account = AccountManager.get_default ()
+                                            .create_account (number_entry.text,
+                                                            desc_entry.text,
+                                                            double.parse (balance_entry.text),
+                                                            current_account_type);
+
+                // show notification
+                Envelope.App.toast (_("Account %s has been created").printf(account.number));
+            } catch (ServiceError err) {
+                error ("error while creating account (%s)".printf (err.message));
+            } catch (AccountError err) {
+                error ("error while creating account (%s)".printf (err.message));
+            }
+        }
     }
 }

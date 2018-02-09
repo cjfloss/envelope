@@ -33,7 +33,7 @@ namespace Envelope.View {
             welcome.activated.connect ((index) => {
                 switch (index) {
                     case 0:
-                        var dialog = new AddAccountDialog ();
+                        var dialog = new AddAccountDialog ((Gtk.Window) this.get_toplevel ());
 
                         dialog.account_created.connect ((account) => {
                             dialog.destroy ();

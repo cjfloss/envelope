@@ -951,9 +951,9 @@ namespace Envelope.View {
 
                 switch (action) {
                     case Action.ADD_ACCOUNT:
-                        var dialog = new AddAccountDialog ();
+                        var dialog = new AddAccountDialog ((Gtk.Window) this.get_toplevel ());
                         dialog.account_created.connect (s_account_created);
-                        dialog.show_all ();
+                        dialog.present ();
                         break;
                     case Action.SHOW_OVERVIEW:
                         overview_selected ();
