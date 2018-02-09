@@ -16,15 +16,16 @@
 
 ## Introduction
 
-Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system).<br/>
-Designate spending categories (envelopes) and distribute your monthly income into them.<br/>
-Configure accounts where you record all your transactions, then assign each of them to a category.<br/>
+Envelope helps you maintain your personal budget by using the tried-and-true [envelope system](https://en.wikipedia.org/wiki/Envelope_system).
+
+Designate spending categories (envelopes) and distribute your monthly income into them.
+
+Configure accounts where you record all your transactions, then assign each of them to a category.
 
 ## Features
 
 * Envelope system budget workflow
 * Import transactions from QIF/OFX files
-* Integrates with the elementary OS desktop
 
 ## Installation
 
@@ -55,7 +56,7 @@ $ sudo ninja install
 
 Want to help? Just fork this repository, pick an issue and start hacking. Just follow the coding style and document your changes.
 
-You can donate to me via
+### Donate
 * `Bitcoin: 15zE9cUoe7m2zHjQFCYpHPG7moFB51ncTN`
 * `Dash: XhhutrX3rzQDcFY6cFDUdDo9ZDPngrv9Tk`
 * `Ethereum: 0xE77D57EA81E1c8Ad394366FfB32A2F556073A147`
