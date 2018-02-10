@@ -27,18 +27,18 @@ namespace Envelope.Tests.Service.Importer.QIF {
     }
 
     private string test_data_path (string filename) {
-        return Test.build_filename (Test.FileType.DIST, "data", filename);
+        return Test.build_filename (Test.FileType.DIST, ".", filename);
     }
 }
 
 void main (string[] args) {
     Test.init (ref args);
 
-    Test.add_func ("/envelope/service/importer/qif/success",
-        Envelope.Tests.Service.Importer.QIF.test_import_success);
-
     Test.add_func ("/envelope/service/importer/qif/file_not_found",
         Envelope.Tests.Service.Importer.QIF.test_import_file_not_found);
+
+    Test.add_func ("/envelope/service/importer/qif/success",
+        Envelope.Tests.Service.Importer.QIF.test_import_success);
 
     Test.run ();
 }
