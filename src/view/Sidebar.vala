@@ -149,6 +149,8 @@ namespace Envelope.View {
             vexpand = true;
             vexpand_set = true;
 
+            width_request = 250;
+
             treeview = new Gtk.TreeView ();
             treeview.set_headers_visible (false);
             treeview.show_expanders = false;

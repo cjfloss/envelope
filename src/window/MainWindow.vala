@@ -142,6 +142,7 @@ namespace Envelope.Window {
 
             // sidebar
             sidebar = Sidebar.get_default ();
+            
 
             Gee.Collection<Account> accounts;
 
@@ -192,8 +193,7 @@ namespace Envelope.Window {
 
         private void configure_window () {
             // configure window
-            width_request = 1200;
-            height_request = 800;
+            set_default_size (1200, 720);
 
             debug ("restoring saved application state");
 
@@ -327,7 +327,7 @@ namespace Envelope.Window {
 
                     // show sidebar if it was not there yet
                     if (paned.get_child1 () == null) {
-                        paned.pack1 (Sidebar.get_default (), true, false);
+                        paned.pack1 (Sidebar.get_default (), false, false);
                     }
                 } else if (widget is AccountWelcomeScreen) {
                     header_bar.title = null;
@@ -335,7 +335,7 @@ namespace Envelope.Window {
                     add_transaction_button.show ();
 
                     if (paned.get_child1 () == null) {
-                        paned.pack1 (Sidebar.get_default (), true, false);
+                        paned.pack1 (Sidebar.get_default (), false, false);
                     }
                 } else if (widget is BudgetOverview) {
                     header_bar.title = null;
@@ -371,7 +371,7 @@ namespace Envelope.Window {
 
             account_manager.account_created.connect ( () => {
                 if (paned.get_child1 () == null) {
-                    paned.pack1 (sidebar, true, false);
+                    paned.pack1 (sidebar, false, false);
                 }
 
                 sidebar.show_all ();
@@ -391,7 +391,7 @@ namespace Envelope.Window {
 
             if (widget != Welcome.get_default ()) {
                 if (paned.get_child1 () == null) {
-                    paned.pack1 (sidebar, true, false);
+                    paned.pack1 (sidebar, false, false);
                 }
             } else {
                 search_entry.hide ();
