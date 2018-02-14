@@ -48,6 +48,22 @@
     <update_contact>https://github.com/cjfloss/envelope/issues</update_contact>
 
     <releases>
+        <release version="0.0.3" date="2018-02-13" urgency="high">
+            <description>
+                <p>New</p>
+                <ul>
+                    <li>Improved add account Dialog</li>
+                    <li>Improved add category Dialog</li>
+                </ul>
+                <p>Fix</p>
+                <ul>
+                    <li>Fix crash while adding second account</li>
+                    <li>Allow resizing window</li>
+                    <li>Add unit tests</li>
+                    <li>Add corrent version to the binary</li>
+                </ul>
+            ​</description>
+        </release>
         <release version="0.0.2" date="2018-02-03" urgency="high">
             <description>
                 <p>Fixed some glitches</p>

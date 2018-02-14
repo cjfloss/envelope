@@ -70,7 +70,7 @@ namespace Envelope.Dialog {
             grid.attach (amount_label, 1, 2, 1, 1);
 
             amount_entry = new Gtk.Entry ();
-            amount_entry.placeholder_text = _("Monthly Budget for");
+            amount_entry.placeholder_text = _("Monthly budget for category");
             grid.attach (amount_entry, 2, 2, 2, 1);
 
             create_button = new Gtk.Button.with_label (_("Create Category"));

@@ -1,6 +1,6 @@
 app_name = meson.project_name()
-version = '0.0.2'
-release_name = 'beta'
+version = '0.0.3'
+release_name = 'release'
 
 prefix = get_option('prefix')
 datadir = join_paths(prefix, get_option('datadir'))
@@ -12,9 +12,9 @@ if find_program('git', required : false).found()
     git_commit_hash = GIT_COMMIT_HASH.stdout().strip()
     version_info = 'git-' + git_branch + '-' + git_commit_hash
 else
-    git_branch = 'master'
-    git_commit_hash = 'release'
-    version_info = 'beta'
+    git_branch = 'no git'
+    git_commit_hash = 'no git'
+    version_info = release_name
 endif
 
 config = configuration_data()
@@ -63,7 +63,6 @@ executable(
     'view/FilterView.vala',
     'view/CategoryProperties.vala',
 
-    'dialog/AbstractDialog.vala',
     'dialog/AddAccountDialog.vala',
     'dialog/AddCategoryDialog.vala',
     'dialog/ImportTransactionsDialog.vala',
