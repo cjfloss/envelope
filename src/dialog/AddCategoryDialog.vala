@@ -20,63 +20,94 @@ using Envelope.Service;
 using Envelope.Util.String;
 
 namespace Envelope.Dialog {
-    public class AddCategoryDialog : AbstractOkCancelDialog {
+    public class AddCategoryDialog : Gtk.Dialog {
         private Gtk.Entry name_entry;
         private Gtk.Entry amount_entry;
+        private Gtk.Button create_button;
+        private Gtk.Button cancel_button;
 
-        public AddCategoryDialog () {
-            base ();
+        public AddCategoryDialog (Gtk.Window parent) {
+            Object (transient_for: parent);
         }
 
-        protected override Gtk.Widget build_content () {
-            ok_button.sensitive = false;
+        construct {
+            deletable = false;
+            modal = true;
+            resizable= false;
+            width_request = 300;
+            window_position = Gtk.WindowPosition.CENTER_ON_PARENT;
 
             var grid = new Gtk.Grid ();
-            grid.row_spacing = 10;
-            grid.column_spacing = 20;
+            get_content_area ().add (grid);
 
-            grid.show_all ();
+            grid.margin_start = grid.margin_end = 12;
+            grid.row_spacing = grid.column_spacing = 12;
+            grid.orientation = Gtk.Orientation.VERTICAL;
+            grid.valign = Gtk.Align.CENTER;
+            grid.vexpand = true;
 
             var name_label = new Gtk.Label (_("Name:"));
             name_label.xalign = 1.0f;
-            grid.attach_next_to (name_label, null, Gtk.PositionType.LEFT, 1, 1);
+            grid.attach (name_label, 1, 1, 1, 1);
 
             name_entry = new Gtk.Entry ();
             name_entry.placeholder_text = _("Category name");
-            grid.attach_next_to (name_entry, name_label, Gtk.PositionType.RIGHT, 1, 1);
+            name_entry.expand = true;
+            name_entry.key_release_event.connect (() => {
+                if (name_entry.get_text () == "") {
+                    create_button.sensitive = false;
+                } else {
+                    create_button.sensitive = true;
+                    amount_entry.placeholder_text = _("Monthly Budget for %s")
+                        .printf(name_entry.get_text ());
+                }
+            });
 
-            var amount_label = new Gtk.Label (_("Budgeted amount:"));
+            grid.attach (name_entry, 2, 1, 2, 1);
+
+            var amount_label = new Gtk.Label (_("Budget:"));
             amount_label.xalign = 1.0f;
-            grid.attach_next_to (amount_label, name_label, Gtk.PositionType.BOTTOM, 1, 1);
+            grid.attach (amount_label, 1, 2, 1, 1);
 
             amount_entry = new Gtk.Entry ();
-            amount_entry.placeholder_text = _("Eg: 200");
-            grid.attach_next_to (amount_entry, amount_label, Gtk.PositionType.RIGHT, 1, 1);
+            amount_entry.placeholder_text = _("Monthly Budget for");
+            grid.attach (amount_entry, 2, 2, 2, 1);
 
-            return grid;
+            create_button = new Gtk.Button.with_label (_("Create Category"));
+            create_button.sensitive = false;
+            create_button.get_style_context ()
+                                .add_class (Gtk.STYLE_CLASS_SUGGESTED_ACTION);
+            create_button.clicked.connect (() => {
+                this.create_category ();
+                this.destroy ();
+            });
+
+            cancel_button = new Gtk.Button.with_label (_("Cancel"));
+            cancel_button.clicked.connect (() => {
+                this.destroy ();
+            });
+
+            var action_area = (Gtk.Container) get_action_area ();
+            action_area.margin = 6;
+            action_area.margin_top = 14;
+            action_area.add (cancel_button);
+            action_area.add (create_button);
+            action_area.show_all ();
+
+            grid.show_all ();
         }
 
-        protected override void connect_signals () {
-            base.connect_signals ();
-            name_entry.changed.connect (validate_input);
-            amount_entry.changed.connect (validate_input);
-        }
-
-        private void validate_input () {
-            ok_button.sensitive = name_entry.text.length > 0;
-        }
-
-        protected override void apply_cb () {
+        private void create_category () {
             try {
                 BudgetManager.get_default ()
-                    .create_category (name_entry.text.strip (), parse_currency (amount_entry.text.strip ()));
+                    .create_category (name_entry.text.strip (),
+                                    parse_currency (amount_entry.text.strip ())
+                                    );
             } catch (ParseError err) {
                 error ("could not create category %s (%s)", name_entry.text, err.message);
             } catch (ServiceError err) {
                 error ("could not create category %s (%s)", name_entry.text, err.message);
             }
         }
-
-        protected override void cancel_cb () { }
     }
 }

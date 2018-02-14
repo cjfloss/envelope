@@ -98,7 +98,7 @@ namespace Envelope.Dialog {
                 current_account_type = Account.Type.from_int (account_type);
             });
 
-            var balance_label = new Gtk.Label (_("Current balance:"));
+            var balance_label = new Gtk.Label (_("Balance:"));
             balance_label.xalign = 1f;
             grid.attach (balance_label, 0, 3, 1, 1);
 

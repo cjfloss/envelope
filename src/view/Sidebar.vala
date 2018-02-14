@@ -965,8 +965,8 @@ namespace Envelope.View {
                         break;
                     case Action.ADD_CATEGORY:
                         // TODO add new category
-                        var dialog = new AddCategoryDialog ();
-                        dialog.show_all ();
+                        var dialog = new AddCategoryDialog ((Gtk.Window) this.get_toplevel ());
+                        dialog.present ();
                         break;
                     case Action.NONE:
                         break;
