@@ -60,7 +60,7 @@
                     <li>Fix crash while adding second account</li>
                     <li>Allow resizing window</li>
                     <li>Add unit tests</li>
-                    <li>Add corrent version to the binary</li>
+                    <li>Add current version to the binary</li>
                 </ul>
             ​</description>
         </release>

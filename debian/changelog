@@ -7,6 +7,6 @@ com.github.cjfloss.envelope (0.0.3) trusty; urgency=high
   * Fix crash while adding second account
   * Allow resizing window
   * Add unit tests
-  * Add corrent version to the binary
+  * Add current version to the binary
 
  -- Cleiton Floss <cleitonfloss@gmail.com>  Tue, 13 Feb 2018 00:00:00 -0300
