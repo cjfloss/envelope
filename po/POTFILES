@@ -6,7 +6,6 @@ src/view/AccountWelcomeScreen.vala
 src/view/BudgetOverview.vala
 src/view/FilterView.vala
 src/view/CategoryProperties.vala
-src/dialog/AbstractDialog.vala
 src/dialog/AddAccountDialog.vala
 src/dialog/AddCategoryDialog.vala
 src/dialog/ImportTransactionsDialog.vala
