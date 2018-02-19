@@ -84,7 +84,7 @@ msgstr "Data"
 
 #: src/view/TransactionView.vala:551
 msgid "Merchant"
-msgstr "Klient"
+msgstr "Podmiot"
 
 #: src/view/TransactionView.vala:564
 msgid "Category"
@@ -212,7 +212,7 @@ msgstr "Wydawaj! Zarabiaj!"
 
 #: src/view/AccountWelcomeScreen.vala:41
 msgid "There are currently no transactions in this account"
-msgstr "Aktualnie braj transakcji dla tego konta"
+msgstr "Aktualnie brak transakcji dla tego konta"
 
 #: src/view/AccountWelcomeScreen.vala:47
 msgid "Record a transaction"
