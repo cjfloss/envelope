@@ -21,363 +21,363 @@ msgstr ""
 #. create default categories
 #: src/database/Database.vala:941
 msgid "Groceries"
-msgstr ""
+msgstr "Pożywienie"
 
 #: src/database/Database.vala:942
 msgid "Fuel"
-msgstr ""
+msgstr "Paliwo"
 
 #: src/database/Database.vala:943
 msgid "Public transit"
-msgstr ""
+msgstr "Transport publiczny"
 
 #: src/database/Database.vala:944
 msgid "Restaurants"
-msgstr ""
+msgstr "Restauracje"
 
 #: src/database/Database.vala:945
 msgid "Entertainment"
-msgstr ""
+msgstr "Rozrywka"
 
 #: src/database/Database.vala:946 src/dialog/AddAccountDialog.vala:80
 msgid "Savings"
-msgstr ""
+msgstr "Oszczędności"
 
 #: src/database/Database.vala:947
 msgid "Personal care"
-msgstr ""
+msgstr "Higienia osobista"
 
 #: src/database/Database.vala:948
 msgid "Alcohol & Bars"
-msgstr ""
+msgstr "Alkohol i bary"
 
 #: src/database/Database.vala:949
 msgid "Emergency fund"
-msgstr ""
+msgstr "Na czarną godzinę"
 
 #. OK button
 #: src/view/TransactionView.vala:184 src/view/TransactionView.vala:889
 #: src/view/CategoryProperties.vala:144
 msgid "Apply"
-msgstr ""
+msgstr "Zatwierdź"
 
 #: src/view/TransactionView.vala:195 src/view/TransactionView.vala:341
 #: src/view/TransactionView.vala:905 src/view/TransactionView.vala:923
 msgid "Add transaction"
-msgstr ""
+msgstr "Dodaj transakcję"
 
 #: src/view/TransactionView.vala:318
 msgid "No results."
-msgstr ""
+msgstr "Brak wyników"
 
 #. Cancel button
 #: src/view/TransactionView.vala:345 src/view/CategoryProperties.vala:140
 #: src/dialog/AddAccountDialog.vala:121 src/dialog/AddCategoryDialog.vala:85
 #: src/widget/CellRendererCategoryPicker.vala:87
 msgid "Cancel"
-msgstr ""
+msgstr "Anuluj"
 
 #. columns
 #: src/view/TransactionView.vala:538
 msgid "Date"
-msgstr ""
+msgstr "Data"
 
 #: src/view/TransactionView.vala:551
 msgid "Merchant"
-msgstr ""
+msgstr "Klient"
 
 #: src/view/TransactionView.vala:564
 msgid "Category"
-msgstr ""
+msgstr "Kategoria"
 
 #: src/view/TransactionView.vala:577
 #, c-format
 msgid "Outflow (%s)"
-msgstr ""
+msgstr "Wydatek (%s)"
 
 #: src/view/TransactionView.vala:590
 #, c-format
 msgid "Inflow (%s)"
-msgstr ""
+msgstr "Przychód (%s)"
 
 #: src/view/TransactionView.vala:603
 msgid "Memo"
-msgstr ""
+msgstr "Notatka"
 
 #. right-click menu
 #: src/view/TransactionView.vala:618
 msgid "Split"
-msgstr ""
+msgstr "Podziel"
 
 #. right-click menu
 #: src/view/TransactionView.vala:620 src/view/Sidebar.vala:236
 msgid "Remove"
-msgstr ""
+msgstr "Usuń"
 
 #: src/view/TransactionView.vala:951
 msgid "Transaction removed"
-msgstr ""
+msgstr "Transakcja usunięta"
 
 #: src/view/Sidebar.vala:278
 #, c-format
 msgid "Budget overview for %s"
-msgstr ""
+msgstr "Przegląd budżetu dla %s"
 
 #: src/view/Sidebar.vala:282
 msgid "Spending this month"
-msgstr ""
+msgstr "Wydano w tym miesiącu"
 
 #: src/view/Sidebar.vala:291
 #, c-format
 msgid "Money spent in %s"
-msgstr ""
+msgstr "Pieniądze wydane w %s"
 
 #: src/view/Sidebar.vala:294
 msgid "Income this month"
-msgstr ""
+msgstr "Przychód w tym miesiącu"
 
 #: src/view/Sidebar.vala:303
 #, c-format
 msgid "Money earned in %s"
-msgstr ""
+msgstr "Pieniądze zarobione w %s"
 
 #. remaining
 #: src/view/Sidebar.vala:306 src/view/CategoryProperties.vala:125
 msgid "Remaining"
-msgstr ""
+msgstr "Pozostało"
 
 #: src/view/Sidebar.vala:315
 #, c-format
 msgid "Remaining balance for %s"
-msgstr ""
+msgstr "Pozostały bilans dla %s"
 
 #. Add "Accounts" category header
 #: src/view/Sidebar.vala:319
 msgid "Accounts"
-msgstr ""
+msgstr "Konta"
 
 #. Add "Add account..."
 #: src/view/Sidebar.vala:344
 msgid "Add account…"
-msgstr ""
+msgstr "Dodaj konto…"
 
 #: src/view/Sidebar.vala:353
 msgid "Add a new account"
-msgstr ""
+msgstr "Dodaj nowe konto"
 
 #. Add "Categories" category header
 #: src/view/Sidebar.vala:357
 msgid "Spending categories"
-msgstr ""
+msgstr "Kategorie wydatków"
 
 #. Add "Uncategorized"
 #: src/view/Sidebar.vala:464 src/window/MainWindow.vala:285
 msgid "Uncategorized"
-msgstr ""
+msgstr "Nieskategoryzowane"
 
 #. Add category...
 #: src/view/Sidebar.vala:493
 msgid "Add category…"
-msgstr ""
+msgstr "Dodaj kategorię…"
 
 #: src/view/Sidebar.vala:494
 msgid "Add a new spending category"
-msgstr ""
+msgstr "Dodaj nową kategorię wydatkową"
 
 #: src/view/Sidebar.vala:749
 msgid "None yet"
-msgstr ""
+msgstr "Jeszcze nic nie ma"
 
 #: src/view/Sidebar.vala:1127
 #, c-format
 msgid "Category %s removed"
-msgstr ""
+msgstr "Kategoria %s usunięta"
 
 #: src/view/Sidebar.vala:1138
 #, c-format
 msgid "Account %s removed"
-msgstr ""
+msgstr "Konto %s usunięte"
 
 #: src/view/WelcomeScreen.vala:28
 msgid "Add an account"
-msgstr ""
+msgstr "Dodaj konto"
 
 #: src/view/WelcomeScreen.vala:29
 msgid "You have not configured any account yet"
-msgstr ""
+msgstr "Nie skonfigurowałeś jeszcze żadnego konta"
 
 #: src/view/AccountWelcomeScreen.vala:41
 msgid "Spend! Get paid!"
-msgstr ""
+msgstr "Wydawaj! Zarabiaj!"
 
 #: src/view/AccountWelcomeScreen.vala:41
 msgid "There are currently no transactions in this account"
-msgstr ""
+msgstr "Aktualnie braj transakcji dla tego konta"
 
 #: src/view/AccountWelcomeScreen.vala:47
 msgid "Record a transaction"
-msgstr ""
+msgstr "Zanotuj transakcję"
 
 #: src/view/AccountWelcomeScreen.vala:48
 msgid "Record a fresh new transaction for this account. Or, plan a future one!"
-msgstr ""
+msgstr "Zanotuj nową transakcję dla tego konta, lub zaplanuj nową na przyszłość!"
 
 #. import button
 #: src/view/AccountWelcomeScreen.vala:50 src/window/MainWindow.vala:105
 msgid "Import transactions"
-msgstr ""
+msgstr "Importuj transakcje"
 
 #: src/view/AccountWelcomeScreen.vala:51
 msgid "Import from a QIF file obtained from another application"
-msgstr ""
+msgstr "Importuj z pliku QIF z innej aplikacji"
 
 #. set_class (summary_container, Granite.StyleClass.CONTENT_VIEW);
 #: src/view/BudgetOverview.vala:93
 msgid "Your budget right now:"
-msgstr ""
+msgstr "Twój aktualny budżet:"
 
 #: src/view/BudgetOverview.vala:105
 msgid "Inflow:"
-msgstr ""
+msgstr "Przychód:"
 
 #: src/view/BudgetOverview.vala:117
 msgid "Outflow:"
-msgstr ""
+msgstr "Wydatki:"
 
 #: src/view/BudgetOverview.vala:129
 msgid "Remaining this month:"
-msgstr ""
+msgstr "Pozostałe w tym miesiącu:"
 
 #. this month
 #: src/view/FilterView.vala:82
 msgid "This month"
-msgstr ""
+msgstr "Ten miesiąc"
 
 #. last month
 #: src/view/FilterView.vala:86
 msgid "Last month"
-msgstr ""
+msgstr "Ostatni miesiąc"
 
 #. future
 #: src/view/FilterView.vala:90
 msgid "Future"
-msgstr ""
+msgstr "Przyszłość"
 
 #. manual dates
 #: src/view/FilterView.vala:94
 msgid "Pick dates:"
-msgstr ""
+msgstr "Wybierz datę:"
 
 #. column_homogeneous = true;
 #. title
 #: src/view/CategoryProperties.vala:77
 msgid "Edit category"
-msgstr ""
+msgstr "Edytuj kategorię"
 
 #. category name text entry
 #: src/view/CategoryProperties.vala:82
 msgid "Name"
-msgstr ""
+msgstr "Nazwa"
 
 #. budgeted amount
 #: src/view/CategoryProperties.vala:92
 msgid "Budget"
-msgstr ""
+msgstr "Budżet"
 
 #: src/view/CategoryProperties.vala:99
 msgid "Monthly budget"
-msgstr ""
+msgstr "Budżet miesięczny"
 
 #. outflow
 #: src/view/CategoryProperties.vala:107
 msgid "Outflow"
-msgstr ""
+msgstr "Wydatek"
 
 #. inflow
 #: src/view/CategoryProperties.vala:116
 msgid "Inflow"
-msgstr ""
+msgstr "Przychód"
 
 #: src/dialog/AddAccountDialog.vala:59
 msgid "Eg.: account number"
-msgstr ""
+msgstr "Np.: numer konta"
 
 #: src/dialog/AddAccountDialog.vala:77
 msgid "Checking"
-msgstr ""
+msgstr "Sprawdzam"
 
 #: src/dialog/AddAccountDialog.vala:101
 msgid "Balance:"
-msgstr ""
+msgstr "Bilans:"
 
 #: src/dialog/AddAccountDialog.vala:110
 msgid "Description:"
-msgstr ""
+msgstr "Opis:"
 
 #: src/dialog/AddAccountDialog.vala:116
 msgid "Optional"
-msgstr ""
+msgstr "Opcjonalnie"
 
 #: src/dialog/AddAccountDialog.vala:120
 msgid "Create Account"
-msgstr ""
+msgstr "Utwórz konto"
 
 #. show notification
 #: src/dialog/AddAccountDialog.vala:156
 #, c-format
 msgid "Account %s has been created"
-msgstr ""
+msgstr "Konto %s zostało utworzone"
 
 #: src/dialog/AddCategoryDialog.vala:49
 msgid "Name:"
-msgstr ""
+msgstr "Nazwa:"
 
 #: src/dialog/AddCategoryDialog.vala:54
 #: src/widget/CellRendererCategoryPicker.vala:77
 msgid "Category name"
-msgstr ""
+msgstr "Nazwa kategorii"
 
 #: src/dialog/AddCategoryDialog.vala:61
 #, c-format
 msgid "Monthly Budget for %s"
-msgstr ""
+msgstr "Miesięczny budżet dla %s"
 
 #: src/dialog/AddCategoryDialog.vala:68
 msgid "Budget:"
-msgstr ""
+msgstr "Budżet:"
 
 #: src/dialog/AddCategoryDialog.vala:73
 msgid "Monthly budget for category"
-msgstr ""
+msgstr "Miesięczny budżet dla kategorii"
 
 #: src/dialog/AddCategoryDialog.vala:76
 msgid "Create Category"
-msgstr ""
+msgstr "Utwórz kategorię"
 
 #: src/dialog/ImportTransactionsDialog.vala:25
 msgid "Import transactions from file"
-msgstr ""
+msgstr "Importuj transakcje z pliku"
 
 #: src/dialog/ImportTransactionsDialog.vala:67
 #, c-format
 msgid "%d transactions imported in account %s"
-msgstr ""
+msgstr "Zaimportowano %d transakcji dla konta %s"
 
 #. apply to all
 #: src/widget/CellRendererCategoryPicker.vala:44
 #: src/widget/CellRendererCategoryPicker.vala:82
 #, c-format
 msgid "Apply to all %s"
-msgstr ""
+msgstr "Zastosuj dla wszystkich %s"
 
 #. OK button
 #: src/widget/CellRendererCategoryPicker.vala:91
 msgid "Set category"
-msgstr ""
+msgstr "Ustaw kategorię"
 
 #: src/window/MainWindow.vala:88
 msgid "Export…"
-msgstr ""
+msgstr "Eksportuj…"
 
 #. export button
 #. export_button = new Gtk.Button.from_icon_name ("document-export", Gtk.IconSize.LARGE_TOOLBAR);
@@ -386,27 +386,27 @@ msgstr ""
 #. add transaction button
 #: src/window/MainWindow.vala:115
 msgid "Record transaction"
-msgstr ""
+msgstr "Zanotuj transakcję"
 
 #: src/window/MainWindow.vala:121
 msgid "Search transactions…"
-msgstr ""
+msgstr "Szukaj transakcji…"
 
 #: src/window/MainWindow.vala:290
 #, c-format
 msgid "Search in %s"
-msgstr ""
+msgstr "Szukaj w %s"
 
 #. uncategorized
 #: src/window/MainWindow.vala:292
 msgid "Search uncategorized"
-msgstr ""
+msgstr "Szukaj nieskategoryzowanych"
 
 #: src/window/MainWindow.vala:369
 msgid "Transaction recorded"
-msgstr ""
+msgstr "Transakcja zanotowana"
 
 #: src/window/MainWindow.vala:415
 #, c-format
 msgid "Transactions in %s"
-msgstr ""
+msgstr "Transakcji w %s"
