@@ -23,13 +23,11 @@ namespace Envelope.Dialog {
     public class ImportTransactionsDialog : Gtk.FileChooserDialog {
         public ImportTransactionsDialog () {
             Object (title: _("Import transactions from file"),
-                parent: Envelope.App.get_default ().main_window,
+                transient_for: (Gtk.Window) Envelope.App.get_default ().main_window.get_toplevel (),
                 action: Gtk.FileChooserAction.OPEN);
-
-            build_ui ();
         }
 
-        private void build_ui () {
+        construct {
             add_button ("_Cancel", Gtk.ResponseType.CANCEL);
             add_button ("_Open", Gtk.ResponseType.ACCEPT);
 
@@ -53,6 +51,7 @@ namespace Envelope.Dialog {
         // call this instead of run ()
         public void execute () {
             var response = run ();
+            debug ("import dialog returned with %d", response);
 
             switch (response) {
                 case Gtk.ResponseType.ACCEPT:
@@ -76,6 +75,7 @@ namespace Envelope.Dialog {
                     break;
                 case Gtk.ResponseType.CANCEL:
                 case Gtk.ResponseType.CLOSE:
+                case Gtk.ResponseType.DELETE_EVENT:
                     close ();
                     break;
                 default:
