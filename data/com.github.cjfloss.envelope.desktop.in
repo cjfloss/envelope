@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Envelope
 Comment=Manage your budget
+Comment[pl]=Zarządzaj swoim budżetem
 Keywords=Budget;Money;
 GenericName=Personal budget manager
 Exec=com.github.cjfloss.envelope
