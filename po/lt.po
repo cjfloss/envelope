@@ -1,383 +1,383 @@
-# Lithuanian translations for com.github.cjfloss.envelope package.
-# Copyright (C) 2018 THE com.github.cjfloss.envelope'S COPYRIGHT HOLDER
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the com.github.cjfloss.envelope package.
-# Automatically generated, 2018.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: com.github.cjfloss.envelope\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-15 12:37-0300\n"
-"PO-Revision-Date: 2018-02-15 12:37-0300\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
-"Language: lt\n"
+"POT-Creation-Date: 2018-03-25 17:33+0300\n"
+"PO-Revision-Date: 2018-06-12 12:13+0300\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
-"%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"Last-Translator: Moo\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language: lt\n"
 
 #. create default categories
 #: src/database/Database.vala:941
 msgid "Groceries"
-msgstr ""
+msgstr "Maisto prekės"
 
 #: src/database/Database.vala:942
 msgid "Fuel"
-msgstr ""
+msgstr "Degalai"
 
 #: src/database/Database.vala:943
 msgid "Public transit"
-msgstr ""
+msgstr "Viešasis transportas"
 
 #: src/database/Database.vala:944
 msgid "Restaurants"
-msgstr ""
+msgstr "Restoranai"
 
 #: src/database/Database.vala:945
 msgid "Entertainment"
-msgstr ""
+msgstr "Pramogos"
 
 #: src/database/Database.vala:946 src/dialog/AddAccountDialog.vala:80
 msgid "Savings"
-msgstr ""
+msgstr "Santaupos"
 
 #: src/database/Database.vala:947
 msgid "Personal care"
-msgstr ""
+msgstr "Asmeninė higiena"
 
 #: src/database/Database.vala:948
 msgid "Alcohol & Bars"
-msgstr ""
+msgstr "Alkoholis ir barai"
 
 #: src/database/Database.vala:949
 msgid "Emergency fund"
-msgstr ""
+msgstr "Nenumatytų išlaidų fondas"
 
 #. OK button
 #: src/view/TransactionView.vala:184 src/view/TransactionView.vala:889
 #: src/view/CategoryProperties.vala:144
 msgid "Apply"
-msgstr ""
+msgstr "Taikyti"
 
 #: src/view/TransactionView.vala:195 src/view/TransactionView.vala:341
 #: src/view/TransactionView.vala:905 src/view/TransactionView.vala:923
 msgid "Add transaction"
-msgstr ""
+msgstr "Pridėti operaciją"
 
 #: src/view/TransactionView.vala:318
 msgid "No results."
-msgstr ""
+msgstr "Rezultatų nėra."
 
 #. Cancel button
 #: src/view/TransactionView.vala:345 src/view/CategoryProperties.vala:140
 #: src/dialog/AddAccountDialog.vala:121 src/dialog/AddCategoryDialog.vala:85
 #: src/widget/CellRendererCategoryPicker.vala:87
 msgid "Cancel"
-msgstr ""
+msgstr "Atsisakyti"
 
 #. columns
 #: src/view/TransactionView.vala:538
 msgid "Date"
-msgstr ""
+msgstr "Data"
 
 #: src/view/TransactionView.vala:551
 msgid "Merchant"
-msgstr ""
+msgstr "Subjektas"
 
 #: src/view/TransactionView.vala:564
 msgid "Category"
-msgstr ""
+msgstr "Kategorija"
 
 #: src/view/TransactionView.vala:577
 #, c-format
 msgid "Outflow (%s)"
-msgstr ""
+msgstr "Išplaukos (%s)"
 
 #: src/view/TransactionView.vala:590
 #, c-format
 msgid "Inflow (%s)"
-msgstr ""
+msgstr "Įplaukos (%s)"
 
 #: src/view/TransactionView.vala:603
 msgid "Memo"
-msgstr ""
+msgstr "Pastabos"
 
 #. right-click menu
 #: src/view/TransactionView.vala:618
 msgid "Split"
-msgstr ""
+msgstr "Skaidyti"
 
 #. right-click menu
 #: src/view/TransactionView.vala:620 src/view/Sidebar.vala:236
 msgid "Remove"
-msgstr ""
+msgstr "Šalinti"
 
 #: src/view/TransactionView.vala:951
 msgid "Transaction removed"
-msgstr ""
+msgstr "Operacija pašalinta"
 
 #: src/view/Sidebar.vala:278
 #, c-format
 msgid "Budget overview for %s"
-msgstr ""
+msgstr "%s biudžeto apžvalga"
 
 #: src/view/Sidebar.vala:282
 msgid "Spending this month"
-msgstr ""
+msgstr "Išlaidos šį mėnesį"
 
 #: src/view/Sidebar.vala:291
 #, c-format
 msgid "Money spent in %s"
-msgstr ""
+msgstr "Per %s išleisti pinigai"
 
 #: src/view/Sidebar.vala:294
 msgid "Income this month"
-msgstr ""
+msgstr "Pajamos šį mėnesį"
 
 #: src/view/Sidebar.vala:303
 #, c-format
 msgid "Money earned in %s"
-msgstr ""
+msgstr "Per %s uždirbti pinigai"
 
 #. remaining
 #: src/view/Sidebar.vala:306 src/view/CategoryProperties.vala:125
 msgid "Remaining"
-msgstr ""
+msgstr "Liko"
 
 #: src/view/Sidebar.vala:315
 #, c-format
 msgid "Remaining balance for %s"
-msgstr ""
+msgstr "Likęs %s likutis"
 
 #. Add "Accounts" category header
 #: src/view/Sidebar.vala:319
 msgid "Accounts"
-msgstr ""
+msgstr "Paskyros"
 
 #. Add "Add account..."
 #: src/view/Sidebar.vala:344
 msgid "Add account…"
-msgstr ""
+msgstr "Pridėti paskyrą…"
 
 #: src/view/Sidebar.vala:353
 msgid "Add a new account"
-msgstr ""
+msgstr "Pridėti naują paskyrą"
 
 #. Add "Categories" category header
 #: src/view/Sidebar.vala:357
 msgid "Spending categories"
-msgstr ""
+msgstr "Išlaidų kategorijos"
 
 #. Add "Uncategorized"
 #: src/view/Sidebar.vala:464 src/window/MainWindow.vala:285
 msgid "Uncategorized"
-msgstr ""
+msgstr "Be kategorijos"
 
 #. Add category...
 #: src/view/Sidebar.vala:493
 msgid "Add category…"
-msgstr ""
+msgstr "Pridėti kategoriją…"
 
 #: src/view/Sidebar.vala:494
 msgid "Add a new spending category"
-msgstr ""
+msgstr "Pridėti naują išlaidų kategoriją"
 
 #: src/view/Sidebar.vala:749
 msgid "None yet"
-msgstr ""
+msgstr "Kol kas nėra"
 
 #: src/view/Sidebar.vala:1127
 #, c-format
 msgid "Category %s removed"
-msgstr ""
+msgstr "Kategorija %s pašalinta"
 
 #: src/view/Sidebar.vala:1138
 #, c-format
 msgid "Account %s removed"
-msgstr ""
+msgstr "Paskyra %s pašalinta"
 
 #: src/view/WelcomeScreen.vala:28
 msgid "Add an account"
-msgstr ""
+msgstr "Pridėti paskyrą"
 
 #: src/view/WelcomeScreen.vala:29
 msgid "You have not configured any account yet"
-msgstr ""
+msgstr "Kol kas nesate sukonfigūravę jokios paskyros"
 
 #: src/view/AccountWelcomeScreen.vala:41
 msgid "Spend! Get paid!"
-msgstr ""
+msgstr "Išleiskite! Užsidirbkite!"
 
 #: src/view/AccountWelcomeScreen.vala:41
 msgid "There are currently no transactions in this account"
-msgstr ""
+msgstr "Šiuo metu šioje paskyroje nėra jokių operacijų"
 
 #: src/view/AccountWelcomeScreen.vala:47
 msgid "Record a transaction"
-msgstr ""
+msgstr "Įrašyti operacija"
 
 #: src/view/AccountWelcomeScreen.vala:48
 msgid "Record a fresh new transaction for this account. Or, plan a future one!"
-msgstr ""
+msgstr "Įrašykite naują operaciją šiai paskyrai. Arba suplanuokite ateities operaciją!"
 
 #. import button
 #: src/view/AccountWelcomeScreen.vala:50 src/window/MainWindow.vala:105
 msgid "Import transactions"
-msgstr ""
+msgstr "Importuoti operacijas"
 
 #: src/view/AccountWelcomeScreen.vala:51
 msgid "Import from a QIF file obtained from another application"
-msgstr ""
+msgstr "Importuoti iš QIF failo, gauto iš kitos programos"
 
 #. set_class (summary_container, Granite.StyleClass.CONTENT_VIEW);
 #: src/view/BudgetOverview.vala:93
 msgid "Your budget right now:"
-msgstr ""
+msgstr "Jūsų biudžetas šiuo metu:"
 
 #: src/view/BudgetOverview.vala:105
 msgid "Inflow:"
-msgstr ""
+msgstr "Įplaukos:"
 
 #: src/view/BudgetOverview.vala:117
 msgid "Outflow:"
-msgstr ""
+msgstr "Išplaukos:"
 
 #: src/view/BudgetOverview.vala:129
 msgid "Remaining this month:"
-msgstr ""
+msgstr "Liko šį mėnesį:"
 
 #. this month
 #: src/view/FilterView.vala:82
 msgid "This month"
-msgstr ""
+msgstr "Šis mėnuo"
 
 #. last month
 #: src/view/FilterView.vala:86
 msgid "Last month"
-msgstr ""
+msgstr "Praeitas mėnuo"
 
 #. future
 #: src/view/FilterView.vala:90
 msgid "Future"
-msgstr ""
+msgstr "Ateitis"
 
 #. manual dates
 #: src/view/FilterView.vala:94
 msgid "Pick dates:"
-msgstr ""
+msgstr "Pasirinkti datas:"
 
 #. column_homogeneous = true;
 #. title
 #: src/view/CategoryProperties.vala:77
 msgid "Edit category"
-msgstr ""
+msgstr "Taisyti kategoriją"
 
 #. category name text entry
 #: src/view/CategoryProperties.vala:82
 msgid "Name"
-msgstr ""
+msgstr "Pavadinimas"
 
 #. budgeted amount
 #: src/view/CategoryProperties.vala:92
 msgid "Budget"
-msgstr ""
+msgstr "Biudžetas"
 
 #: src/view/CategoryProperties.vala:99
 msgid "Monthly budget"
-msgstr ""
+msgstr "Mėnesinis biudžetas"
 
 #. outflow
 #: src/view/CategoryProperties.vala:107
 msgid "Outflow"
-msgstr ""
+msgstr "Išplaukos"
 
 #. inflow
 #: src/view/CategoryProperties.vala:116
 msgid "Inflow"
-msgstr ""
+msgstr "Įplaukos"
 
 #: src/dialog/AddAccountDialog.vala:59
 msgid "Eg.: account number"
-msgstr ""
+msgstr "Pvz.: sąskaitos numeris"
 
 #: src/dialog/AddAccountDialog.vala:77
 msgid "Checking"
-msgstr ""
+msgstr "Tikrinama"
 
 #: src/dialog/AddAccountDialog.vala:101
 msgid "Balance:"
-msgstr ""
+msgstr "Likutis:"
 
 #: src/dialog/AddAccountDialog.vala:110
 msgid "Description:"
-msgstr ""
+msgstr "Aprašas:"
 
 #: src/dialog/AddAccountDialog.vala:116
 msgid "Optional"
-msgstr ""
+msgstr "Nebūtina"
 
 #: src/dialog/AddAccountDialog.vala:120
 msgid "Create Account"
-msgstr ""
+msgstr "Sukurti paskyrą"
 
 #. show notification
 #: src/dialog/AddAccountDialog.vala:156
 #, c-format
 msgid "Account %s has been created"
-msgstr ""
+msgstr "Paskyra %s sukurta"
 
 #: src/dialog/AddCategoryDialog.vala:49
 msgid "Name:"
-msgstr ""
+msgstr "Pavadinimas:"
 
 #: src/dialog/AddCategoryDialog.vala:54
 #: src/widget/CellRendererCategoryPicker.vala:77
 msgid "Category name"
-msgstr ""
+msgstr "Kategorijos pavadinimas"
 
 #: src/dialog/AddCategoryDialog.vala:61
 #, c-format
 msgid "Monthly Budget for %s"
-msgstr ""
+msgstr "Mėnesinis biudžetas, skirtas %s"
 
 #: src/dialog/AddCategoryDialog.vala:68
 msgid "Budget:"
-msgstr ""
+msgstr "Biudžetas:"
 
 #: src/dialog/AddCategoryDialog.vala:73
 msgid "Monthly budget for category"
-msgstr ""
+msgstr "Mėnesinis biudžetas, skirtas kategorijai"
 
 #: src/dialog/AddCategoryDialog.vala:76
 msgid "Create Category"
-msgstr ""
+msgstr "Sukurti kategoriją"
 
 #: src/dialog/ImportTransactionsDialog.vala:25
 msgid "Import transactions from file"
-msgstr ""
+msgstr "Importuoti operacijas iš failo"
 
 #: src/dialog/ImportTransactionsDialog.vala:67
 #, c-format
 msgid "%d transactions imported in account %s"
-msgstr ""
+msgstr "Importuota %d operacijų į %s paskyrą"
 
 #. apply to all
 #: src/widget/CellRendererCategoryPicker.vala:44
 #: src/widget/CellRendererCategoryPicker.vala:82
 #, c-format
 msgid "Apply to all %s"
-msgstr ""
+msgstr "Taikyti visiems %s"
 
 #. OK button
 #: src/widget/CellRendererCategoryPicker.vala:91
 msgid "Set category"
-msgstr ""
+msgstr "Nustatyti kategoriją"
 
 #: src/window/MainWindow.vala:88
 msgid "Export…"
-msgstr ""
+msgstr "Eksportuoti…"
 
 #. export button
 #. export_button = new Gtk.Button.from_icon_name ("document-export", Gtk.IconSize.LARGE_TOOLBAR);
@@ -386,27 +386,27 @@ msgstr ""
 #. add transaction button
 #: src/window/MainWindow.vala:115
 msgid "Record transaction"
-msgstr ""
+msgstr "Įrašyti operaciją"
 
 #: src/window/MainWindow.vala:121
 msgid "Search transactions…"
-msgstr ""
+msgstr "Ieškoti operacijų…"
 
 #: src/window/MainWindow.vala:290
 #, c-format
 msgid "Search in %s"
-msgstr ""
+msgstr "Ieškoti ties %s"
 
 #. uncategorized
 #: src/window/MainWindow.vala:292
 msgid "Search uncategorized"
-msgstr ""
+msgstr "Ieškoti ties be kategorijos"
 
 #: src/window/MainWindow.vala:369
 msgid "Transaction recorded"
-msgstr ""
+msgstr "Operacija įrašyta"
 
 #: src/window/MainWindow.vala:415
 #, c-format
 msgid "Transactions in %s"
-msgstr ""
+msgstr "Operacijos per %s"
