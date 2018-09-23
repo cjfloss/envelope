@@ -2,6 +2,7 @@
 Name=Envelope
 Comment=Manage your budget
 Comment[lt]=Tvarkyti savo biudžetą
+Comment[pl]=Zarządzaj swoim budżetem
 Keywords=Budget;Money;
 Keywords[lt]=Biudžetas;Pinigai;
 GenericName=Personal budget manager
