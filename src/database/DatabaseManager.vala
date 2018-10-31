@@ -542,7 +542,7 @@ namespace Envelope.Database {
         private void init () {
             int version = 0;
             try {
-                database = new Database ("envelope");
+                database = new Database ("envelope.db");
                 this.database.exec ("PRAGMA synchronous = OFF;");
                 version = this.database.query_value ("PRAGMA user_version;");
                 info ("DATABASE_USER_VERSION: %d", version);

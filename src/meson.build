@@ -79,8 +79,9 @@ executable(
     'widget/CellRendererPopoverContainer.vala',
 
     'window/MainWindow.vala',
-    ['Envelope.vala', build_config],
-
+    'Envelope.vala',
+    build_config,
+    
     dependencies : [
         dependency('glib-2.0', version :'>=2.29.0'),
         dependency('gtk+-3.0', version :'>=3.14'),
