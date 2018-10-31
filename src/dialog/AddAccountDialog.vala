@@ -30,28 +30,32 @@ namespace Envelope.Dialog {
         private Gtk.Button cancel_button;
 
         public AddAccountDialog (Gtk.Window parent) {
-            Object (transient_for: parent);
+            Object (
+                transient_for: parent,
+                title: _("Add an Account"),
+                deletable: false,
+                modal: true,
+                resizable: false,
+                width_request: 300,
+                window_position: Gtk.WindowPosition.CENTER_ON_PARENT
+            );
         }
 
         construct {
-            title = "Add an account";
-            deletable = false;
-            modal = true;
-            resizable= false;
-            width_request = 300;
-            window_position = Gtk.WindowPosition.CENTER_ON_PARENT;
-
             var grid = new Gtk.Grid ();
             get_content_area ().add (grid);
 
-            grid.margin_start = grid.margin_end = 12;
-            grid.orientation = Gtk.Orientation.VERTICAL;
+            grid.margin_start = 12;
+            grid.margin_end = 12;
+            grid.margin_top = 20;
             grid.row_spacing = 12;
             grid.column_spacing = 12;
+
+            grid.orientation = Gtk.Orientation.VERTICAL;
             grid.valign = Gtk.Align.CENTER;
             grid.vexpand = true;
 
-            var number_label = new Gtk.Label ("Label:");
+            var number_label = new Gtk.Label (_("Label:"));
             number_label.xalign = 1f;
             grid.attach(number_label, 0, 1, 1, 1);
 
@@ -65,7 +69,7 @@ namespace Envelope.Dialog {
             });
             grid.attach(number_entry, 1, 1, 1, 1);
 
-            var type_label = new Gtk.Label ("Type:");
+            var type_label = new Gtk.Label (_("Type:"));
             type_label.xalign = 1f;
             grid.attach (type_label, 0, 2, 1, 1);
 
