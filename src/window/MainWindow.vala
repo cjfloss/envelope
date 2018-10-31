@@ -211,9 +211,10 @@ namespace Envelope.Window {
             if (saved_state.selected_account_id != -1) {
                 // TODO check if account still exists
                 sidebar.select_account_by_id (saved_state.selected_account_id);
-            } else if (saved_state.selected_category_id != -1) {
-                // TODO check if category still exists
-                sidebar.select_category_by_id (saved_state.selected_category_id);
+                if (saved_state.selected_category_id != -1) {
+                    // TODO check if category still exists
+                    sidebar.select_category_by_id (saved_state.selected_category_id);
+                }
             }
 
             paned.set_position (saved_state.sidebar_width);
