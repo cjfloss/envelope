@@ -16,7 +16,7 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
-using Envelope.DB;
+using Envelope.Database;
 using Gee;
 
 namespace Envelope.Service {
@@ -43,12 +43,12 @@ namespace Envelope.Service {
             clear ();
             try {
                 load_merchants ();
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 warning ("could not load merchants; transaction search autocompletion won't work (%s)".printf (err.message));
             }
         }
 
-        private void load_merchants () throws SQLHeavy.Error {
+        private void load_merchants () throws DatabaseError {
             Collection<Merchant> merchants = DatabaseManager.get_default ().get_merchants ();
 
             if (!merchants.is_empty) {

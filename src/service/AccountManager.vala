@@ -17,7 +17,7 @@
 */
 
 using Gee;
-using Envelope.DB;
+using Envelope.Database;
 
 namespace Envelope.Service {
     public errordomain AccountError {
@@ -54,7 +54,7 @@ namespace Envelope.Service {
         public Collection<Account> get_accounts () throws ServiceError {
             try {
                 return dbm.load_all_accounts ();
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -64,7 +64,7 @@ namespace Envelope.Service {
             try {
                 account = dbm.load_account (account_id);
                 return account != null;
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -92,8 +92,8 @@ namespace Envelope.Service {
                 account_created (account);
 
                 return account;
-            } catch (SQLHeavy.Error err) {
-                if (err is SQLHeavy.Error.CONSTRAINT) {
+            } catch (DatabaseError err) {
+                if (err is DatabaseError.CONSTRAINT) {
                     throw new AccountError.ALREADY_EXISTS ("account number already exists");
                 }
 
@@ -105,7 +105,7 @@ namespace Envelope.Service {
             try {
                 dbm.delete_account (account);
                 account_deleted (account);
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -125,8 +125,8 @@ namespace Envelope.Service {
 
                 // fire signal
                 account_updated (account);
-            } catch (SQLHeavy.Error err) {
-                if (err is SQLHeavy.Error.CONSTRAINT) {
+            } catch (DatabaseError err) {
+                if (err is DatabaseError.CONSTRAINT) {
                     throw new AccountError.ALREADY_EXISTS ("account number already exists");
                 }
 
@@ -136,18 +136,19 @@ namespace Envelope.Service {
 
         public void update_account_balance (ref Account account) throws ServiceError {
             try {
-                var db_transaction = dbm.start_transaction ();
-                dbm.update_account_balance (account, ref db_transaction);
-                db_transaction.commit ();
-            } catch (SQLHeavy.Error err) {
+                dbm.start_transaction ();
+                dbm.update_account_balance (account);
+                dbm.commit_transaction ();
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
+                dbm.rollback_transaction ();
             }
         }
 
         public Gee.List<Transaction> load_account_transactions (Account account) throws ServiceError {
             try {
                 return dbm.load_account_transactions (account);
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -170,14 +171,14 @@ namespace Envelope.Service {
                     transaction.category = category;
                 }
 
-                var db_transaction = dbm.start_transaction ();
+                dbm.start_transaction ();
 
-                dbm.insert_transaction (transaction, ref db_transaction);
+                dbm.insert_transaction (transaction);
 
                 adjust_balance (account, transaction);
-                dbm.update_account_balance (account, ref db_transaction);
+                dbm.update_account_balance (account);
 
-                db_transaction.commit ();
+                dbm.commit_transaction ();
 
                 account.transactions.add (transaction);
                 account.transactions.sort ();
@@ -186,7 +187,7 @@ namespace Envelope.Service {
                 account_updated (account);
 
                 return transaction;
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 account.balance = old_balance;
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
@@ -202,10 +203,10 @@ namespace Envelope.Service {
                 // should not be null, we're updating an existing transaction
                 assert (current_transaction != null);
 
-                var db_transaction = dbm.start_transaction ();
+                dbm.start_transaction ();
 
                 // update transaction
-                dbm.update_transaction (transaction, ref db_transaction);
+                dbm.update_transaction (transaction);
 
                 // first cancel old transaction
                 adjust_balance (transaction.account, current_transaction, true);
@@ -213,13 +214,13 @@ namespace Envelope.Service {
                 // update account balance
                 adjust_balance (transaction.account, transaction);
 
-                dbm.update_account_balance (transaction.account, ref db_transaction);
+                dbm.update_account_balance (transaction.account);
 
-                db_transaction.commit ();
+                dbm.commit_transaction ();
 
                 transaction_updated (transaction);
                 account_updated (transaction.account);
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 transaction.account.balance = old_balance;
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
@@ -230,14 +231,14 @@ namespace Envelope.Service {
          */
         public void remove_transaction (ref Transaction transaction) throws ServiceError {
             try {
-                var db_transaction = dbm.start_transaction ();
+                dbm.start_transaction ();
 
-                dbm.delete_transaction (transaction.@id, ref db_transaction);
+                dbm.delete_transaction (transaction.@id);
 
                 adjust_balance (transaction.account, transaction, true);
-                dbm.update_account_balance (transaction.account, ref db_transaction);
+                dbm.update_account_balance (transaction.account);
 
-                db_transaction.commit ();
+                dbm.commit_transaction ();
 
                 if (transaction.account != null && transaction.account.transactions != null) {
                     transaction.account.transactions.remove (transaction);
@@ -245,7 +246,7 @@ namespace Envelope.Service {
 
                 transaction_deleted (transaction);
                 account_updated (transaction.account);
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -303,12 +304,12 @@ namespace Envelope.Service {
 
                     account.balance += balance_delta;
 
-                    var db_transaction = dbm.start_transaction ();
+                    dbm.start_transaction ();
 
-                    dbm.insert_transactions (transactions, ref db_transaction);
-                    dbm.update_account_balance (account, ref db_transaction);
+                    dbm.insert_transactions (transactions);
+                    dbm.update_account_balance (account);
 
-                    db_transaction.commit ();
+                    dbm.commit_transaction ();
 
                     account.transactions.add_all (transactions);
                     account.transactions.sort ();
@@ -321,7 +322,7 @@ namespace Envelope.Service {
                 }
 
                 return 0;
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 account.balance = balance_before_import;
                 throw new ServiceError.DATABASE_ERROR (err.message);
             } catch (ImporterError err) {

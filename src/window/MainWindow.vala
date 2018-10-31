@@ -16,7 +16,7 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
-using Envelope.DB;
+using Envelope.Database;
 using Envelope.View;
 using Envelope.Service;
 using Envelope.Service.Settings;
@@ -211,9 +211,10 @@ namespace Envelope.Window {
             if (saved_state.selected_account_id != -1) {
                 // TODO check if account still exists
                 sidebar.select_account_by_id (saved_state.selected_account_id);
-            } else if (saved_state.selected_category_id != -1) {
-                // TODO check if category still exists
-                sidebar.select_category_by_id (saved_state.selected_category_id);
+                if (saved_state.selected_category_id != -1) {
+                    // TODO check if category still exists
+                    sidebar.select_category_by_id (saved_state.selected_category_id);
+                }
             }
 
             paned.set_position (saved_state.sidebar_width);

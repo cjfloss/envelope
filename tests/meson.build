@@ -26,7 +26,6 @@ importT = executable (
         dependency('gobject-2.0'),
         dependency('gee-0.8'),
         dependency('granite', version :'>=0.3.0'),
-        dependency('sqlheavy-0.1'),
         dependency('gio-2.0'),
         meson.get_compiler('vala').find_library('posix'),
         meson.get_compiler('c').find_library('m', required : false)

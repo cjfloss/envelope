@@ -17,7 +17,7 @@
 */
 
 using Gee;
-using Envelope.DB;
+using Envelope.Database;
 
 namespace Envelope.Service {
     /**
@@ -102,7 +102,7 @@ namespace Envelope.Service {
                 debug ("loaded %d categorie(s)".printf (categories.size));
 
                 return categories;
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -124,7 +124,7 @@ namespace Envelope.Service {
                 category_added (category);
 
                 return category;
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -136,7 +136,7 @@ namespace Envelope.Service {
                 dbm.delete_category (category); // delete from database
                 categories = null;              // invalidate categories cache
                 category_deleted (category);    // fire the category_deleted signal
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -148,7 +148,7 @@ namespace Envelope.Service {
                 dbm.update_category (category);             // update in database
                 categories = null;                          // invalidate categories cache
                 compute_state_and_fire_changed_event ();    // re-compute budget state and fire state_changed
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -161,7 +161,7 @@ namespace Envelope.Service {
             try {
                 dbm.set_category_budgeted_amount (category, year, month);
                 category_budget_changed (category);
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -172,7 +172,7 @@ namespace Envelope.Service {
             try {
                 dbm.categorize_for_merchant (merchant_name, category);  // set category for all transactions having the same merchant
                 compute_state_and_fire_changed_event ();                // re-compute budget state and fire state_changed
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -183,7 +183,7 @@ namespace Envelope.Service {
         public Collection<Transaction> get_current_transactions () throws ServiceError {
             try {
                 return dbm.get_current_transactions ();
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -196,7 +196,7 @@ namespace Envelope.Service {
         public Collection<Transaction> get_transactions_for_month (int year, int month) throws ServiceError {
             try {
                 return dbm.get_transactions_for_month_and_year (month, year);
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -207,7 +207,7 @@ namespace Envelope.Service {
         public Collection<Transaction> get_uncategorized_transactions () throws ServiceError {
             try {
                 return dbm.load_uncategorized_transactions ();
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }
@@ -242,7 +242,7 @@ namespace Envelope.Service {
                 }
 
                 return transactions;
-            } catch (SQLHeavy.Error err) {
+            } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
         }

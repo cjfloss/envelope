@@ -16,7 +16,7 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
-using Envelope.DB;
+using Envelope.Database;
 using Envelope.Dialog;
 using Envelope.Widget;
 using Envelope.Service;
