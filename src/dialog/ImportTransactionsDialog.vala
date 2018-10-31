@@ -22,9 +22,13 @@ using Envelope.View;
 namespace Envelope.Dialog {
     public class ImportTransactionsDialog : Gtk.FileChooserDialog {
         public ImportTransactionsDialog () {
-            Object (title: _("Import transactions from file"),
+            Object (
+                title: _("Import transactions from file"),
                 transient_for: (Gtk.Window) Envelope.App.get_default ().main_window.get_toplevel (),
-                action: Gtk.FileChooserAction.OPEN);
+                action: Gtk.FileChooserAction.OPEN,
+                select_multiple: false,
+                create_folders: false
+            );
         }
 
         construct {
@@ -32,9 +36,6 @@ namespace Envelope.Dialog {
             add_button ("_Open", Gtk.ResponseType.ACCEPT);
 
             debug ("pointing file chooser to path: %s".printf (Granite.Services.Paths.home_folder.get_path ()));
-
-            select_multiple = false;
-            create_folders = false;
 
             try {
                 set_current_folder_file (Granite.Services.Paths.home_folder);
