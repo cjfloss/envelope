@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2018 Cleiton Floss <cleitonfloss@gmail.com> -->
-<component type="desktop">
-    <id>com.github.cjfloss.envelope.desktop</id>
+<component type="desktop-application">
+    <id>com.github.cjfloss.envelope</id>
     <metadata_license>CC0</metadata_license>
     <project_license>GPL-3.0+</project_license>
     <name>Envelope</name>
@@ -37,9 +37,9 @@
     </content_rating>
 
     <description>
-        <p>Maintain your personal budget by using the tried-and-true envelope system.</p>
-        <p>Designate spending categories (envelopes) and distribute your monthly income into them.</p>
-        <p>Configure accounts where you record all your transactions, then assign each of them to a category.</p>
+        <p>Maintain your personal budget by using the tried-and-true envelope system.<br/>
+        Designate spending categories (envelopes) and distribute your monthly income into them.<br/>
+        Configure accounts where you record all your transactions, then assign each of them to a category.</p>
         <p>Originaly made by Nicolas Laplante.</p>
         <p>Features</p>
         <ul>
@@ -48,24 +48,31 @@
         </ul>
     </description>
 
+    <launchable type="desktop-id">org.gnome.gnome-power-statistics.desktop</launchable>
+
     <provides>
         <binary>com.github.cjfloss.envelope</binary>
     </provides>
 
     <screenshots>
         <screenshot type="default">
+            <caption>Editing a category</caption>
             <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png</image>
         </screenshot>
-        <screenshot type="default">
+        <screenshot>
+            <caption>When you lauch envelope for the first time</caption>
             <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/01.png</image>
         </screenshot>
-        <screenshot type="default">
+        <screenshot>
+            <caption>Dialog to add an account</caption>
             <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/02.png</image>
         </screenshot>
-        <screenshot type="default">
+        <screenshot>
+            <caption>Whn you just added an account</caption>
             <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/03.png</image>
         </screenshot>
-        <screenshot type="default">
+        <screenshot>
+            <caption>Adding a transaction</caption>
             <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/04.png</image>
         </screenshot>
     </screenshots>
@@ -74,7 +81,7 @@
     <url type="homepage">https://github.com/cjfloss/envelope</url>
     <url type="bugtracker">https://github.com/cjfloss/envelope/issues</url>
     <url type="help">https://github.com/cjfloss/envelope/issues</url>
-    <update_contact>https://github.com/cjfloss/envelope/issues</update_contact>
+    <update_contact>cleitonfloss_AT_gmail.com</update_contact>
 
     <releases>
         <release version="0.0.3" date="2018-02-13" urgency="high">
