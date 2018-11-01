@@ -1,138 +1,140 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2018 Cleiton Floss <cleitonfloss@gmail.com> -->
+<!-- Copyright 2018 Cleiton Floss <cleitonfloss_AT_gmail.com> -->
 <component type="desktop-application">
-    <id>com.github.cjfloss.envelope</id>
-    <metadata_license>CC0</metadata_license>
-    <project_license>GPL-3.0+</project_license>
-    <name>Envelope</name>
-    <summary>Personal budget manager</summary>
-    <content_rating type="oars-1.0">
-        <content_attribute id="violence-cartoon">none</content_attribute>
-        <content_attribute id="violence-fantasy">none</content_attribute>
-        <content_attribute id="violence-realistic">none</content_attribute>
-        <content_attribute id="violence-bloodshed">none</content_attribute>
-        <content_attribute id="violence-sexual">none</content_attribute>
-        <content_attribute id="drugs-alcohol">none</content_attribute>
-        <content_attribute id="drugs-narcotics">none</content_attribute>
-        <content_attribute id="drugs-tobacco">none</content_attribute>
-        <content_attribute id="sex-nudity">none</content_attribute>
-        <content_attribute id="sex-themes">none</content_attribute>
-        <content_attribute id="sex-homosexuality">none</content_attribute>
-        <content_attribute id="sex-prostitution">none</content_attribute>
-        <content_attribute id="sex-adultery">none</content_attribute>
-        <content_attribute id="sex-appearance">none</content_attribute>
-        <content_attribute id="violence-desecration">none</content_attribute>
-        <content_attribute id="violence-slavery">none</content_attribute>
-        <content_attribute id="violence-worship">none</content_attribute>
-        <content_attribute id="language-profanity">none</content_attribute>
-        <content_attribute id="language-humor">none</content_attribute>
-        <content_attribute id="language-discrimination">none</content_attribute>
-        <content_attribute id="social-chat">none</content_attribute>
-        <content_attribute id="social-info">none</content_attribute>
-        <content_attribute id="social-audio">none</content_attribute>
-        <content_attribute id="social-location">none</content_attribute>
-        <content_attribute id="social-contacts">none</content_attribute>
-        <content_attribute id="money-purchasing">none</content_attribute>
-        <content_attribute id="money-gambling">none</content_attribute>
-    </content_rating>
+  <id>com.github.cjfloss.envelope</id>
+  <metadata_license>CC0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name>Envelope</name>
+  <summary>Personal budget manager</summary>
 
-    <description>
-        <p>Maintain your personal budget by using the tried-and-true envelope system.<br/>
-        Designate spending categories (envelopes) and distribute your monthly income into them.<br/>
-        Configure accounts where you record all your transactions, then assign each of them to a category.</p>
-        <p>Originaly made by Nicolas Laplante.</p>
-        <p>Features</p>
+  <content_rating type="oars-1.0">
+    <content_attribute id="violence-cartoon">none</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="sex-homosexuality">none</content_attribute>
+    <content_attribute id="sex-prostitution">none</content_attribute>
+    <content_attribute id="sex-adultery">none</content_attribute>
+    <content_attribute id="sex-appearance">none</content_attribute>
+    <content_attribute id="violence-desecration">none</content_attribute>
+    <content_attribute id="violence-slavery">none</content_attribute>
+    <content_attribute id="violence-worship">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">none</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-audio">none</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">none</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+
+  <description>
+    <p>Maintain your personal budget by using the tried-and-true envelope system.<br/>
+       Designate spending categories (envelopes) and distribute your monthly income into them.<br/>
+       Configure accounts where you record all your transactions, then assign each of them to a category.</p>
+    <p>Originaly made by Nicolas Laplante.</p>
+    <p>Features</p>
+    <ul>
+      <li>Envelope system budget workflow</li>
+      <li>Import transactions from QIF files</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">com.github.cjfloss.envelope.desktop</launchable>
+
+  <provides>
+    <binary>com.github.cjfloss.envelope</binary>
+  </provides>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Editing a category</caption>
+      <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>When you lauch envelope for the first time</caption>
+      <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/01.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Dialog to add an account</caption>
+      <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/02.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Whn you just added an account</caption>
+      <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/03.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Adding a transaction</caption>
+      <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/04.png</image>
+    </screenshot>
+  </screenshots>
+
+  <developer_name>Cleiton Floss</developer_name>
+
+  <url type="homepage">https://github.com/cjfloss/envelope</url>
+  <url type="bugtracker">https://github.com/cjfloss/envelope/issues</url>
+  <url type="help">https://github.com/cjfloss/envelope/issues</url>
+  <update_contact>cleitonfloss_AT_gmail.com</update_contact>
+
+  <releases>
+    <release version="0.0.3" date="2018-02-13" urgency="high">
+      <description>
+        <p>New</p>
         <ul>
-            <li>Envelope system budget workflow</li>
-            <li>Import transactions from QIF files</li>
+          <li>Improved add account Dialog</li>
+          <li>Improved add category Dialog</li>
         </ul>
-    </description>
+        <p>Fix</p>
+        <ul>
+          <li>Fix crash while adding second account</li>
+          <li>Allow resizing window</li>
+          <li>Add unit tests</li>
+          <li>Add current version to the binary</li>
+        </ul>
+      ​</description>
+    </release>
+    <release version="0.0.2" date="2018-02-03" urgency="high">
+      <description>
+        <p>Fixed some glitches</p>
+        <ul>
+          <li>Fix crash while removing category</li>
+          <li>Fix information loss on editing</li>
+          <li>Add AppData changelog</li>
+          <li>Update app branding</li>
+        </ul>
+      </description>
+    </release>
+    ​<release version="0.0.1" date="2018-01-22" urgency="low">
+      <description>
+        <p>First release: Testing</p>
+        <p>Basic functionalities</p>
+        <ul>
+          <li>Add account</li>
+          <li>Add transactions</li>
+          <li>Import QIF files</li>
+        </ul>
+      ​</description>
+    ​</release>
+  </releases>
 
-    <launchable type="desktop-id">org.gnome.gnome-power-statistics.desktop</launchable>
+  <categories>
+    <category>Office</category>
+    <category>Utility</category>
+    <category>Finance</category>
+  </categories>
 
-    <provides>
-        <binary>com.github.cjfloss.envelope</binary>
-    </provides>
-
-    <screenshots>
-        <screenshot type="default">
-            <caption>Editing a category</caption>
-            <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/05.png</image>
-        </screenshot>
-        <screenshot>
-            <caption>When you lauch envelope for the first time</caption>
-            <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/01.png</image>
-        </screenshot>
-        <screenshot>
-            <caption>Dialog to add an account</caption>
-            <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/02.png</image>
-        </screenshot>
-        <screenshot>
-            <caption>Whn you just added an account</caption>
-            <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/03.png</image>
-        </screenshot>
-        <screenshot>
-            <caption>Adding a transaction</caption>
-            <image>https://raw.githubusercontent.com/cjfloss/envelope/master/data/screenshots/04.png</image>
-        </screenshot>
-    </screenshots>
-
-    <developer_name>Cleiton Floss</developer_name>
-    <url type="homepage">https://github.com/cjfloss/envelope</url>
-    <url type="bugtracker">https://github.com/cjfloss/envelope/issues</url>
-    <url type="help">https://github.com/cjfloss/envelope/issues</url>
-    <update_contact>cleitonfloss_AT_gmail.com</update_contact>
-
-    <releases>
-        <release version="0.0.3" date="2018-02-13" urgency="high">
-            <description>
-                <p>New</p>
-                <ul>
-                    <li>Improved add account Dialog</li>
-                    <li>Improved add category Dialog</li>
-                </ul>
-                <p>Fix</p>
-                <ul>
-                    <li>Fix crash while adding second account</li>
-                    <li>Allow resizing window</li>
-                    <li>Add unit tests</li>
-                    <li>Add current version to the binary</li>
-                </ul>
-            ​</description>
-        </release>
-        <release version="0.0.2" date="2018-02-03" urgency="high">
-            <description>
-                <p>Fixed some glitches</p>
-                <ul>
-                    <li>Fix crash while removing category</li>
-                    <li>Fix information loss on editing</li>
-                    <li>Add AppData changelog</li>
-                    <li>Update app branding</li>
-                </ul>
-            ​</description>
-        </release>
-        ​<release version="0.0.1" date="2018-01-22" urgency="low">
-            <description>
-                <p>First release: Testing</p>
-                <p>Basic functionalities</p>
-                <ul>
-                    <li>Add account</li>
-                    <li>Add transactions</li>
-                    <li>Import QIF files</li>
-                </ul>
-            ​</description>
-        ​</release>
-    ​</releases>
-
-    <categories>
-        <category>Office</category>
-        <category>Utility</category>
-        <category>Finance</category>
-    </categories>
-
-    <custom>
-        <value key="x-appcenter-color-primary">#226324</value>
-        <value key="x-appcenter-color-primary-text">rgb(255, 255, 255)</value>
-        <value key="x-appcenter-suggested-price">0</value>
-    </custom>
+  <custom>
+    <value key="x-appcenter-color-primary">#226324</value>
+    <value key="x-appcenter-color-primary-text">rgb(255, 255, 255)</value>
+    <value key="x-appcenter-suggested-price">0</value>
+  </custom>
 </component>
