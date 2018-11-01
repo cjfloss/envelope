@@ -104,7 +104,7 @@ namespace Envelope.Database {
          * @param arguments Values to bind in the SQL query or null.
          * @throws DatabaseError if the underlying SQLite operation fails.
          */
-        public Cursor exec_cursor (string        sql,
+        public Cursor exec_cursor (string sql,
                                    GLib.Value[]? arguments = null)
                                    throws DatabaseError {
             return new Cursor (this.db, sql, arguments);
@@ -119,7 +119,7 @@ namespace Envelope.Database {
          * @param arguments Values to bind in the SQL query or null.
          * @throws DatabaseError if the underlying SQLite operation fails.
          */
-        public void exec (string        sql,
+        public void exec (string sql,
                           GLib.Value[]? arguments = null)
                           throws DatabaseError {
             if (arguments == null) {
@@ -155,7 +155,7 @@ namespace Envelope.Database {
          * @return The contents of the first row's column as an int.
          * @throws DatabaseError if the underlying SQLite operation fails.
          */
-        public int query_value (string        sql,
+        public int query_value (string sql,
                                  GLib.Value[]? args = null)
                                  throws DatabaseError {
             var cursor = this.exec_cursor (sql, args);

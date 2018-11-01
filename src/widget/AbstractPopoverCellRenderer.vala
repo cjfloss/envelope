@@ -27,7 +27,7 @@ namespace Envelope.Widget {
 
         public signal void dismissed ();
 
-        protected string? current_path;
+        protected string ? current_path;
 
         protected abstract void build_ui ();
         protected abstract void connect_signals ();
@@ -40,13 +40,14 @@ namespace Envelope.Widget {
             connect_real_signals ();
         }
 
-        public override unowned Gtk.CellEditable? start_editing ( Gdk.Event? event,
-                                        Gtk.Widget widget,
-                                        string path,
-                                        Gdk.Rectangle background_area,
-                                        Gdk.Rectangle cell_area,
-                                        Gtk.CellRendererState flags) {
-            unowned Gtk.CellEditable? return_value = base.start_editing (event, widget, path, background_area, cell_area, flags);
+        public override unowned Gtk.CellEditable ? start_editing ( Gdk.Event ? event,
+                Gtk.Widget widget,
+                string path,
+                Gdk.Rectangle background_area,
+                Gdk.Rectangle cell_area,
+                Gtk.CellRendererState flags) {
+            unowned Gtk.CellEditable ? return_value = base.start_editing (event, widget,
+                    path, background_area, cell_area, flags);
 
             current_path = path;
 
@@ -74,27 +75,27 @@ namespace Envelope.Widget {
             // close popover when treeview's model changes
             Gtk.TreeView treeview = relative_to as Gtk.TreeView;
 
-            treeview.model.row_changed.connect ( () => {
+            treeview.model.row_changed.connect (() => {
                 real_dismiss ();
             });
 
-            treeview.model.row_deleted.connect ( () => {
+            treeview.model.row_deleted.connect (() => {
                 real_dismiss ();
             });
 
-            treeview.model.row_has_child_toggled.connect ( () => {
+            treeview.model.row_has_child_toggled.connect (() => {
                 real_dismiss ();
             });
 
-            treeview.model.row_inserted.connect ( () => {
+            treeview.model.row_inserted.connect (() => {
                 real_dismiss ();
             });
 
-            treeview.model.rows_reordered.connect ( () => {
+            treeview.model.rows_reordered.connect (() => {
                 real_dismiss ();
             });
 
-            popover.closed.connect ( () => {
+            popover.closed.connect (() => {
                 dismissed ();
             });
 

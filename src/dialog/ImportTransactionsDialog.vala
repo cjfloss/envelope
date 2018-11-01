@@ -62,9 +62,11 @@ namespace Envelope.Dialog {
                     try {
                         var account_ref = Sidebar.get_default ().selected_account;
 
-                        int size = AccountManager.get_default ().import_transactions_from_file (ref account_ref, get_file ());
+                        int size = AccountManager.get_default ()
+                                      .import_transactions_from_file (ref account_ref, get_file ());
 
-                        Envelope.App.toast (_("%d transactions imported in account %s").printf(size, account_ref.number));
+                        Envelope.App.toast (_("%d transactions imported in account %s")
+                                            .printf (size, account_ref.number));
 
                         // refresh search autocompletion
                         MerchantStore.get_default ().reload ();

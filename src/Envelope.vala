@@ -63,12 +63,15 @@ namespace Envelope {
 
         protected override void activate () {
             Granite.Services.Logger.initialize (Build.APP_NAME);
-            Granite.Services.Logger.DisplayLevel = DEBUG ? Granite.Services.LogLevel.DEBUG : Granite.Services.LogLevel.INFO;
+            Granite.Services.Logger.DisplayLevel = DEBUG ?
+                                                   Granite.Services.LogLevel.DEBUG :
+                                                   Granite.Services.LogLevel.INFO;
 
             Granite.Services.Paths.initialize (Build.APP_NAME, Build.PKG_DATADIR);
 
             info ("Revision: %s", Build.VERSION_INFO);
-            info ("Report any issues/bugs you might find to %s", "https://github.com/cjfloss/envelope");
+            info ("Report any issues/bugs you might find to %s",
+                  "https://github.com/cjfloss/envelope");
 
             if (main_window == null) {
                 main_window = new MainWindow ();

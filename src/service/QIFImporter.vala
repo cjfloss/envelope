@@ -27,37 +27,37 @@ namespace Envelope.Service {
             qif_importer_instance = this;
         }
 
-        private const char LINE_TYPE_TRANSACTION_DELIMITER                   = '^';
-        private const char LINE_TYPE_DATE                                    = 'D';
-        private const char LINE_TYPE_AMOUNT                                  = 'T';
-        private const char LINE_TYPE_MEMO                                    = 'M';
-        private const char LINE_TYPE_CLEARED                                 = 'C';
-        private const char LINE_TYPE_CHECK_NUM                               = 'C';
-        private const char LINE_TYPE_PAYEE                                   = 'P';
-        private const char LINE_TYPE_PAYEE_ADDRESS                           = 'A';
-        private const char LINE_TYPE_CATEGORY                                = 'L';
-        private const char LINE_TYPE_REIMBURSABLE                            = 'F';
-        private const char LINE_TYPE_SPLIT                                   = 'S';
-        private const char LINE_TYPE_SPLIT_MEMO                              = 'E';
-        private const char LINE_TYPE_SPLIT_AMOUNT                            = '$';
-        private const char LINE_TYPE_SPLIT_PERCENT                           = '%';
-        private const char LINE_TYPE_INVESTMENT                              = 'N';
-        private const char LINE_TYPE_SECURITY_NAME                           = 'Y';
-        private const char LINE_TYPE_PRICE                                   = 'I';
-        private const char LINE_TYPE_SHARE_QTY_SPLIT_RATIO                   = 'Q';
-        private const char LINE_TYPE_COMMISSION_COST                         = 'O';
-        private const char LINE_TYPE_QUICKEN_EXTENDED                        = 'X';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_SHIP_TO_ADDRESS        = 'A';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_TYPE                   = 'I';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_INVOICE_DUE_DATE       = 'E';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_TAX_ACCOUNT            = 'C';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_TAX_RATE               = 'R';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_TAX_AMOUNT             = 'T';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_DESCRIPTION  = 'S';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_CATEGORY     = 'N';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_QTY          = '#';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_UNIT_PRICE   = '$';
-        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_TAXABLE      = 'F';
+        private const char LINE_TYPE_TRANSACTION_DELIMITER = '^';
+        private const char LINE_TYPE_DATE = 'D';
+        private const char LINE_TYPE_AMOUNT = 'T';
+        private const char LINE_TYPE_MEMO = 'M';
+        private const char LINE_TYPE_CLEARED = 'C';
+        private const char LINE_TYPE_CHECK_NUM = 'C';
+        private const char LINE_TYPE_PAYEE = 'P';
+        private const char LINE_TYPE_PAYEE_ADDRESS = 'A';
+        private const char LINE_TYPE_CATEGORY = 'L';
+        private const char LINE_TYPE_REIMBURSABLE = 'F';
+        private const char LINE_TYPE_SPLIT = 'S';
+        private const char LINE_TYPE_SPLIT_MEMO = 'E';
+        private const char LINE_TYPE_SPLIT_AMOUNT = '$';
+        private const char LINE_TYPE_SPLIT_PERCENT = '%';
+        private const char LINE_TYPE_INVESTMENT = 'N';
+        private const char LINE_TYPE_SECURITY_NAME = 'Y';
+        private const char LINE_TYPE_PRICE = 'I';
+        private const char LINE_TYPE_SHARE_QTY_SPLIT_RATIO = 'Q';
+        private const char LINE_TYPE_COMMISSION_COST = 'O';
+        private const char LINE_TYPE_QUICKEN_EXTENDED = 'X';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_SHIP_TO_ADDRESS = 'A';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_TYPE = 'I';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_INVOICE_DUE_DATE = 'E';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_TAX_ACCOUNT = 'C';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_TAX_RATE = 'R';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_TAX_AMOUNT = 'T';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_DESCRIPTION = 'S';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_CATEGORY = 'N';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_QTY = '#';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_UNIT_PRICE = '$';
+        private const char LINE_TYPE_QUICKEN_EXTENDED_LINE_ITEM_TAXABLE = 'F';
 
         private struct QIFTransaction {
             bool split;
@@ -115,7 +115,7 @@ namespace Envelope.Service {
 
                 // now we must parse each section which are delimited by a single '^' line
                 QIFTransaction transaction = QIFTransaction ();
-                string? line = null;
+                string ? line = null;
 
                 do {
                     line = stream.read_line ();
@@ -127,7 +127,8 @@ namespace Envelope.Service {
                             Transaction trans;
 
                             if (transaction.split) {
-                                // TODO find the first transaction which is split == false in the items before this one in the list
+                                // TODO find the first transaction which is split == false
+                                //    in the items before this one in the list
                                 // this is the parent transaction
                             }
 
@@ -208,15 +209,17 @@ namespace Envelope.Service {
             return true;
         }
 
-        private void qif_transaction_to_transaction (QIFTransaction transaction, out Transaction trans) {
+        private void qif_transaction_to_transaction (QIFTransaction transaction,
+                out Transaction trans) {
             trans = new Transaction ();
 
             trans.label = transaction.payee.strip ();
             trans.description = transaction.memo != null ? transaction.memo.strip () : null;
             trans.amount = Math.fabs (transaction.amount);
 
-            trans.direction = transaction.amount < 0 ?
-                Transaction.Direction.OUTGOING :  Transaction.Direction.INCOMING;
+            trans.direction = transaction.amount < 0
+                              ? Transaction.Direction.OUTGOING
+                              : Transaction.Direction.INCOMING;
 
             // parse date
             DateTime dt;
@@ -236,7 +239,8 @@ namespace Envelope.Service {
                 year = "20" + year;
             }
 
-            date = new DateTime.local (int.parse (year), int.parse (tokens[0]), int.parse (tokens[1]), 0, 0, 0d);
+            date = new DateTime.local (int.parse (year), int.parse (tokens[0]),
+                                       int.parse (tokens[1]), 0, 0, 0d);
 
             return true;
         }

@@ -165,7 +165,12 @@ namespace Envelope.Database {
         DELETE FROM `transactions` WHERE `account_id` = ?;""";
 
     private const string SQL_GET_UNIQUE_MERCHANTS = """
-        SELECT `label`, COUNT(`label`) as `number` FROM `transactions` GROUP BY `label` ORDER BY `number` DESC, `label` ASC;""";
+        SELECT `label`, COUNT(`label`) as `number`
+            FROM `transactions`
+            GROUP BY `label`
+            ORDER BY `number`
+                DESC, `label` ASC;
+    """;
 
     private const string SQL_LOAD_CATEGORIES = """
         SELECT `c`.*, `cb`.`year`, `cb`.`month`, `cb`.`amount_budgeted`
@@ -189,7 +194,11 @@ namespace Envelope.Database {
         UPDATE `transactions` SET `category_id` = ? WHERE `label` = ?;""";
 
     private const string SQL_LOAD_CURRENT_TRANSACTIONS = """
-        SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') AND date('now', 'start of month', '+1 month', '-1 days');""";
+        SELECT * FROM transactions
+        WHERE date(date, 'unixepoch')
+            BETWEEN date('now', 'start of month')
+            AND date('now', 'start of month', '+1 month', '-1 days');
+    """;
 
     private const string SQL_LOAD_TRANSACTIONS_FOR_MONTH = """
         SELECT t.*, c.*, cb.* FROM transactions t
@@ -197,14 +206,27 @@ namespace Envelope.Database {
         ON c.id = t.category_id
         LEFT JOIN categories_budgets cb
         ON cb.category_id = t.category_id AND cb.year = ? and cb.month = ?
-        WHERE date(t.date, 'unixepoch') BETWEEN date(?, 'start of month') AND date(?, 'start of month', '+1 month', '-1 days')
-        ORDER BY t.date DESC;""";
+        WHERE date(t.date, 'unixepoch')
+            BETWEEN date(?, 'start of month')
+            AND date(?, 'start of month', '+1 month', '-1 days')
+        ORDER BY t.date DESC;
+    """;
 
     private const string SQL_LOAD_CURRENT_TRANSACTIONS_FOR_CATEGORY = """
-        SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id = ?;""";
+        SELECT * FROM transactions
+        WHERE date(date, 'unixepoch')
+            BETWEEN date('now', 'start of month')
+            AND date('now', 'start of month', '+1 month', '-1 days')
+            AND category_id = ?;
+    """;
 
     private const string SQL_LOAD_CURRENT_UNCATEGORIZED_TRANSACTIONS = """
-        SELECT * FROM transactions WHERE date(date, 'unixepoch') BETWEEN date('now', 'start of month') and date('now', 'start of month', '+1 month', '-1 days') AND category_id IS NULL;""";
+        SELECT * FROM transactions
+        WHERE date (date, 'unixepoch')
+            BETWEEN date('now', 'start of month')
+            AND date('now', 'start of month', '+1 month', '-1 days')
+            AND category_id IS NULL;
+    """;
 
     private const string SQL_INSERT_CATEGORY = """
         INSERT INTO `categories`

@@ -27,12 +27,12 @@ namespace Envelope.Widget {
             base (relative_to);
         }
 
-        public override unowned Gtk.CellEditable? start_editing (Gdk.Event? event,
-                                            Gtk.Widget widget,
-                                            string path,
-                                            Gdk.Rectangle background_area,
-                                            Gdk.Rectangle cell_area,
-                                            Gtk.CellRendererState flags) {
+        public override unowned Gtk.CellEditable ? start_editing (Gdk.Event ? event,
+                Gtk.Widget widget,
+                string path,
+                Gdk.Rectangle background_area,
+                Gdk.Rectangle cell_area,
+                Gtk.CellRendererState flags) {
             base.start_editing (event, widget, path, background_area, cell_area, flags);
             popover.show ();
 
@@ -55,7 +55,8 @@ namespace Envelope.Widget {
 
             date_selected = true;
 
-            var dt = new DateTime.local (calendar.year, calendar.month + 1, calendar.day, 0, 0, 0);
+            var dt = new DateTime.local (calendar.year, calendar.month + 1,
+                                         calendar.day, 0, 0, 0);
 
             edited (current_path, dt.format (date_format));
 

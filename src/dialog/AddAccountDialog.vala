@@ -57,17 +57,17 @@ namespace Envelope.Dialog {
 
             var number_label = new Gtk.Label (_("Label:"));
             number_label.xalign = 1f;
-            grid.attach(number_label, 0, 1, 1, 1);
+            grid.attach (number_label, 0, 1, 1, 1);
 
             number_entry = new Gtk.Entry ();
             number_entry.placeholder_text = _("Eg.: account number");
             number_entry.expand = true;
             number_entry.key_release_event.connect (() => {
-                number_entry.get_text () == "" ?
-                    create_button.sensitive = false :
-                    create_button.sensitive = true;
+                number_entry.get_text () == ""
+                ? create_button.sensitive = false
+                : create_button.sensitive = true;
             });
-            grid.attach(number_entry, 1, 1, 1, 1);
+            grid.attach (number_entry, 1, 1, 1, 1);
 
             var type_label = new Gtk.Label (_("Type:"));
             type_label.xalign = 1f;
@@ -78,10 +78,10 @@ namespace Envelope.Dialog {
 
             type_list_store.append (out type_list_store_iter);
             type_list_store.set (type_list_store_iter, 0,
-                                _("Checking"), 1, Account.Type.CHECKING);
+                                 _("Checking"), 1, Account.Type.CHECKING);
             type_list_store.append (out type_list_store_iter);
             type_list_store.set (type_list_store_iter, 0,
-                                _("Savings"), 1, Account.Type.SAVINGS);
+                                 _("Savings"), 1, Account.Type.SAVINGS);
 
             type_choice = new Gtk.ComboBox.with_model (type_list_store);
             type_choice.expand = true;
@@ -93,7 +93,7 @@ namespace Envelope.Dialog {
 
             type_choice.active = 0;
 
-            type_choice.changed.connect ( () => {
+            type_choice.changed.connect (() => {
                 type_choice.get_active_iter (out type_list_store_iter);
 
                 int account_type;
@@ -151,13 +151,13 @@ namespace Envelope.Dialog {
         private void create_account () {
             try {
                 var account = AccountManager.get_default ()
-                                            .create_account (number_entry.text,
-                                                            desc_entry.text,
-                                                            double.parse (balance_entry.text),
-                                                            current_account_type);
+                              .create_account (number_entry.text,
+                                               desc_entry.text,
+                                               double.parse (balance_entry.text),
+                                               current_account_type);
 
                 // show notification
-                Envelope.App.toast (_("Account %s has been created").printf(account.number));
+                Envelope.App.toast (_("Account %s has been created").printf (account.number));
             } catch (ServiceError err) {
                 error ("error while creating account (%s)".printf (err.message));
             } catch (AccountError err) {

@@ -65,7 +65,7 @@ namespace Envelope.Dialog {
                 } else {
                     create_button.sensitive = true;
                     amount_entry.placeholder_text = _("Monthly Budget for %s")
-                        .printf(name_entry.get_text ());
+                        .printf (name_entry.get_text ());
                 }
             });
 

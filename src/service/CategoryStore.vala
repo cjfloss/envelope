@@ -61,10 +61,10 @@ namespace Envelope.Service {
          * @param name the name of the category to lookup
          * @return the category instance, or null if not found
          */
-        public Category? get_category_by_name (string name) {
-            Category? category = null;
+        public Category ? get_category_by_name (string name) {
+            Category ? category = null;
 
-            @foreach ( (model, path, iter) => {
+            @foreach ((model, path, iter) => {
                 Category fe_category;
                 model.@get (iter, Column.CATEGORY, out fe_category, -1);
 
@@ -85,9 +85,9 @@ namespace Envelope.Service {
         * @return the category instance, or null if not found
         */
         public Category get_category_by_id (int id) {
-            Category? category = null;
+            Category ? category = null;
 
-            @foreach ( (model, path, iter) => {
+            @foreach ((model, path, iter) => {
                 Category fe_category;
 
                 model.@get (iter, Column.CATEGORY, out fe_category, -1);
@@ -117,17 +117,17 @@ namespace Envelope.Service {
         private void connect_signals () {
             var budget_manager = BudgetManager.get_default ();
 
-            budget_manager.category_added.connect ( (category) => {
+            budget_manager.category_added.connect ((category) => {
                 debug ("category added; reloading");
                 reload ();
             });
 
-            budget_manager.category_deleted.connect ( (category) => {
+            budget_manager.category_deleted.connect ((category) => {
                 debug ("category deleted; reloading");
                 reload ();
             });
 
-            budget_manager.category_renamed.connect ( (category) => {
+            budget_manager.category_renamed.connect ((category) => {
                 debug ("category renamed; reloading");
                 reload ();
             });

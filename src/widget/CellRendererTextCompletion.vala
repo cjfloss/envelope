@@ -42,12 +42,12 @@ namespace Envelope.Widget {
             edited (path, text_entry.text);
         }
 
-        public override unowned Gtk.CellEditable? start_editing (Gdk.Event? event,
-                                                                Gtk.Widget widget,
-                                                                string path,
-                                                                Gdk.Rectangle background_area,
-                                                                Gdk.Rectangle cell_area,
-                                                                Gtk.CellRendererState flags) {
+        public override unowned Gtk.CellEditable ? start_editing (Gdk.Event ? event,
+                Gtk.Widget widget,
+                string path,
+                Gdk.Rectangle background_area,
+                Gdk.Rectangle cell_area,
+                Gtk.CellRendererState flags) {
             assert (editable);
 
             // create new completion every time, since the backing store might

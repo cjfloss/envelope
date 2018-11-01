@@ -40,14 +40,14 @@ namespace Envelope.View {
             MANUAL
         }
 
-        public FilterType                  filter_type      { get; set; }
+        public FilterType filter_type { get; set; }
 
-        public Gtk.RadioButton             btn_this_month   { get; private set; }
-        public Gtk.RadioButton             btn_last_month   { get; private set; }
-        public Gtk.RadioButton             btn_future       { get; private set; }
-        public Gtk.RadioButton             btn_manual       { get; private set; }
-        public Granite.Widgets.DatePicker  from_date        { get; private set; }
-        public Granite.Widgets.DatePicker  to_date          { get; private set; }
+        public Gtk.RadioButton btn_this_month { get; private set; }
+        public Gtk.RadioButton btn_last_month { get; private set; }
+        public Gtk.RadioButton btn_future { get; private set; }
+        public Gtk.RadioButton btn_manual { get; private set; }
+        public Granite.Widgets.DatePicker from_date { get; private set; }
+        public Granite.Widgets.DatePicker to_date { get; private set; }
 
         private FilterView () {
             Object (orientation: Gtk.Orientation.VERTICAL);
@@ -74,7 +74,8 @@ namespace Envelope.View {
             var inner_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 12);
             pack_start (inner_box);
 
-            var title_image = new Gtk.Image.from_icon_name ("office-calendar", Gtk.IconSize.LARGE_TOOLBAR);
+            var title_image = new Gtk.Image.from_icon_name ("office-calendar",
+                    Gtk.IconSize.LARGE_TOOLBAR);
             inner_box.pack_start (title_image, false, false);
 
             // this month
@@ -83,15 +84,18 @@ namespace Envelope.View {
             inner_box.pack_start (btn_this_month, false, false);
 
             // last month
-            btn_last_month = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Last month"));
+            btn_last_month = new Gtk.RadioButton.with_label_from_widget (btn_this_month,
+                    _("Last month"));
             inner_box.pack_start (btn_last_month, false, false);
 
             // future
-            btn_future = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Future"));
+            btn_future = new Gtk.RadioButton.with_label_from_widget (btn_this_month,
+                    _("Future"));
             inner_box.pack_start (btn_future, false, false);
 
             // manual dates
-            btn_manual = new Gtk.RadioButton.with_label_from_widget (btn_this_month, _("Pick dates:"));
+            btn_manual = new Gtk.RadioButton.with_label_from_widget (btn_this_month,
+                    _("Pick dates:"));
             inner_box.pack_start (btn_manual, false, false);
 
             from_date = new Granite.Widgets.DatePicker ();
@@ -108,7 +112,7 @@ namespace Envelope.View {
         private void connect_signals () {
             debug ("connect filter view signals");
 
-            notify["filter-type"].connect ( (s, p) => {
+            notify["filter-type"].connect ((s, p) => {
                 switch (filter_type) {
                     case FilterType.THIS_MONTH:
                         btn_this_month.active = true;
@@ -127,28 +131,28 @@ namespace Envelope.View {
                 }
             });
 
-            btn_last_month.toggled.connect ( () => {
+            btn_last_month.toggled.connect (() => {
                 if (btn_last_month.get_active ()) {
                     filter_type = FilterType.LAST_MONTH;
                     fire_date_filter_changed_signal ();
                 }
             });
 
-            btn_this_month.toggled.connect ( () => {
+            btn_this_month.toggled.connect (() => {
                 if (btn_this_month.get_active ()) {
                     filter_type = FilterType.THIS_MONTH;
                     fire_date_filter_changed_signal ();
                 }
             });
 
-            btn_future.toggled.connect ( () => {
+            btn_future.toggled.connect (() => {
                 if (btn_future.get_active ()) {
                     filter_type = FilterType.FUTURE;
                     fire_date_filter_changed_signal ();
                 }
             });
 
-            btn_manual.toggled.connect ( () => {
+            btn_manual.toggled.connect (() => {
                 if (btn_manual.get_active ()) {
                     filter_type = FilterType.MANUAL;
 
@@ -164,20 +168,22 @@ namespace Envelope.View {
                 }
             });
 
-            from_date.notify["date"].connect ( () => {
-                if (btn_manual.get_active () && from_date.date != null && to_date.date != null) {
+            from_date.notify["date"].connect (() => {
+                if (btn_manual.get_active () && from_date.date != null
+                        && to_date.date != null) {
                     fire_date_filter_changed_signal ();
                 }
             });
 
-            to_date.notify["date"].connect ( () => {
-                if (btn_manual.get_active () && from_date.date != null && to_date.date != null) {
+            to_date.notify["date"].connect (() => {
+                if (btn_manual.get_active () && from_date.date != null
+                        && to_date.date != null) {
                     fire_date_filter_changed_signal ();
                 }
             });
         }
 
-        private void compute_dates (out DateTime? from, out DateTime? to) {
+        private void compute_dates (out DateTime ? from, out DateTime ? to) {
             int month, year;
             Envelope.Util.Date.get_year_month (out year, out month);
 
@@ -189,7 +195,8 @@ namespace Envelope.View {
                     int last_month, last_year;
                     Envelope.Util.Date.months_ago (1, out last_year, out last_month);
 
-                    Envelope.Util.Date.get_month_boundaries (last_year, last_month, out from, out to);
+                    Envelope.Util.Date.get_month_boundaries (last_year, last_month, out from,
+                            out to);
                     break;
                 case FilterType.FUTURE:
                     Envelope.Util.Date.tomorrow (out from);

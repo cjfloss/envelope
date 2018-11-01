@@ -46,10 +46,11 @@ namespace Envelope.Service {
         public signal void account_updated (Account account);
         public signal void account_deleted (Account account);
 
-        public signal void transaction_recorded     (Transaction transaction);
-        public signal void transactions_imported    (ArrayList<Transaction> transactions, Account account);
-        public signal void transaction_updated      (Transaction transaction);
-        public signal void transaction_deleted      (Transaction transaction);
+        public signal void transaction_recorded (Transaction transaction);
+        public signal void transactions_imported (ArrayList<Transaction> transactions,
+                Account account);
+        public signal void transaction_updated (Transaction transaction);
+        public signal void transaction_deleted (Transaction transaction);
 
         public Collection<Account> get_accounts () throws ServiceError {
             try {
@@ -59,7 +60,8 @@ namespace Envelope.Service {
             }
         }
 
-        public bool get_account_by_id (int account_id, out Account? account) throws ServiceError {
+        public bool get_account_by_id (int account_id,
+                                       out Account ? account) throws ServiceError {
             // load from database
             try {
                 account = dbm.load_account (account_id);
@@ -77,7 +79,7 @@ namespace Envelope.Service {
          * @throws ServiceError
          */
         public Account create_account (string number,
-                                       string? description,
+                                       string ? description,
                                        double balance,
                                        Account.Type account_type) throws AccountError, ServiceError {
             var account = new Account ();
@@ -118,7 +120,8 @@ namespace Envelope.Service {
          *
          * @return bool true if transaction suceedded, false otherwise
          */
-        public void rename_account (Account account, string new_number) throws AccountError, ServiceError {
+        public void rename_account (Account account,
+                                    string new_number) throws AccountError, ServiceError {
             try {
                 dbm.rename_account (account, new_number);
                 account.number = new_number;
@@ -145,7 +148,8 @@ namespace Envelope.Service {
             }
         }
 
-        public Gee.List<Transaction> load_account_transactions (Account account) throws ServiceError {
+        public Gee.List<Transaction> load_account_transactions (
+            Account account) throws ServiceError {
             try {
                 return dbm.load_account_transactions (account);
             } catch (DatabaseError err) {
@@ -153,7 +157,14 @@ namespace Envelope.Service {
             }
         }
 
-        public Transaction record_transaction (ref Account account, DateTime date, string label, string description, double amount, Category? category, Transaction? parent = null) throws ServiceError {
+        public Transaction record_transaction (ref Account account,
+                                               DateTime date,
+                                               string label,
+                                               string description,
+                                               double amount,
+                                               Category ? category,
+                                               Transaction ? parent = null)
+        throws ServiceError {
             var old_balance = account.balance;
 
             try {
@@ -163,7 +174,9 @@ namespace Envelope.Service {
                 transaction.parent = parent;
                 transaction.date = date;
                 transaction.description = description;
-                transaction.direction = amount > 0d ? Transaction.Direction.INCOMING : Transaction.Direction.OUTGOING;
+                transaction.direction = amount > 0d
+                    ? Transaction.Direction.INCOMING
+                    : Transaction.Direction.OUTGOING;
                 transaction.amount = Math.fabs (amount);
                 transaction.account = account;
 
@@ -229,7 +242,8 @@ namespace Envelope.Service {
         /**
          * Remove a transaction from the database, adjusting the affected account's balance
          */
-        public void remove_transaction (ref Transaction transaction) throws ServiceError {
+        public void remove_transaction (ref Transaction transaction)
+        throws ServiceError {
             try {
                 dbm.start_transaction ();
 
@@ -254,7 +268,8 @@ namespace Envelope.Service {
         /**
          * Imports transactions into this account. Will do its best to discard duplicates.
          */
-        public int import_transactions_from_file (ref Account account, File file) throws ImporterError, ServiceError {
+        public int import_transactions_from_file (ref Account account,
+                File file) throws ImporterError, ServiceError {
             var path = file.get_path ();
 
             if (!file.query_exists ()) {
@@ -299,8 +314,9 @@ namespace Envelope.Service {
                         t.account = account;
                     }
 
-                    info ("adjusting balance for account: %s (new balance: %s)".printf (Envelope.Util.String.format_currency (account.balance),
-                        Envelope.Util.String.format_currency (account.balance + balance_delta)));
+                    info ("adjusting balance for account: %s (new balance: %s)"
+                          .printf (Envelope.Util.String.format_currency (account.balance),
+                                   Envelope.Util.String.format_currency (account.balance + balance_delta)));
 
                     account.balance += balance_delta;
 
@@ -339,7 +355,8 @@ namespace Envelope.Service {
          * @param cancel if true, will invert the calculations to actually cancel a transaction
          * @return the new account's balance
          */
-        private static double adjust_balance (Account account, Transaction transaction, bool cancel = false) {
+        private static double adjust_balance (Account account, Transaction transaction,
+                                              bool cancel = false) {
             switch (transaction.direction) {
                 case Transaction.Direction.INCOMING:
                     if (cancel) {

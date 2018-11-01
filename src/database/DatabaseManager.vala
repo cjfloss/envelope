@@ -68,9 +68,9 @@ namespace Envelope.Database {
         private Database database;
 
         // in-memory caches for often-used objects
-        //private SortedMap<int, Account>           account_cache     = new TreeMap<int, Account> ();
-        private SortedMap<string, Category>       category_cache    = new TreeMap<string, Category> ();
-        private SortedMap<string, Merchant>       merchant_cache    = new TreeMap<string, Merchant> ();
+        //private SortedMap<int, Account> account_cache = new TreeMap<int, Account> ();
+        private SortedMap<string, Category> category_cache = new TreeMap<string, Category> ();
+        private SortedMap<string, Merchant> merchant_cache = new TreeMap<string, Merchant> ();
 
         /**
          * Obtain a reference to the singleton instance of the DatabaseManager
@@ -138,7 +138,7 @@ namespace Envelope.Database {
          * @return the Account object having the specified id, or null if not found
          * @throws DatabaseError
          */
-        public Account? load_account (int account_id) throws DatabaseError {
+        public Account ? load_account (int account_id) throws DatabaseError {
             // if (account_cache.has_key (account_id)) {
             //     return account_cache.@get (account_id);
             // }
@@ -257,7 +257,9 @@ namespace Envelope.Database {
             }
         }
 
-        public void update_category_budgeted_amount (MonthlyCategory category, int year, int month) throws DatabaseError {
+        public void update_category_budgeted_amount (MonthlyCategory category,
+                int year,
+                int month) throws DatabaseError {
             GLib.Value[] args = {category.amount_budgeted, (int) category.@id, year, month};
             this.database.exec (SQL_UPDATE_CATEGORY_BUDGET, args);
         }
@@ -318,7 +320,7 @@ namespace Envelope.Database {
          * @param transaction the database transaction to use
          * @throws SQLHeavy.Error
          */
-        public void update_account_balance (Account account)  throws DatabaseError {
+        public void update_account_balance (Account account) throws DatabaseError {
             GLib.Value[] args = {
                 account.balance,
                 (int) account.@id
@@ -435,7 +437,7 @@ namespace Envelope.Database {
             GLib.Value[] args = { id };
             var results = this.database.exec_cursor (SQL_GET_TRANSACTION_BY_ID, args);
 
-            foreach(var stmt in results) {
+            foreach (var stmt in results) {
                 Transaction transaction;
                 query_result_to_transaction (stmt, out transaction);
 
@@ -454,7 +456,7 @@ namespace Envelope.Database {
 
             var results = this.database.exec_cursor (SQL_LOAD_CATEGORIES);
 
-            foreach(var stmt in results) {
+            foreach (var stmt in results) {
                 MonthlyCategory category;
                 int parent_id;
 
@@ -585,7 +587,8 @@ namespace Envelope.Database {
                 try {
                     this.start_transaction ();
 
-                    var default_categories = new string[] { _("Groceries"),
+                    var default_categories = new string[] {
+                        _("Groceries"),
                         _("Fuel"),
                         _("Public transit"),
                         _("Restaurants"),
@@ -637,7 +640,10 @@ namespace Envelope.Database {
             }
         }
 
-        private void query_result_to_transaction (Sqlite.Statement results, out Transaction transaction, Category? category = null) throws DatabaseError {
+        private void query_result_to_transaction (Sqlite.Statement results,
+                out Transaction transaction,
+                Category ? category = null)
+        throws DatabaseError {
             int cols = results.column_count ();
             int category_id = 0;
             transaction = new Transaction ();
@@ -678,7 +684,10 @@ namespace Envelope.Database {
             }
         }
 
-        private void query_result_to_category (Sqlite.Statement results, out MonthlyCategory category, out int parent_id) throws DatabaseError {
+        private void query_result_to_category (Sqlite.Statement results,
+                                               out MonthlyCategory category,
+                                               out int parent_id)
+        throws DatabaseError {
             int cols = results.column_count ();
             category = new MonthlyCategory ();
 
@@ -712,13 +721,13 @@ namespace Envelope.Database {
 
         private void connect_signals () {
             // invalidate merchant cache when a transaction is recorded
-            transaction_created.connect ( (transaction) =>  {
+            transaction_created.connect ((transaction) => {
                 merchant_cache.clear ();
             });
         }
 
         private void debug_sql (string sql) {
-            debug ("SQLITE: %s", sql.strip());
+            debug ("SQLITE: %s", sql.strip ());
         }
     }
 }

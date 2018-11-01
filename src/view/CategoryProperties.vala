@@ -65,7 +65,8 @@ namespace Envelope.View {
             remaining_label.visible = category.amount_budgeted != 0d;
             remaining_label_label.visible = remaining_label.visible;
 
-            available_label.label = "Max. %s".printf (Envelope.Util.String.format_currency (BudgetManager.get_default ().state.budget_available));
+            available_label.label = "Max. %s".printf (Envelope.Util.String.format_currency (
+                                        BudgetManager.get_default ().state.budget_available));
         }
 
         private void build_ui () {
@@ -142,7 +143,7 @@ namespace Envelope.View {
 
             // OK button
             ok_button = new Gtk.Button.with_label (_("Apply"));
-            ok_button.get_style_context ().add_class("suggested-action");
+            ok_button.get_style_context ().add_class ("suggested-action");
             box.add (ok_button);
 
             show_all ();

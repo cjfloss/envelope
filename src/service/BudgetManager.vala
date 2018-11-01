@@ -36,14 +36,14 @@ namespace Envelope.Service {
         public Collection<MonthlyCategory> categories;
 
         public double budgeted_outflow { get {
-            double amount = 0d;
+                double amount = 0d;
 
-            foreach (MonthlyCategory category in categories) {
-                amount += category.amount_budgeted;
-            }
+                foreach (MonthlyCategory category in categories) {
+                    amount += category.amount_budgeted;
+                }
 
-            return amount;
-        }}
+                return amount;
+            }}
 
         public Collection<Transaction> uncategorized;
 
@@ -51,8 +51,8 @@ namespace Envelope.Service {
         public double uncategorized_outflow;
 
         public double budget_available { get {
-            return inflow - budgeted_outflow;
-        }}
+                return inflow - budgeted_outflow;
+            }}
     }
 
     private static BudgetManager budget_manager_instance = null;
@@ -72,7 +72,7 @@ namespace Envelope.Service {
             return budget_manager_instance;
         }
 
-        public BudgetState? state { get; private set; }
+        public BudgetState ? state { get; private set; }
 
         public signal void budget_changed (BudgetState state);
 
@@ -113,7 +113,8 @@ namespace Envelope.Service {
          * @param {string} name - the name of the category
          * @return {Category} the new category
          */
-        public Category create_category (string name, double budgeted_amount = 0d) throws ServiceError {
+        public Category create_category (string name,
+                                         double budgeted_amount = 0d) throws ServiceError {
             try {
                 MonthlyCategory category = new MonthlyCategory ();
                 category.name = name;
@@ -166,12 +167,15 @@ namespace Envelope.Service {
             }
         }
 
-        public void categorize_all_for_merchant (string merchant_name, Category category) throws ServiceError {
+        public void categorize_all_for_merchant (string merchant_name,
+                Category category) throws ServiceError {
             return_if_fail (category.@id != null);
 
             try {
-                dbm.categorize_for_merchant (merchant_name, category);  // set category for all transactions having the same merchant
-                compute_state_and_fire_changed_event ();                // re-compute budget state and fire state_changed
+                // set category for all transactions having the same merchant
+                dbm.categorize_for_merchant (merchant_name, category);
+                // re-compute budget state and fire state_changed
+                compute_state_and_fire_changed_event ();
             } catch (DatabaseError err) {
                 throw new ServiceError.DATABASE_ERROR (err.message);
             }
@@ -193,7 +197,8 @@ namespace Envelope.Service {
          *
          * @return ArrayList<Transaction> list of transactions in the requested period
          */
-        public Collection<Transaction> get_transactions_for_month (int year, int month) throws ServiceError {
+        public Collection<Transaction> get_transactions_for_month (int year,
+                int month) throws ServiceError {
             try {
                 return dbm.get_transactions_for_month_and_year (month, year);
             } catch (DatabaseError err) {
@@ -219,11 +224,18 @@ namespace Envelope.Service {
          * @param {double} inflow
          * @param {double} outflow
          */
-        public Gee.List<Transaction>  compute_current_category_operations (Category? category, out double inflow, out double outflow) throws ServiceError {
+        public Gee.List<Transaction> compute_current_category_operations (
+            Category ? category,
+            out double inflow,
+            out double outflow)
+        throws ServiceError {
             try {
-                Gee.List<Transaction> transactions = dbm.get_current_transactions_for_category (category);
+                Gee.List<Transaction> transactions = dbm.get_current_transactions_for_category (
+                    category);
 
-                debug ("transaction for category %s: %d", category != null ? category.name : "(uncategorized)", transactions.size);
+                debug ("transaction for category %s: %d", category != null ?
+                       category.name : "(uncategorized)",
+                       transactions.size);
 
                 inflow = 0d;
                 outflow = 0d;
@@ -255,23 +267,23 @@ namespace Envelope.Service {
             var am = AccountManager.get_default ();
 
             // listen to transaction operations
-            am.transaction_recorded.connect ( () =>  {
+            am.transaction_recorded.connect (() => {
                 compute_state_and_fire_changed_event ();
             });
 
-            am.transactions_imported.connect ( () =>  {
+            am.transactions_imported.connect (() => {
                 compute_state_and_fire_changed_event ();
             });
 
-            am.transaction_updated.connect ( () =>  {
+            am.transaction_updated.connect (() => {
                 compute_state_and_fire_changed_event ();
             });
 
-            am.transaction_deleted.connect ( () =>  {
+            am.transaction_deleted.connect (() => {
                 compute_state_and_fire_changed_event ();
             });
 
-            am.account_deleted.connect ( () => {
+            am.account_deleted.connect (() => {
                 compute_state_and_fire_changed_event ();
             });
         }
@@ -295,7 +307,8 @@ namespace Envelope.Service {
         /**
          * Compute the budget state for the specified year and month
          */
-        private void compute_state_for_month (int month, int year, out BudgetState budget_state) throws ServiceError {
+        private void compute_state_for_month (int month, int year,
+                                              out BudgetState budget_state) throws ServiceError {
             DateTime from;
             DateTime to;
             Envelope.Util.Date.get_month_boundaries (month, year, out from, out to);

@@ -52,12 +52,12 @@ namespace Envelope {
         }
 
         public Account.with_number (string number) {
-            this();
+            this ();
             this.number = number;
         }
 
         public Account.from_transaction_list (ref ArrayList<Transaction> transactions) {
-            this();
+            this ();
             this.transactions = transactions;
         }
 

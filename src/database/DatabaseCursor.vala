@@ -40,15 +40,16 @@ public class Envelope.Database.Cursor : Object {
      * @param arguments array of values to bind to the SQL statement or null if
      * none
      */
-    public Cursor (Sqlite.Database   db,
-                   string            sql,
-                   GLib.Value[]?     arguments) throws DatabaseError {
+    public Cursor (Sqlite.Database db,
+                   string sql,
+                   GLib.Value[] ? arguments) throws DatabaseError {
         this.db = db;
 
         this.throw_if_code_is_error (db.prepare_v2 (sql,
-                                                    -1,
-                                                    out this.statement,
-                                                    null));
+                                     -1,
+                                     out this.statement,
+                                     null));
+
         if (arguments == null) {
             return;
         }
@@ -70,7 +71,7 @@ public class Envelope.Database.Cursor : Object {
      * @param arguments array of values to bind to the SQL statement or null if
      * none
      */
-    public void bind (GLib.Value[]? arguments) throws DatabaseError {
+    public void bind (GLib.Value[] ? arguments) throws DatabaseError {
         this.statement.reset ();
         this.dirty = true;
         this.current_state = -1;
