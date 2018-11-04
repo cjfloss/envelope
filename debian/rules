@@ -11,6 +11,3 @@
 
 %:
 	dh $@ --buildsystem=meson
-
-override_dh_strip:
-  dh_strip --dbg-package=com.github.cjfloss.envelope-dbg
