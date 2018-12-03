@@ -21,22 +21,11 @@ using Envelope.Window;
 namespace Envelope {
     private static App application_instance = null;
 
-    public class App : Granite.Application {
+    public class App : Gtk.Application {
         public const int TOAST_TIMEOUT = 3000;
 
         construct {
-            // App info
-            build_data_dir = Build.DATADIR;
-            build_pkg_data_dir = Build.PKG_DATADIR;
-            build_release_name = Build.RELEASE_NAME;
-            build_version = Build.VERSION;
-            build_version_info = Build.VERSION_INFO;
-
-            program_name = _(Build.APP_NAME);
-            exec_name = Build.APP_NAME;
-
             application_id = Build.APP_NAME;
-            app_launcher = Build.APP_NAME + ".desktop";
 
             application_instance = this;
         }
@@ -63,9 +52,8 @@ namespace Envelope {
 
         protected override void activate () {
             Granite.Services.Logger.initialize (Build.APP_NAME);
-            Granite.Services.Logger.DisplayLevel = DEBUG ?
-                                                   Granite.Services.LogLevel.DEBUG :
-                                                   Granite.Services.LogLevel.INFO;
+            Granite.Services.Logger.DisplayLevel = Granite.Services.LogLevel.DEBUG;
+            //                                       : Services.LogLevel.INFO;
 
             Granite.Services.Paths.initialize (Build.APP_NAME, Build.PKG_DATADIR);
 

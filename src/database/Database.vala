@@ -54,8 +54,7 @@ namespace Envelope.Database {
          *
          * @param name Name of the database which is used to create the file-name
          */
-        public Database (string name)
-                         throws DatabaseError, Error {
+        public Database (string name) throws DatabaseError, Error {
             Object (name : name);
             init ();
         }
