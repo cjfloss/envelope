@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.cjfloss.envelope\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-31 19:17-0400\n"
+"POT-Creation-Date: 2018-12-03 05:20-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,93 +17,93 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/database/Database.vala:85
+#: src/database/Database.vala:84
 #, c-format
 msgid "Error while opening SQLite database %s: %s"
 msgstr ""
 
-#: src/database/Database.vala:194
+#: src/database/Database.vala:193
 #, c-format
 msgid "Failed to roll back transaction: %s"
 msgstr ""
 
-#: src/database/DatabaseCursor.vala:103
+#: src/database/DatabaseCursor.vala:104
 #, c-format
 msgid "Unsupported type %s"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:588
+#: src/database/DatabaseManager.vala:591
 msgid "Groceries"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:589
+#: src/database/DatabaseManager.vala:592
 msgid "Fuel"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:590
+#: src/database/DatabaseManager.vala:593
 msgid "Public transit"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:591
+#: src/database/DatabaseManager.vala:594
 msgid "Restaurants"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:592
+#: src/database/DatabaseManager.vala:595
 msgid "Entertainment"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:593 src/dialog/AddAccountDialog.vala:84
+#: src/database/DatabaseManager.vala:596 src/dialog/AddAccountDialog.vala:84
 msgid "Savings"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:594
+#: src/database/DatabaseManager.vala:597
 msgid "Personal care"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:595
+#: src/database/DatabaseManager.vala:598
 msgid "Alcohol & Bars"
 msgstr ""
 
-#: src/database/DatabaseManager.vala:596
+#: src/database/DatabaseManager.vala:599
 msgid "Emergency fund"
 msgstr ""
 
 #. OK button
-#: src/view/TransactionView.vala:185 src/view/TransactionView.vala:895
-#: src/view/CategoryProperties.vala:144
+#: src/view/TransactionView.vala:184 src/view/TransactionView.vala:906
+#: src/view/CategoryProperties.vala:145
 msgid "Apply"
 msgstr ""
 
-#: src/view/TransactionView.vala:196 src/view/TransactionView.vala:348
-#: src/view/TransactionView.vala:911 src/view/TransactionView.vala:929
+#: src/view/TransactionView.vala:195 src/view/TransactionView.vala:341
+#: src/view/TransactionView.vala:922 src/view/TransactionView.vala:940
 msgid "Add transaction"
 msgstr ""
 
-#: src/view/TransactionView.vala:319
+#: src/view/TransactionView.vala:318
 msgid "No results."
 msgstr ""
 
 #. Cancel button
-#: src/view/TransactionView.vala:352 src/view/CategoryProperties.vala:140
+#: src/view/TransactionView.vala:345 src/view/CategoryProperties.vala:141
 #: src/dialog/AddAccountDialog.vala:125 src/dialog/AddCategoryDialog.vala:91
-#: src/widget/CellRendererCategoryPicker.vala:87
+#: src/widget/CellRendererCategoryPicker.vala:89
 msgid "Cancel"
 msgstr ""
 
 #. columns
-#: src/view/TransactionView.vala:544
+#: src/view/TransactionView.vala:543
 msgid "Date"
 msgstr ""
 
-#: src/view/TransactionView.vala:557
+#: src/view/TransactionView.vala:556
 msgid "Merchant"
 msgstr ""
 
-#: src/view/TransactionView.vala:570
+#: src/view/TransactionView.vala:569
 msgid "Category"
 msgstr ""
 
-#: src/view/TransactionView.vala:583
+#: src/view/TransactionView.vala:582
 #, c-format
 msgid "Outflow (%s)"
 msgstr ""
@@ -113,21 +113,21 @@ msgstr ""
 msgid "Inflow (%s)"
 msgstr ""
 
-#: src/view/TransactionView.vala:609
+#: src/view/TransactionView.vala:610
 msgid "Memo"
 msgstr ""
 
 #. right-click menu
-#: src/view/TransactionView.vala:624
+#: src/view/TransactionView.vala:625
 msgid "Split"
 msgstr ""
 
 #. right-click menu
-#: src/view/TransactionView.vala:626 src/view/Sidebar.vala:236
+#: src/view/TransactionView.vala:627 src/view/Sidebar.vala:236
 msgid "Remove"
 msgstr ""
 
-#: src/view/TransactionView.vala:957
+#: src/view/TransactionView.vala:968
 msgid "Transaction removed"
 msgstr ""
 
@@ -155,7 +155,7 @@ msgid "Money earned in %s"
 msgstr ""
 
 #. remaining
-#: src/view/Sidebar.vala:306 src/view/CategoryProperties.vala:125
+#: src/view/Sidebar.vala:306 src/view/CategoryProperties.vala:126
 msgid "Remaining"
 msgstr ""
 
@@ -170,43 +170,43 @@ msgid "Accounts"
 msgstr ""
 
 #. Add "Add account..."
-#: src/view/Sidebar.vala:344
+#: src/view/Sidebar.vala:346
 msgid "Add account…"
 msgstr ""
 
-#: src/view/Sidebar.vala:353
+#: src/view/Sidebar.vala:355
 msgid "Add a new account"
 msgstr ""
 
 #. Add "Categories" category header
-#: src/view/Sidebar.vala:357
+#: src/view/Sidebar.vala:359
 msgid "Spending categories"
 msgstr ""
 
 #. Add "Uncategorized"
-#: src/view/Sidebar.vala:464 src/window/MainWindow.vala:286
+#: src/view/Sidebar.vala:469 src/window/MainWindow.vala:299
 msgid "Uncategorized"
 msgstr ""
 
 #. Add category...
-#: src/view/Sidebar.vala:493
+#: src/view/Sidebar.vala:500
 msgid "Add category…"
 msgstr ""
 
-#: src/view/Sidebar.vala:494
+#: src/view/Sidebar.vala:502
 msgid "Add a new spending category"
 msgstr ""
 
-#: src/view/Sidebar.vala:749
+#: src/view/Sidebar.vala:770
 msgid "None yet"
 msgstr ""
 
-#: src/view/Sidebar.vala:1127
+#: src/view/Sidebar.vala:1153
 #, c-format
 msgid "Category %s removed"
 msgstr ""
 
-#: src/view/Sidebar.vala:1138
+#: src/view/Sidebar.vala:1164
 #, c-format
 msgid "Account %s removed"
 msgstr ""
@@ -223,91 +223,91 @@ msgstr ""
 msgid "Spend! Get paid!"
 msgstr ""
 
-#: src/view/AccountWelcomeScreen.vala:41
+#: src/view/AccountWelcomeScreen.vala:42
 msgid "There are currently no transactions in this account"
 msgstr ""
 
-#: src/view/AccountWelcomeScreen.vala:47
+#: src/view/AccountWelcomeScreen.vala:48
 msgid "Record a transaction"
 msgstr ""
 
-#: src/view/AccountWelcomeScreen.vala:48
+#: src/view/AccountWelcomeScreen.vala:49
 msgid "Record a fresh new transaction for this account. Or, plan a future one!"
 msgstr ""
 
 #. import button
-#: src/view/AccountWelcomeScreen.vala:50 src/window/MainWindow.vala:105
+#: src/view/AccountWelcomeScreen.vala:51 src/window/MainWindow.vala:106
 msgid "Import transactions"
 msgstr ""
 
-#: src/view/AccountWelcomeScreen.vala:51
+#: src/view/AccountWelcomeScreen.vala:52
 msgid "Import from a QIF file obtained from another application"
 msgstr ""
 
 #. set_class (summary_container, Granite.StyleClass.CONTENT_VIEW);
-#: src/view/BudgetOverview.vala:93
+#: src/view/BudgetOverview.vala:96
 msgid "Your budget right now:"
 msgstr ""
 
-#: src/view/BudgetOverview.vala:105
+#: src/view/BudgetOverview.vala:109
 msgid "Inflow:"
 msgstr ""
 
-#: src/view/BudgetOverview.vala:117
+#: src/view/BudgetOverview.vala:124
 msgid "Outflow:"
 msgstr ""
 
-#: src/view/BudgetOverview.vala:129
+#: src/view/BudgetOverview.vala:139
 msgid "Remaining this month:"
 msgstr ""
 
 #. this month
-#: src/view/FilterView.vala:82
+#: src/view/FilterView.vala:83
 msgid "This month"
 msgstr ""
 
 #. last month
-#: src/view/FilterView.vala:86
+#: src/view/FilterView.vala:88
 msgid "Last month"
 msgstr ""
 
 #. future
-#: src/view/FilterView.vala:90
+#: src/view/FilterView.vala:93
 msgid "Future"
 msgstr ""
 
 #. manual dates
-#: src/view/FilterView.vala:94
+#: src/view/FilterView.vala:98
 msgid "Pick dates:"
 msgstr ""
 
 #. column_homogeneous = true;
 #. title
-#: src/view/CategoryProperties.vala:77
+#: src/view/CategoryProperties.vala:78
 msgid "Edit category"
 msgstr ""
 
 #. category name text entry
-#: src/view/CategoryProperties.vala:82
+#: src/view/CategoryProperties.vala:83
 msgid "Name"
 msgstr ""
 
 #. budgeted amount
-#: src/view/CategoryProperties.vala:92
+#: src/view/CategoryProperties.vala:93
 msgid "Budget"
 msgstr ""
 
-#: src/view/CategoryProperties.vala:99
+#: src/view/CategoryProperties.vala:100
 msgid "Monthly budget"
 msgstr ""
 
 #. outflow
-#: src/view/CategoryProperties.vala:107
+#: src/view/CategoryProperties.vala:108
 msgid "Outflow"
 msgstr ""
 
 #. inflow
-#: src/view/CategoryProperties.vala:116
+#: src/view/CategoryProperties.vala:117
 msgid "Inflow"
 msgstr ""
 
@@ -387,55 +387,190 @@ msgstr ""
 msgid "Import transactions from file"
 msgstr ""
 
-#: src/dialog/ImportTransactionsDialog.vala:67
+#: src/dialog/ImportTransactionsDialog.vala:68
 #, c-format
 msgid "%d transactions imported in account %s"
 msgstr ""
 
 #. apply to all
 #: src/widget/CellRendererCategoryPicker.vala:44
-#: src/widget/CellRendererCategoryPicker.vala:82
+#: src/widget/CellRendererCategoryPicker.vala:83
 #, c-format
 msgid "Apply to all %s"
 msgstr ""
 
 #. OK button
-#: src/widget/CellRendererCategoryPicker.vala:91
+#: src/widget/CellRendererCategoryPicker.vala:93
 msgid "Set category"
 msgstr ""
 
-#: src/window/MainWindow.vala:88
+#: src/window/MainWindow.vala:90
 msgid "Export…"
 msgstr ""
 
 #. export button
-#. export_button = new Gtk.Button.from_icon_name ("document-export", Gtk.IconSize.LARGE_TOOLBAR);
+#. export_button = new Gtk.Button.from_icon_name ("document-export",
+#. Gtk.IconSize.LARGE_TOOLBAR);
 #. export_button.tooltip_text = _("Backup budget");
 #. header_bar.pack_end (export_button);
 #. add transaction button
-#: src/window/MainWindow.vala:115
+#: src/window/MainWindow.vala:118
 msgid "Record transaction"
 msgstr ""
 
-#: src/window/MainWindow.vala:121
+#: src/window/MainWindow.vala:127
 msgid "Search transactions…"
 msgstr ""
 
-#: src/window/MainWindow.vala:291
+#: src/window/MainWindow.vala:304
 #, c-format
 msgid "Search in %s"
 msgstr ""
 
 #. uncategorized
-#: src/window/MainWindow.vala:293
+#: src/window/MainWindow.vala:306
 msgid "Search uncategorized"
 msgstr ""
 
-#: src/window/MainWindow.vala:370
+#: src/window/MainWindow.vala:387
 msgid "Transaction recorded"
 msgstr ""
 
-#: src/window/MainWindow.vala:416
+#: src/window/MainWindow.vala:436
 #, c-format
 msgid "Transactions in %s"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.desktop.in:3
+#: data/com.github.cjfloss.envelope.appdata.xml.in:7
+msgid "Envelope"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.desktop.in:4
+msgid "Manage your budget"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.desktop.in:7
+msgid "Budget;Money;"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.desktop.in:9
+#: data/com.github.cjfloss.envelope.appdata.xml.in:8
+msgid "Personal budget manager"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.desktop.in:12
+msgid "com.github.cjfloss.envelope"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:44
+msgid "Originaly made by Nicolas Laplante."
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:45
+msgid "Features"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:47
+msgid "Envelope system budget workflow"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:48
+msgid "Import transactions from QIF files"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:60
+msgid "Editing a category"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:64
+msgid "When you lauch envelope for the first time"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:68
+msgid "Dialog to add an account"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:72
+msgid "When you just added an account"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:76
+msgid "Adding a transaction"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:81
+msgid "Cleiton Floss"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:91
+msgid "New"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:93
+msgid "Improved add account Dialog"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:94
+msgid "Improved add category Dialog"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:96
+msgid "Fix"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:98
+msgid "Fix crash while adding second account"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:99
+msgid "Allow resizing window"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:100
+msgid "Add unit tests"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:101
+msgid "Add current version to the binary"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:107
+msgid "Fixed some glitches"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:109
+msgid "Fix crash while removing category"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:110
+msgid "Fix information loss on editing"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:111
+msgid "Add AppData changelog"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:112
+msgid "Update app branding"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:118
+msgid "First release: Testing"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:119
+msgid "Basic functionalities"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:121
+msgid "Add account"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:122
+msgid "Add transactions"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:123
+msgid "Import QIF files"
 msgstr ""
