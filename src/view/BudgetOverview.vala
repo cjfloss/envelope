@@ -144,8 +144,13 @@ namespace Envelope.View {
 
             remaining_value_label = new Gtk.Label (Envelope.Util.String.format_currency (
                     budget_state.remaining));
-            Granite.Widgets.Utils.set_theming (remaining_value_label, STYLE_CLASS_OUTFLOW,
-                                               "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            if (budget_state.remaining >= 0) {
+                Granite.Widgets.Utils.set_theming (remaining_value_label, STYLE_CLASS_INFLOW,
+                                                  "inflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            } else {
+                Granite.Widgets.Utils.set_theming (remaining_value_label, STYLE_CLASS_OUTFLOW,
+                                                   "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            }
             remaining_box.pack_start (remaining_value_label, false);
         }
 
@@ -242,7 +247,13 @@ namespace Envelope.View {
                                             budget_state.outflow);
             remaining_value_label.label = Envelope.Util.String.format_currency (Math.fabs (
                                               budget_state.inflow) - Math.fabs (budget_state.outflow));
-
+            if (budget_state.remaining >= 0) {
+              Granite.Widgets.Utils.set_theming (remaining_value_label, STYLE_CLASS_INFLOW,
+                                                "inflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            } else {
+              Granite.Widgets.Utils.set_theming (remaining_value_label, STYLE_CLASS_OUTFLOW,
+                                                 "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            }
             generate_operations_summary ();
         }
 
