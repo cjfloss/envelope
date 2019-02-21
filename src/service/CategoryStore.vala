@@ -61,8 +61,8 @@ namespace Envelope.Service {
          * @param name the name of the category to lookup
          * @return the category instance, or null if not found
          */
-        public Category ? get_category_by_name (string name) {
-            Category ? category = null;
+        public Category? get_category_by_name (string name) {
+            Category? category = null;
 
             @foreach ((model, path, iter) => {
                 Category fe_category;
@@ -85,7 +85,7 @@ namespace Envelope.Service {
         * @return the category instance, or null if not found
         */
         public Category get_category_by_id (int id) {
-            Category ? category = null;
+            Category? category = null;
 
             @foreach ((model, path, iter) => {
                 Category fe_category;

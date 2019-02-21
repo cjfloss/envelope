@@ -39,12 +39,12 @@ test (
 )
 endif
 
-asc = find_program ('appstreamcli', required: false)
+asc = find_program ('appstream-util', required: false)
 if asc.found ()
 test (
  'Validate appdata file',
   asc,
-  args: ['validate', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
+  args: ['validate-strict', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
 )
 endif
 

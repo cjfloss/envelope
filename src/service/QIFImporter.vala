@@ -115,7 +115,7 @@ namespace Envelope.Service {
 
                 // now we must parse each section which are delimited by a single '^' line
                 QIFTransaction transaction = QIFTransaction ();
-                string ? line = null;
+                string? line = null;
 
                 do {
                     line = stream.read_line ();
@@ -209,17 +209,14 @@ namespace Envelope.Service {
             return true;
         }
 
-        private void qif_transaction_to_transaction (QIFTransaction transaction,
-                out Transaction trans) {
+        private void qif_transaction_to_transaction (QIFTransaction transaction, out Transaction trans) {
             trans = new Transaction ();
 
             trans.label = transaction.payee.strip ();
             trans.description = transaction.memo != null ? transaction.memo.strip () : null;
             trans.amount = Math.fabs (transaction.amount);
 
-            trans.direction = transaction.amount < 0
-                              ? Transaction.Direction.OUTGOING
-                              : Transaction.Direction.INCOMING;
+            trans.direction = transaction.amount < 0 ? Transaction.Direction.OUTGOING : Transaction.Direction.INCOMING;
 
             // parse date
             DateTime dt;
@@ -239,8 +236,7 @@ namespace Envelope.Service {
                 year = "20" + year;
             }
 
-            date = new DateTime.local (int.parse (year), int.parse (tokens[0]),
-                                       int.parse (tokens[1]), 0, 0, 0d);
+            date = new DateTime.local (int.parse (year), int.parse (tokens[0]), int.parse (tokens[1]), 0, 0, 0d);
 
             return true;
         }

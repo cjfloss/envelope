@@ -72,7 +72,7 @@ namespace Envelope.Service {
             return budget_manager_instance;
         }
 
-        public BudgetState ? state { get; private set; }
+        public BudgetState? state { get; private set; }
 
         public signal void budget_changed (BudgetState state);
 
@@ -224,18 +224,11 @@ namespace Envelope.Service {
          * @param {double} inflow
          * @param {double} outflow
          */
-        public Gee.List<Transaction> compute_current_category_operations (
-            Category ? category,
-            out double inflow,
-            out double outflow)
-        throws ServiceError {
+        public Gee.List<Transaction> compute_current_category_operations (Category? category, out double inflow, out double outflow) throws ServiceError {
             try {
-                Gee.List<Transaction> transactions = dbm.get_current_transactions_for_category (
-                    category);
+                Gee.List<Transaction> transactions = dbm.get_current_transactions_for_category (category);
 
-                debug ("transaction for category %s: %d", category != null ?
-                       category.name : "(uncategorized)",
-                       transactions.size);
+                debug ("transaction for category %s: %d", category != null ? category.name : "(uncategorized)", transactions.size);
 
                 inflow = 0d;
                 outflow = 0d;

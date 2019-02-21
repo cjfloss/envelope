@@ -6,6 +6,7 @@
   <project_license>GPL-3.0+</project_license>
   <name>Envelope</name>
   <summary>Personal budget manager</summary>
+  <translation type="gettext">com.github.cjfloss.envelope</translation>
 
   <content_rating type="oars-1.0">
     <content_attribute id="violence-cartoon">none</content_attribute>
@@ -38,11 +39,11 @@
   </content_rating>
 
   <description>
-    <p>Maintain your personal budget by using the tried-and-true envelope system.<br/>
-       Designate spending categories (envelopes) and distribute your monthly income into them.<br/>
+    <p>Maintain your personal budget by using the tried-and-true envelope system.
+       Designate spending categories (envelopes) and distribute your monthly income into them.
        Configure accounts where you record all your transactions, then assign each of them to a category.</p>
     <p>Originaly made by Nicolas Laplante.</p>
-    <p>Features</p>
+    <p>Features:</p>
     <ul>
       <li>Envelope system budget workflow</li>
       <li>Import transactions from QIF files</li>
@@ -88,12 +89,12 @@
   <releases>
     <release version="0.0.3" date="2018-02-13" urgency="high">
       <description>
-        <p>New</p>
+        <p>New:</p>
         <ul>
           <li>Improved add account Dialog</li>
           <li>Improved add category Dialog</li>
         </ul>
-        <p>Fix</p>
+        <p>Fix:</p>
         <ul>
           <li>Fix crash while adding second account</li>
           <li>Allow resizing window</li>
@@ -104,7 +105,7 @@
     </release>
     <release version="0.0.2" date="2018-02-03" urgency="high">
       <description>
-        <p>Fixed some glitches</p>
+        <p>Fixed some glitches:</p>
         <ul>
           <li>Fix crash while removing category</li>
           <li>Fix information loss on editing</li>
@@ -115,8 +116,8 @@
     </release>
     ​<release version="0.0.1" date="2018-01-22" urgency="low">
       <description>
-        <p>First release: Testing</p>
-        <p>Basic functionalities</p>
+        <p>First release: Testing.</p>
+        <p>Basic functionalities:</p>
         <ul>
           <li>Add account</li>
           <li>Add transactions</li>

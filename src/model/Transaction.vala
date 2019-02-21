@@ -42,9 +42,9 @@ namespace Envelope {
         public double amount { get; set; }
         public Account account { get; set; }
         public DateTime date { get; set; }
-        public int ? @id { get; set; }
-        public Transaction ? parent { get; set; }
-        public Category ? category { get; set; }
+        public int? @id { get; set; }
+        public Transaction? parent { get; set; }
+        public Category? category { get; set; }
 
         public Transaction () {
             amount = 0d;

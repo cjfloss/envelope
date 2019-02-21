@@ -63,9 +63,7 @@ namespace Envelope.Dialog {
             number_entry.placeholder_text = _("Eg.: account number");
             number_entry.expand = true;
             number_entry.key_release_event.connect (() => {
-                number_entry.get_text () == ""
-                ? create_button.sensitive = false
-                : create_button.sensitive = true;
+                number_entry.get_text () == "" ? create_button.sensitive = false : create_button.sensitive = true;
             });
             grid.attach (number_entry, 1, 1, 1, 1);
 
@@ -77,11 +75,9 @@ namespace Envelope.Dialog {
             Gtk.TreeIter type_list_store_iter;
 
             type_list_store.append (out type_list_store_iter);
-            type_list_store.set (type_list_store_iter, 0,
-                                 _("Checking"), 1, Account.Type.CHECKING);
+            type_list_store.set (type_list_store_iter, 0, _("Checking"), 1, Account.Type.CHECKING);
             type_list_store.append (out type_list_store_iter);
-            type_list_store.set (type_list_store_iter, 0,
-                                 _("Savings"), 1, Account.Type.SAVINGS);
+            type_list_store.set (type_list_store_iter, 0, _("Savings"), 1, Account.Type.SAVINGS);
 
             type_choice = new Gtk.ComboBox.with_model (type_list_store);
             type_choice.expand = true;
@@ -125,8 +121,7 @@ namespace Envelope.Dialog {
             cancel_button = new Gtk.Button.with_label (_("Cancel"));
 
             create_button.sensitive = false;
-            create_button.get_style_context ()
-                        .add_class (Gtk.STYLE_CLASS_SUGGESTED_ACTION);
+            create_button.get_style_context ().add_class (Gtk.STYLE_CLASS_SUGGESTED_ACTION);
 
             cancel_button.clicked.connect (() => {
                 this.destroy ();
@@ -150,11 +145,7 @@ namespace Envelope.Dialog {
 
         private void create_account () {
             try {
-                var account = AccountManager.get_default ()
-                              .create_account (number_entry.text,
-                                               desc_entry.text,
-                                               double.parse (balance_entry.text),
-                                               current_account_type);
+                var account = AccountManager.get_default ().create_account (number_entry.text, desc_entry.text, double.parse (balance_entry.text), current_account_type);
 
                 // show notification
                 Envelope.App.toast (_("Account %s has been created").printf (account.number));
