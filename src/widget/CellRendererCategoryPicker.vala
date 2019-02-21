@@ -33,12 +33,12 @@ namespace Envelope.Widget {
             base (relative_to);
         }
 
-        public override unowned Gtk.CellEditable? start_editing (Gdk.Event? event,
-                                       Gtk.Widget widget,
-                                       string path,
-                                       Gdk.Rectangle background_area,
-                                       Gdk.Rectangle cell_area,
-                                       Gtk.CellRendererState flags) {
+        public override unowned Gtk.CellEditable ? start_editing (Gdk.Event ? event,
+                Gtk.Widget widget,
+                string path,
+                Gdk.Rectangle background_area,
+                Gdk.Rectangle cell_area,
+                Gtk.CellRendererState flags) {
             base.start_editing (event, widget, path, background_area, cell_area, flags);
 
             check_button.label = _("Apply to all %s").printf (merchant_name);
@@ -55,7 +55,7 @@ namespace Envelope.Widget {
             category_entry.completion = completion;
             category_entry.text = category_name;
 
-            category_entry.focus.connect ( () => {
+            category_entry.focus.connect (() => {
                 completion.complete ();
                 return true;
             });
@@ -79,7 +79,9 @@ namespace Envelope.Widget {
             grid.attach_next_to (category_entry, null, Gtk.PositionType.BOTTOM, 2, 1);
 
             // apply to all
-            check_button = new Gtk.CheckButton.with_label (_("Apply to all %s").printf (merchant_name));
+            check_button = new Gtk.CheckButton.with_label (
+                                                _("Apply to all %s")
+                                                .printf (merchant_name));
 
             grid.attach_next_to (check_button, null, Gtk.PositionType.BOTTOM, 2, 1);
 
@@ -89,25 +91,25 @@ namespace Envelope.Widget {
 
             // OK button
             ok_button = new Gtk.Button.with_label (_("Set category"));
-            ok_button.get_style_context ().add_class("suggested-action");
+            ok_button.get_style_context ().add_class ("suggested-action");
             grid.attach_next_to (ok_button, cancel_button, Gtk.PositionType.RIGHT, 1, 1);
 
             grid.show_all ();
         }
 
         protected override void connect_signals () {
-            cancel_button.clicked.connect ( () => {
+            cancel_button.clicked.connect (() => {
                 check_button.active = false;
                 popover.hide ();
             });
 
-            ok_button.clicked.connect ( () => {
+            ok_button.clicked.connect (() => {
                 edited (current_path, category_entry.text);
                 check_button.active = false;
                 popover.hide ();
             });
 
-            check_button.toggled.connect ( () => {
+            check_button.toggled.connect (() => {
                 apply_to_all = check_button.active;
             });
         }

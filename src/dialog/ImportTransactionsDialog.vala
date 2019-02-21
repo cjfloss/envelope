@@ -22,9 +22,13 @@ using Envelope.View;
 namespace Envelope.Dialog {
     public class ImportTransactionsDialog : Gtk.FileChooserDialog {
         public ImportTransactionsDialog () {
-            Object (title: _("Import transactions from file"),
+            Object (
+                title: _("Import transactions from file"),
                 transient_for: (Gtk.Window) Envelope.App.get_default ().main_window.get_toplevel (),
-                action: Gtk.FileChooserAction.OPEN);
+                action: Gtk.FileChooserAction.OPEN,
+                select_multiple: false,
+                create_folders: false
+            );
         }
 
         construct {
@@ -32,9 +36,6 @@ namespace Envelope.Dialog {
             add_button ("_Open", Gtk.ResponseType.ACCEPT);
 
             debug ("pointing file chooser to path: %s".printf (Granite.Services.Paths.home_folder.get_path ()));
-
-            select_multiple = false;
-            create_folders = false;
 
             try {
                 set_current_folder_file (Granite.Services.Paths.home_folder);
@@ -61,9 +62,11 @@ namespace Envelope.Dialog {
                     try {
                         var account_ref = Sidebar.get_default ().selected_account;
 
-                        int size = AccountManager.get_default ().import_transactions_from_file (ref account_ref, get_file ());
+                        int size = AccountManager.get_default ()
+                                      .import_transactions_from_file (ref account_ref, get_file ());
 
-                        Envelope.App.toast (_("%d transactions imported in account %s").printf(size, account_ref.number));
+                        Envelope.App.toast (_("%d transactions imported in account %s")
+                                            .printf (size, account_ref.number));
 
                         // refresh search autocompletion
                         MerchantStore.get_default ().reload ();

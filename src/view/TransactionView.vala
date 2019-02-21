@@ -16,7 +16,7 @@
 * with envelope. If not, see http://www.gnu.org/licenses/.
 */
 
-using Envelope.DB;
+using Envelope.Database;
 using Envelope.Widget;
 using Envelope.Service;
 using Envelope.Dialog;
@@ -95,16 +95,16 @@ namespace Envelope.View {
         private TransactionView () {
             Object (orientation: Gtk.Orientation.VERTICAL);
 
-            transactions_store = new Gtk.TreeStore(COLUMN_COUNT,
-                typeof (string),
-                typeof (string),
-                typeof (string),
-                typeof (string),
-                typeof (string),
-                typeof (int),
-                typeof (Transaction),
-                typeof (string),
-                typeof (string));
+            transactions_store = new Gtk.TreeStore (COLUMN_COUNT,
+                                                    typeof (string),
+                                                    typeof (string),
+                                                    typeof (string),
+                                                    typeof (string),
+                                                    typeof (string),
+                                                    typeof (int),
+                                                    typeof (Transaction),
+                                                    typeof (string),
+                                                    typeof (string));
 
             view_store = new Gtk.TreeModelFilter (transactions_store, null);
             view_store.set_visible_func (view_store_filter_func);
@@ -136,7 +136,7 @@ namespace Envelope.View {
             }
 
             Gtk.TreeIter iter;
-            Gtk.TreeIter? parent_iter = null;
+            Gtk.TreeIter ? parent_iter = null;
 
             if (transaction.parent != null) {
                 Transaction parent_transaction = transaction.parent;
@@ -152,15 +152,15 @@ namespace Envelope.View {
 
             transactions_store.append (out iter, parent_iter);
             transactions_store.@set (iter,
-                Column.DATE, transaction.date.format (CELL_DATE_FORMAT),
-                Column.MERCHANT, transaction.label,
-                Column.OUTFLOW, out_amount,
-                Column.INFLOW, in_amount,
-                Column.MEMO, transaction.description,
-                Column.ID, transaction.@id,
-                Column.TRANSACTION, transaction,
-                Column.CATEGORY, category_name,
-                Column.COLOR, color, -1);
+                                     Column.DATE, transaction.date.format (CELL_DATE_FORMAT),
+                                     Column.MERCHANT, transaction.label,
+                                     Column.OUTFLOW, out_amount,
+                                     Column.INFLOW, in_amount,
+                                     Column.MEMO, transaction.description,
+                                     Column.ID, transaction.@id,
+                                     Column.TRANSACTION, transaction,
+                                     Column.CATEGORY, category_name,
+                                     Column.COLOR, color, -1);
 
             update_view ();
         }
@@ -180,7 +180,7 @@ namespace Envelope.View {
                     current_editing_iter = add_empty_row ();
                     treeview.get_selection ().select_iter (current_editing_iter);
 
-                    btn_add_transaction.get_style_context ().add_class("suggested-action");
+                    btn_add_transaction.get_style_context ().add_class ("suggested-action");
                     btn_add_transaction.label = _("Apply");
                     //btn_add_transaction.sensitive = false;
 
@@ -191,7 +191,7 @@ namespace Envelope.View {
 
                     // restore previous state
                     current_add_transaction_action = AddTransactionAction.NONE;
-                    btn_add_transaction.get_style_context ().remove_class("suggested-action");
+                    btn_add_transaction.get_style_context ().remove_class ("suggested-action");
                     btn_add_transaction.label = _("Add transaction");
                     break;
                 default:
@@ -255,7 +255,7 @@ namespace Envelope.View {
         }
 
         private void get_transaction_iter (Transaction transaction, out Gtk.TreeIter? iter) {
-            Gtk.TreeIter? found_iter = null;
+            Gtk.TreeIter ? found_iter = null;
             int id = transaction.@id;
 
             transactions_store.@foreach ((model, path, fe_iter) => {
@@ -313,9 +313,9 @@ namespace Envelope.View {
             filter_box.show_all ();
 
             // infobar shown when filters do not return any transaction
-            infobar = new Gtk.InfoBar  ();
+            infobar = new Gtk.InfoBar ();
             infobar.message_type = Gtk.MessageType.WARNING;
-            infobar.get_content_area ().add (new Gtk.Label(_("No results.")));
+            infobar.get_content_area ().add (new Gtk.Label (_("No results.")));
 
             infobar.hide ();
             add (infobar);
@@ -375,7 +375,7 @@ namespace Envelope.View {
             treeview.show_all ();
 
             // memo cell renderer
-            renderer_memo = new Gtk.CellRendererText();
+            renderer_memo = new Gtk.CellRendererText ();
             renderer_memo.editable = true;
             renderer_memo.ellipsize = Pango.EllipsizeMode.END;
             renderer_memo.ellipsize_set = true;
@@ -396,7 +396,7 @@ namespace Envelope.View {
             renderer_label.editable = true;
             renderer_label.ellipsize = Pango.EllipsizeMode.END;
             renderer_label.ellipsize_set = true;
-            renderer_label.edited.connect ((path, text) =>  {
+            renderer_label.edited.connect ((path, text) => {
                 Gtk.TreeIter iter;
                 if (tree_model_sort.get_iter_from_string (out iter, path)) {
                     Gtk.TreeIter store_iter;
@@ -405,7 +405,8 @@ namespace Envelope.View {
                     string merchant;
                     transactions_store.@get (store_iter, Column.MERCHANT, out merchant, -1);
 
-                    transactions_store.@set (store_iter, Column.MERCHANT, text == "" ? merchant : text, -1);
+                    transactions_store.@set (store_iter, Column.MERCHANT,
+                                             text == "" ? merchant : text, -1);
                 }
             });
 
@@ -443,7 +444,8 @@ namespace Envelope.View {
                     if (renderer_category.apply_to_all) {
                         try {
                             BudgetManager.get_default ().categorize_all_for_merchant (merchant, category);
-                            transactions = AccountManager.get_default ().load_account_transactions (Sidebar.get_default ().selected_account);
+                            transactions = AccountManager.get_default ()
+                                           .load_account_transactions (Sidebar.get_default ().selected_account);
                             add_transactions ();
                         } catch (ServiceError err) {
                             error ("could not categorize all transactions (%s)", err.message);
@@ -454,29 +456,31 @@ namespace Envelope.View {
                         transactions_store.@get (store_iter, Column.TRANSACTION, out transaction, -1);
                         transaction.category = category;
 
-                        transactions_store.@set (store_iter, Column.CATEGORY, category != null ? category.name : "", -1);
+                        transactions_store.@set (store_iter, Column.CATEGORY,
+                                                 category != null ? category.name : "", -1);
                     }
                 }
             });
 
             // cell renderer for outgoing transactions
-            Gtk.CellRendererText renderer_out = new Gtk.CellRendererText();
+            Gtk.CellRendererText renderer_out = new Gtk.CellRendererText ();
             renderer_out.editable = true;
             renderer_out.foreground = CELL_COLOR_OUTGOING;
             renderer_out.xalign = 1.0f;
             renderer_out.ellipsize = Pango.EllipsizeMode.END;
             renderer_out.ellipsize_set = true;
-            renderer_out.edited.connect ((path, text) =>  {
+            renderer_out.edited.connect ((path, text) => {
                 Gtk.TreeIter iter;
                 if (tree_model_sort.get_iter_from_string (out iter, path)) {
                     Gtk.TreeIter store_iter;
                     get_transaction_iter_from_sort_iter (out store_iter, iter);
 
-                    string? outflow;
+                    string ? outflow;
 
                     if (text.strip () != "") {
                         try {
-                            outflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text), false);
+                            outflow = Envelope.Util.String.format_currency (
+                                          Envelope.Util.String.parse_currency (text), false);
                         } catch (Envelope.Util.String.ParseError err) {
                             outflow = "<error>";
                         }
@@ -489,23 +493,24 @@ namespace Envelope.View {
             });
 
             // cell renderer for incoming transactions
-            Gtk.CellRendererText renderer_in = new Gtk.CellRendererText();
+            Gtk.CellRendererText renderer_in = new Gtk.CellRendererText ();
             renderer_in.editable = true;
             renderer_in.foreground = CELL_COLOR_INCOMING;
             renderer_in.xalign = 1.0f;
             renderer_in.ellipsize = Pango.EllipsizeMode.END;
             renderer_in.ellipsize_set = true;
-            renderer_in.edited.connect ((path, text) =>  {
+            renderer_in.edited.connect ((path, text) => {
                 Gtk.TreeIter iter;
                 if (tree_model_sort.get_iter_from_string (out iter, path)) {
                     Gtk.TreeIter store_iter;
                     get_transaction_iter_from_sort_iter (out store_iter, iter);
 
-                    string? inflow;
+                    string ? inflow;
 
                     if (text.strip () != "") {
                         try {
-                            inflow = Envelope.Util.String.format_currency (Envelope.Util.String.parse_currency (text), false);
+                            inflow = Envelope.Util.String.format_currency (
+                                         Envelope.Util.String.parse_currency (text), false);
                         } catch (Envelope.Util.String.ParseError err) {
                             inflow = "<error>";
                         }
@@ -574,7 +579,8 @@ namespace Envelope.View {
             treeview.append_column (category_column);
 
             var out_column = new Gtk.TreeViewColumn ();
-            out_column.set_title (_("Outflow (%s)").printf (Envelope.Util.String.get_currency_symbol ().to_string()));
+            out_column.set_title (_("Outflow (%s)").printf (
+                                      Envelope.Util.String.get_currency_symbol ().to_string ()) );
             out_column.max_width = -1;
             out_column.min_width = 165;
             out_column.pack_start (renderer_out, true);
@@ -587,7 +593,8 @@ namespace Envelope.View {
             treeview.append_column (out_column);
 
             var in_column = new Gtk.TreeViewColumn ();
-            in_column.set_title (_("Inflow (%s)").printf (Envelope.Util.String.get_currency_symbol ().to_string()));
+            in_column.set_title (_("Inflow (%s)").printf (
+                                     Envelope.Util.String.get_currency_symbol ().to_string ()) );
             in_column.max_width = -1;
             in_column.min_width = 165;
             in_column.pack_start (renderer_in, true);
@@ -625,7 +632,8 @@ namespace Envelope.View {
             treeview.show_all ();
         }
 
-        private void cell_renderer_category_func (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+        private void cell_renderer_category_func (Gtk.CellLayout layout,
+                Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
             cell_renderer_color_function (layout, renderer, model, iter);
 
             CellRendererCategoryPicker cp = renderer as CellRendererCategoryPicker;
@@ -638,22 +646,29 @@ namespace Envelope.View {
             cp.category_name = category_name;
         }
 
-        private void cell_renderer_color_inflow_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
-            set_cell_foreground_from_date (layout, renderer, model, iter, CELL_COLOR_INCOMING);
+        private void cell_renderer_color_inflow_function (Gtk.CellLayout layout,
+                Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+            set_cell_foreground_from_date (layout, renderer, model, iter,
+                                           CELL_COLOR_INCOMING);
         }
 
-        private void cell_renderer_color_outflow_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
-            set_cell_foreground_from_date (layout, renderer, model, iter, CELL_COLOR_OUTGOING);
+        private void cell_renderer_color_outflow_function (Gtk.CellLayout layout,
+                Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+            set_cell_foreground_from_date (layout, renderer, model, iter,
+                                           CELL_COLOR_OUTGOING);
         }
 
-        private void cell_renderer_color_function (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
+        private void cell_renderer_color_function (Gtk.CellLayout layout,
+                Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter) {
             set_cell_foreground_from_date (layout, renderer, model, iter);
         }
 
-        private void set_cell_foreground_from_date (Gtk.CellLayout layout, Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter, string? default_color = null) {
+        private void set_cell_foreground_from_date (Gtk.CellLayout layout,
+                Gtk.CellRenderer renderer, Gtk.TreeModel model, Gtk.TreeIter iter,
+                string ? default_color = null) {
             Gtk.CellRendererText crt = renderer as Gtk.CellRendererText;
 
-            string? color;
+            string ? color;
             model.@get (iter, Column.COLOR, out color, -1);
 
             if (color != null) {
@@ -674,8 +689,8 @@ namespace Envelope.View {
             Gtk.SortType type;
             sortable.get_sort_column_id (out column, out type);
 
-            string? amount1;
-            string? amount2;
+            string ? amount1;
+            string ? amount2;
             model.@get (iter1, column, out amount1, -1);
             model.@get (iter2, column, out amount2, -1);
 
@@ -717,8 +732,8 @@ namespace Envelope.View {
             Gtk.SortType type;
             sortable.get_sort_column_id (out column, out type);
 
-            string? date1;
-            string? date2;
+            string ? date1;
+            string ? date2;
             model.@get (iter1, column, out date1, -1);
             model.@get (iter2, column, out date2, -1);
 
@@ -773,14 +788,14 @@ namespace Envelope.View {
             transactions_store.append (out insert_iter, parent);
 
             transactions_store.@set (insert_iter,
-                Column.DATE, "",
-                Column.MERCHANT, "",
-                Column.MEMO, "",
-                Column.OUTFLOW, "",
-                Column.INFLOW, "",
-                Column.ID, null,
-                Column.TRANSACTION, transaction,
-                Column.CATEGORY, "", -1);
+                                     Column.DATE, "",
+                                     Column.MERCHANT, "",
+                                     Column.MEMO, "",
+                                     Column.OUTFLOW, "",
+                                     Column.INFLOW, "",
+                                     Column.ID, null,
+                                     Column.TRANSACTION, transaction,
+                                     Column.CATEGORY, "", -1);
 
             return insert_iter;
         }
@@ -794,7 +809,7 @@ namespace Envelope.View {
                 transaction_edited (path, iter);
             });
 
-            FilterView.get_default ().date_filter_changed.connect ( () => {
+            FilterView.get_default ().date_filter_changed.connect (() => {
                 var filter_view = FilterView.get_default ();
 
                 filter_from = filter_view.from;
@@ -804,7 +819,7 @@ namespace Envelope.View {
             });
 
             // right-click menu
-            treeview.button_press_event.connect ( (button_event) => {
+            treeview.button_press_event.connect ((button_event) => {
                 if (button_event.button == 3) {
                     // get targeted line
                     Gtk.TreePath target_path;
@@ -812,7 +827,8 @@ namespace Envelope.View {
                     int target_x;
                     int target_y;
 
-                    if (treeview.get_path_at_pos ((int) button_event.x, (int) button_event.y, out target_path, out target_column, out target_x, out target_y)) {
+                    if (treeview.get_path_at_pos ((int) button_event.x, (int) button_event.y,
+                                                   out target_path, out target_column, out target_x, out target_y)) {
                         var selection = treeview.get_selection ();
 
                         selection.unselect_all ();
@@ -828,7 +844,7 @@ namespace Envelope.View {
             });
 
             // remove transaction on delete key
-            treeview.key_press_event.connect ( (event) => {
+            treeview.key_press_event.connect ((event) => {
                 if (event.keyval == Gdk.Key.Delete) {
                     if (current_add_transaction_action != AddTransactionAction.EDITING) {
                         // DEL key pressed! delete transaction
@@ -842,7 +858,7 @@ namespace Envelope.View {
             right_click_menu_item_remove.activate.connect (popup_menu_remove_activated);
             right_click_menu_item_split.activate.connect (popup_menu_split_activated);
 
-            notify["transactions"].connect ( () => {
+            notify["transactions"].connect (() => {
                 if (transactions != null) {
                     add_transactions ();
                 } else {
@@ -850,7 +866,7 @@ namespace Envelope.View {
                 }
             });
 
-            notify["with-filter-view"].connect ( () => {
+            notify["with-filter-view"].connect (() => {
                 debug ("with_filter_view changed (%s)", with_filter_view ? "true" : "false");
 
                 if (!with_filter_view) {
@@ -861,8 +877,9 @@ namespace Envelope.View {
                 }
             });
 
-            notify["with-add-transaction-view"].connect ( () => {
-                debug ("with_add_transaction_view changed (%s)", with_add_transaction_view ? "true" : "false");
+            notify["with-add-transaction-view"].connect (() => {
+                debug ("with_add_transaction_view changed (%s)",
+                       with_add_transaction_view ? "true" : "false");
 
                 if (!with_add_transaction_view) {
                     button_box.hide ();
@@ -885,7 +902,7 @@ namespace Envelope.View {
                     Gtk.TreePath path = view_store.get_path (child_iter);
                     treeview.scroll_to_cell (path, treeview.get_column (0), true, 0, 0);
 
-                    btn_add_transaction.get_style_context ().add_class("suggested-action");
+                    btn_add_transaction.get_style_context ().add_class ("suggested-action");
                     btn_add_transaction.label = _("Apply");
 
                     current_add_transaction_action = AddTransactionAction.EDITING;
@@ -901,7 +918,7 @@ namespace Envelope.View {
 
                     // restore previous state
                     current_add_transaction_action = AddTransactionAction.NONE;
-                    btn_add_transaction.get_style_context ().remove_class("suggested-action");
+                    btn_add_transaction.get_style_context ().remove_class ("suggested-action");
                     btn_add_transaction.label = _("Add transaction");
 
                     btn_add_transaction_cancel.hide ();
@@ -919,7 +936,7 @@ namespace Envelope.View {
 
                     transactions_store.remove (ref current_editing_iter);
 
-                    btn_add_transaction.get_style_context ().remove_class("suggested-action");
+                    btn_add_transaction.get_style_context ().remove_class ("suggested-action");
                     btn_add_transaction.label = _("Add transaction");
 
                     btn_add_transaction_cancel.hide ();
@@ -970,11 +987,11 @@ namespace Envelope.View {
             Gtk.TreeIter view_iter;
             if (view_store.convert_child_iter_to_iter (out view_iter, current_editing_iter)) {
                 view_store.@get (view_iter, Column.DATE, out t_date,
-                    Column.MERCHANT, out t_label,
-                    Column.MEMO, out t_description,
-                    Column.INFLOW, out t_in_amount,
-                    Column.OUTFLOW, out t_out_amount,
-                    Column.CATEGORY, out t_category, -1);
+                                 Column.MERCHANT, out t_label,
+                                 Column.MEMO, out t_description,
+                                 Column.INFLOW, out t_in_amount,
+                                 Column.OUTFLOW, out t_out_amount,
+                                 Column.CATEGORY, out t_category, -1);
 
                 // amount
                 double amount = 0d;
@@ -1000,7 +1017,8 @@ namespace Envelope.View {
 
                 try {
                     var acct_ref = Sidebar.get_default ().selected_account;
-                    AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label, t_description, amount, category,  null);
+                    AccountManager.get_default ().record_transaction (ref acct_ref, date, t_label,
+                            t_description, amount, category, null);
                 } catch (ServiceError err) {
                     error (err.message);
                 }
@@ -1019,13 +1037,13 @@ namespace Envelope.View {
                 string category_name;
 
                 transactions_store.@get (iter,
-                    Column.DATE, out date,
-                    Column.MERCHANT, out label,
-                    Column.OUTFLOW, out out_amount,
-                    Column.INFLOW, out in_amount,
-                    Column.MEMO, out description,
-                    Column.TRANSACTION, out transaction,
-                    Column.CATEGORY, out category_name, -1);
+                                         Column.DATE, out date,
+                                         Column.MERCHANT, out label,
+                                         Column.OUTFLOW, out out_amount,
+                                         Column.INFLOW, out in_amount,
+                                         Column.MEMO, out description,
+                                         Column.TRANSACTION, out transaction,
+                                         Column.CATEGORY, out category_name, -1);
 
                 if (transaction != null && transaction.@id != null) {
                     transaction.label = label;
@@ -1054,8 +1072,8 @@ namespace Envelope.View {
                     }
 
                     transaction.date = new DateTime.local (parse_date.get_year (),
-                        parse_date.get_month (),
-                        parse_date.get_day (), 0, 0, 0);
+                                                           parse_date.get_month (),
+                                                           parse_date.get_day (), 0, 0, 0);
 
                     // category
                     transaction.category = CategoryStore.get_default ().get_category_by_name (category_name);
@@ -1094,7 +1112,8 @@ namespace Envelope.View {
          * @param transaction_iter the Gtk.TreeIter to initialize
          * @param sort_iter the Gtk.TreeIter to convert
          */
-        private void get_transaction_iter_from_sort_iter (out Gtk.TreeIter transaction_iter, Gtk.TreeIter sort_iter) {
+        private void get_transaction_iter_from_sort_iter (out Gtk.TreeIter
+                transaction_iter, Gtk.TreeIter sort_iter) {
             Gtk.TreeIter view_iter;
             (treeview.model as Gtk.TreeModelSort).convert_iter_to_child_iter (out view_iter, sort_iter);
             view_store.convert_iter_to_child_iter (out transaction_iter, view_iter);

@@ -27,21 +27,27 @@ namespace Envelope.Dialog {
         private Gtk.Button cancel_button;
 
         public AddCategoryDialog (Gtk.Window parent) {
-            Object (transient_for: parent);
+            Object (
+                title: _("Add a Category"),
+                transient_for: parent,
+                deletable: false,
+                modal: true,
+                resizable: false,
+                width_request: 300,
+                window_position: Gtk.WindowPosition.CENTER_ON_PARENT
+            );
         }
 
         construct {
-            deletable = false;
-            modal = true;
-            resizable= false;
-            width_request = 300;
-            window_position = Gtk.WindowPosition.CENTER_ON_PARENT;
-
             var grid = new Gtk.Grid ();
             get_content_area ().add (grid);
 
-            grid.margin_start = grid.margin_end = 12;
-            grid.row_spacing = grid.column_spacing = 12;
+            grid.margin_start = 12;
+            grid.margin_end = 12;
+            grid.margin_top = 20;
+            grid.row_spacing = 12;
+            grid.column_spacing = 12;
+
             grid.orientation = Gtk.Orientation.VERTICAL;
             grid.valign = Gtk.Align.CENTER;
             grid.vexpand = true;
@@ -59,7 +65,7 @@ namespace Envelope.Dialog {
                 } else {
                     create_button.sensitive = true;
                     amount_entry.placeholder_text = _("Monthly Budget for %s")
-                        .printf(name_entry.get_text ());
+                        .printf (name_entry.get_text ());
                 }
             });
 

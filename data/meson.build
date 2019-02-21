@@ -35,14 +35,29 @@ i18n.merge_file (
     po_dir : join_paths (meson.source_root (), 'po')
 )
 
-#test (
-#    'Validate desktop file',
-#    find_program ('desktop-file-validate'),
-#    args : join_paths (meson.current_build_dir (), app_name + '.desktop')
-#)
+dvf = find_program('desktop-file-validate', required: false)
+if dvf.found()
+test (
+    'Validate desktop file',
+    dvf,
+    args : join_paths (meson.current_build_dir (), meson.project_name () + '.desktop')
+)
+endif
 
-#test (
-#   'Validate appdata file',
-#    find_program ('appstreamcli'),
-#    args : ['validate', join_paths (meson.current_build_dir (), app_name + '.appdata.xml')]
-#)
+asc = find_program('appstreamcli', required : false)
+if asc.found()
+test (
+   'Validate appdata file',
+    asc,
+    args : ['validate', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
+)
+endif
+
+vala_lint = find_program ('io.elementary.vala-lint', required: false)
+if vala_lint.found()
+  test (
+    'Vala lint',
+    vala_lint,
+    args: ['-d', join_paths (meson.source_root (), 'src')]
+  )
+endif

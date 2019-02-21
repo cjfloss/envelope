@@ -20,19 +20,20 @@ using Envelope.Service;
 
 namespace Envelope.Widget {
     public class CellRendererPopoverContainer : AbstractPopoverCellRenderer {
-        public CellRendererUpdatable? content { get; set; }
+        public CellRendererUpdatable ? content { get; set; }
 
         public CellRendererPopoverContainer (Gtk.Widget relative_to) {
             base (relative_to);
         }
 
-        public override unowned Gtk.CellEditable? start_editing (Gdk.Event? event,
-                                                                Gtk.Widget widget,
-                                                                string path,
-                                                                Gdk.Rectangle background_area,
-                                                                Gdk.Rectangle cell_area,
-                                                                Gtk.CellRendererState flags) {
-            unowned Gtk.CellEditable? return_value = base.start_editing (event, widget, path, background_area, cell_area, flags);
+        public override unowned Gtk.CellEditable ? start_editing (Gdk.Event ? event,
+                Gtk.Widget widget,
+                string path,
+                Gdk.Rectangle background_area,
+                Gdk.Rectangle cell_area,
+                Gtk.CellRendererState flags) {
+            unowned Gtk.CellEditable ? return_value = base.start_editing (event, widget,
+                    path, background_area, cell_area, flags);
 
             if (content == null) {
                 return return_value;
@@ -42,7 +43,8 @@ namespace Envelope.Widget {
             var childs = popover.get_children ();
 
             if (childs.length () != 0 && childs.first ().data != content) {
-                CellRendererUpdatable old_content = childs.first ().data as CellRendererUpdatable;
+                CellRendererUpdatable old_content = childs.first ().data as
+                                                    CellRendererUpdatable;
                 old_content.dismiss.disconnect (on_content_dismiss);
                 popover.remove (old_content);
             }

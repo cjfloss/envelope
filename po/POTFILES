@@ -1,4 +1,6 @@
 src/database/Database.vala
+src/database/DatabaseCursor.vala
+src/database/DatabaseManager.vala
 src/view/TransactionView.vala
 src/view/Sidebar.vala
 src/view/WelcomeScreen.vala
@@ -9,11 +11,6 @@ src/view/CategoryProperties.vala
 src/dialog/AddAccountDialog.vala
 src/dialog/AddCategoryDialog.vala
 src/dialog/ImportTransactionsDialog.vala
-src/widget/AbstractPopoverCellRenderer.vala
-src/widget/CellRendererDatePicker.vala
-src/widget/CellRendererTextCompletion.vala
 src/widget/CellRendererCategoryPicker.vala
-src/widget/CellRendererUpdatable.vala
-src/widget/CellRendererPopoverContainer.vala
 src/window/MainWindow.vala
 src/Envelope.vala
