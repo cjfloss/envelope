@@ -21,7 +21,7 @@ namespace Envelope.Database {
     private const string ACCOUNTS = """
         CREATE TABLE IF NOT EXISTS accounts (
             `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-            `number` TEXT NOT NULL,
+            `number` TEXT NOT NULL UNIQUE,
             `description` TEXT,
             `balance` DOUBLE,
             `type` INT);
@@ -55,7 +55,7 @@ namespace Envelope.Database {
     private const string CATEGORIES = """
         CREATE TABLE IF NOT EXISTS categories (
             `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-            `name` TEXT NOT NULL,
+            `name` TEXT NOT NULL UNIQUE,
             `description` TEXT,
             `parent_category_id` INT,
         FOREIGN KEY (`parent_category_id`)
