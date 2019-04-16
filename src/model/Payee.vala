@@ -19,22 +19,22 @@
 using Gee;
 
 namespace Envelope {
-    public class Merchant : Object, Comparable<Merchant> {
+    public class Payee : Object, Comparable<Payee> {
         public string label { get; private set; }
         public int occurences { get; private set; }
 
-        public Merchant (string label, int occurences) {
+        public Payee (string label, int occurences) {
             Object ();
             this.label = label;
             this.occurences = occurences;
         }
 
-        public int compare_to (Merchant merchant) {
-            if (occurences > merchant.occurences) {
+        public int compare_to (Payee payee) {
+            if (occurences > payee.occurences) {
                 return 1;
             }
 
-            if (occurences == merchant.occurences) {
+            if (occurences == payee.occurences) {
                 return 0;
             }
 

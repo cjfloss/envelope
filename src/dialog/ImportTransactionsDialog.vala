@@ -67,7 +67,7 @@ namespace Envelope.Dialog {
                         Envelope.App.toast (_("%d transactions imported in account %s").printf (size, account_ref.number));
 
                         // refresh search autocompletion
-                        MerchantStore.get_default ().reload ();
+                        PayeeStore.get_default ().reload ();
                     } catch (ServiceError err) {
                         error (err.message);
                     } catch (ImporterError err) {

@@ -164,7 +164,7 @@ namespace Envelope.Database {
     private const string SQL_DELETE_ACCOUNT_TRANSACTIONS = """
         DELETE FROM `transactions` WHERE `account_id` = ?;""";
 
-    private const string SQL_GET_UNIQUE_MERCHANTS = """
+    private const string SQL_GET_UNIQUE_PAYEES = """
         SELECT `label`, COUNT(`label`) as `number`
             FROM `transactions`
             GROUP BY `label`
@@ -190,7 +190,7 @@ namespace Envelope.Database {
     private const string SQL_UPDATE_CATEGORY = """
         UPDATE `categories` SET `name` = ?, `description` = ?, `parent_category_id` = ? WHERE `id` = ?;""";
 
-    private const string SQL_CATEGORIZE_ALL_FOR_MERCHANT = """
+    private const string SQL_CATEGORIZE_ALL_FOR_PAYEE = """
         UPDATE `transactions` SET `category_id` = ? WHERE `label` = ?;""";
 
     private const string SQL_LOAD_CURRENT_TRANSACTIONS = """
