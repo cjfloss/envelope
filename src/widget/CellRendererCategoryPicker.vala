@@ -33,12 +33,7 @@ namespace Envelope.Widget {
             base (relative_to);
         }
 
-        public override unowned Gtk.CellEditable ? start_editing (Gdk.Event ? event,
-                Gtk.Widget widget,
-                string path,
-                Gdk.Rectangle background_area,
-                Gdk.Rectangle cell_area,
-                Gtk.CellRendererState flags) {
+        public override unowned Gtk.CellEditable? start_editing (Gdk.Event? event, Gtk.Widget widget, string path, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
             base.start_editing (event, widget, path, background_area, cell_area, flags);
 
             check_button.label = _("Apply to all %s").printf (merchant_name);
@@ -79,10 +74,7 @@ namespace Envelope.Widget {
             grid.attach_next_to (category_entry, null, Gtk.PositionType.BOTTOM, 2, 1);
 
             // apply to all
-            check_button = new Gtk.CheckButton.with_label (
-                                                _("Apply to all %s")
-                                                .printf (merchant_name));
-
+            check_button = new Gtk.CheckButton.with_label (_("Apply to all %s").printf (merchant_name));
             grid.attach_next_to (check_button, null, Gtk.PositionType.BOTTOM, 2, 1);
 
             // Cancel button

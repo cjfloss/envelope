@@ -25,14 +25,9 @@ namespace Envelope.Util.Date {
      * @param start the output start date of the month
      * @param end the output ending date of the month
      */
-    public void get_month_boundaries (int month, int year, out DateTime start,
-                                      out DateTime end) {
+    public void get_month_boundaries (int month, int year, out DateTime start, out DateTime end) {
         start = new DateTime.local (year, month, 1, 0, 0, 0);
-        end = new DateTime.local (year, month,
-                                  GLib.Date.get_days_in_month (
-                                      (DateMonth) month,
-                                      (DateYear) year),
-                                      23, 59, 59);
+        end = new DateTime.local (year, month, GLib.Date.get_days_in_month ((DateMonth) month, (DateYear) year), 23, 59, 59);
     }
 
     /**
@@ -71,7 +66,6 @@ namespace Envelope.Util.Date {
      */
     public void tomorrow (out DateTime tomorrow) {
         var dt = new DateTime.now_local ().add_days (1);
-        tomorrow = new DateTime.local (dt.get_year (), dt.get_month (),
-                                       dt.get_day_of_month (), 0, 0, 0);
+        tomorrow = new DateTime.local (dt.get_year (), dt.get_month (), dt.get_day_of_month (), 0, 0, 0);
     }
 }

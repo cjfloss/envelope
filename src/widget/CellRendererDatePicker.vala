@@ -42,7 +42,6 @@ namespace Envelope.Widget {
         protected override void build_ui () {
             calendar = new Gtk.Calendar ();
             popover.add (calendar);
-
             calendar.show_all ();
         }
 
@@ -52,11 +51,9 @@ namespace Envelope.Widget {
 
         private void select_date () {
             popover.hide ();
-
             date_selected = true;
 
-            var dt = new DateTime.local (calendar.year, calendar.month + 1,
-                                         calendar.day, 0, 0, 0);
+            var dt = new DateTime.local (calendar.year, calendar.month + 1,calendar.day, 0, 0, 0);
 
             edited (current_path, dt.format (date_format));
 

@@ -38,19 +38,14 @@ namespace Envelope.View {
         public signal void add_transaction_selected (Account account);
 
         public AccountWelcomeScreen () {
-            base (_("Spend! Get paid!"),
-                  _("There are currently no transactions in this account"));
+            base (_("Spend! Get paid!"), _("There are currently no transactions in this account"));
             build_ui ();
             connect_signals ();
         }
 
         private void build_ui () {
-            append ("add", _("Record a transaction"),
-                    _("Record a fresh new transaction for this account. Or, plan a future one!"));
-
-            append ("document-import", _("Import transactions"),
-                    _("Import from a QIF file obtained from another application"));
-
+            append ("add", _("Record a transaction"), _("Record a fresh new transaction for this account. Or, plan a future one!"));
+            append ("document-import", _("Import transactions"), _("Import from a QIF file obtained from another application"));
             show_all ();
         }
 

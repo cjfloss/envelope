@@ -49,8 +49,7 @@ namespace Envelope.View {
 
         public override void update () {
             category_name_entry.text = category.name;
-            budgeted_amount_entry.text = category.amount_budgeted != 0d ?
-                Envelope.Util.String.format_currency (category.amount_budgeted) : "";
+            budgeted_amount_entry.text = category.amount_budgeted != 0d ? Envelope.Util.String.format_currency (category.amount_budgeted) : "";
 
             inflow_label.label = Envelope.Util.String.format_currency (inflow);
             inflow_label.visible = inflow > 0d;
@@ -65,8 +64,7 @@ namespace Envelope.View {
             remaining_label.visible = category.amount_budgeted != 0d;
             remaining_label_label.visible = remaining_label.visible;
 
-            available_label.label = "Max. %s".printf (Envelope.Util.String.format_currency (
-                                        BudgetManager.get_default ().state.budget_available));
+            available_label.label = "Max. %s".printf (Envelope.Util.String.format_currency (BudgetManager.get_default ().state.budget_available));
         }
 
         private void build_ui () {

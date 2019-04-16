@@ -64,8 +64,7 @@ namespace Envelope.Dialog {
                     create_button.sensitive = false;
                 } else {
                     create_button.sensitive = true;
-                    amount_entry.placeholder_text = _("Monthly Budget for %s")
-                        .printf (name_entry.get_text ());
+                    amount_entry.placeholder_text = _("Monthly Budget for %s").printf (name_entry.get_text ());
                 }
             });
 
@@ -81,8 +80,7 @@ namespace Envelope.Dialog {
 
             create_button = new Gtk.Button.with_label (_("Create Category"));
             create_button.sensitive = false;
-            create_button.get_style_context ()
-                                .add_class (Gtk.STYLE_CLASS_SUGGESTED_ACTION);
+            create_button.get_style_context ().add_class (Gtk.STYLE_CLASS_SUGGESTED_ACTION);
             create_button.clicked.connect (() => {
                 this.create_category ();
                 this.destroy ();
@@ -105,10 +103,7 @@ namespace Envelope.Dialog {
 
         private void create_category () {
             try {
-                BudgetManager.get_default ()
-                    .create_category (name_entry.text.strip (),
-                                    parse_currency (amount_entry.text.strip ())
-                                    );
+                BudgetManager.get_default ().create_category (name_entry.text.strip (), parse_currency (amount_entry.text.strip ()));
             } catch (ParseError err) {
                 error ("could not create category %s (%s)", name_entry.text, err.message);
             } catch (ServiceError err) {

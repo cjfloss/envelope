@@ -138,7 +138,7 @@ namespace Envelope.Database {
          * @return the Account object having the specified id, or null if not found
          * @throws DatabaseError
          */
-        public Account ? load_account (int account_id) throws DatabaseError {
+        public Account? load_account (int account_id) throws DatabaseError {
             // if (account_cache.has_key (account_id)) {
             //     return account_cache.@get (account_id);
             // }
@@ -257,9 +257,7 @@ namespace Envelope.Database {
             }
         }
 
-        public void update_category_budgeted_amount (MonthlyCategory category,
-                int year,
-                int month) throws DatabaseError {
+        public void update_category_budgeted_amount (MonthlyCategory category, int year, int month) throws DatabaseError {
             GLib.Value[] args = {category.amount_budgeted, (int) category.@id, year, month};
             this.database.exec (SQL_UPDATE_CATEGORY_BUDGET, args);
         }
@@ -283,12 +281,7 @@ namespace Envelope.Database {
          * @throws SQLHeavy.Error
          */
         public void create_account (Account account) throws DatabaseError {
-            GLib.Value[] args = {
-                account.number,
-                account.description,
-                account.balance,
-                (int) account.account_type
-            };
+            GLib.Value[] args = {account.number, account.description, account.balance, (int) account.account_type};
             this.database.exec (SQL_INSERT_ACCOUNT, args);
 
             account.@id = (int) this.database.last_insert_rowid ();
@@ -321,10 +314,7 @@ namespace Envelope.Database {
          * @throws SQLHeavy.Error
          */
         public void update_account_balance (Account account) throws DatabaseError {
-            GLib.Value[] args = {
-                account.balance,
-                (int) account.@id
-            };
+            GLib.Value[] args = {account.balance, (int) account.@id};
             this.database.exec (SQL_UPDATE_ACCOUNT_BALANCE, args);
 
             // update cache
@@ -640,10 +630,7 @@ namespace Envelope.Database {
             }
         }
 
-        private void query_result_to_transaction (Sqlite.Statement results,
-                out Transaction transaction,
-                Category ? category = null)
-        throws DatabaseError {
+        private void query_result_to_transaction (Sqlite.Statement results, out Transaction transaction, Category? category = null) throws DatabaseError {
             int cols = results.column_count ();
             int category_id = 0;
             transaction = new Transaction ();
@@ -684,10 +671,7 @@ namespace Envelope.Database {
             }
         }
 
-        private void query_result_to_category (Sqlite.Statement results,
-                                               out MonthlyCategory category,
-                                               out int parent_id)
-        throws DatabaseError {
+        private void query_result_to_category (Sqlite.Statement results, out MonthlyCategory category, out int parent_id) throws DatabaseError {
             int cols = results.column_count ();
             category = new MonthlyCategory ();
 

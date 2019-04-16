@@ -40,15 +40,10 @@ public class Envelope.Database.Cursor : Object {
      * @param arguments array of values to bind to the SQL statement or null if
      * none
      */
-    public Cursor (Sqlite.Database db,
-                   string sql,
-                   GLib.Value[] ? arguments) throws DatabaseError {
+    public Cursor (Sqlite.Database db, string sql, GLib.Value[]? arguments) throws DatabaseError {
         this.db = db;
 
-        this.throw_if_code_is_error (db.prepare_v2 (sql,
-                                     -1,
-                                     out this.statement,
-                                     null));
+        this.throw_if_code_is_error (db.prepare_v2 (sql, -1, out this.statement, null));
 
         if (arguments == null) {
             return;
@@ -71,7 +66,7 @@ public class Envelope.Database.Cursor : Object {
      * @param arguments array of values to bind to the SQL statement or null if
      * none
      */
-    public void bind (GLib.Value[] ? arguments) throws DatabaseError {
+    public void bind (GLib.Value[]? arguments) throws DatabaseError {
         this.statement.reset ();
         this.dirty = true;
         this.current_state = -1;
@@ -106,10 +101,7 @@ public class Envelope.Database.Cursor : Object {
             }
 
             if (this.db.errcode () != Sqlite.OK) {
-                throw new DatabaseError.BIND ("Failed to bind value %d in %s: %s",
-                                              i,
-                                              this.statement.sql (),
-                                              this.db.errmsg ());
+                throw new DatabaseError.BIND ("Failed to bind value %d in %s: %s", i, this.statement.sql (), this.db.errmsg ());
             }
         }
     }
@@ -176,18 +168,14 @@ public class Envelope.Database.Cursor : Object {
     /**
      * Convert a SQLite return code to a DatabaseError
      */
-    protected void throw_if_code_is_error (int sqlite_error)
-                                           throws DatabaseError {
+    protected void throw_if_code_is_error (int sqlite_error) throws DatabaseError {
         switch (sqlite_error) {
             case Sqlite.OK:
             case Sqlite.DONE:
             case Sqlite.ROW:
                 return;
             default:
-                throw new DatabaseError.SQLITE_ERROR
-                                        ("SQLite error %d: %s",
-                                         sqlite_error,
-                                         this.db.errmsg ());
+                throw new DatabaseError.SQLITE_ERROR ("SQLite error %d: %s", sqlite_error, this.db.errmsg ());
         }
     }
 

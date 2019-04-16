@@ -84,8 +84,7 @@ namespace Envelope.Window {
 
             preferences_menu_item = new Gtk.MenuItem.with_label ("Preferences");
 
-            var menu_icon = new Gtk.Image.from_icon_name ("open-menu",
-                    Gtk.IconSize.LARGE_TOOLBAR);
+            var menu_icon = new Gtk.Image.from_icon_name ("open-menu", Gtk.IconSize.LARGE_TOOLBAR);
             app_menu.set_image (menu_icon);
             settings_menu.append (_("Export\u2026"), null);
             menu_popover = new Gtk.Popover.from_model (app_menu, settings_menu);
@@ -104,21 +103,17 @@ namespace Envelope.Window {
 
             // import button
             import_button.tooltip_text = _("Import transactions");
-            import_button = new Gtk.Button.from_icon_name ("document-import",
-                    Gtk.IconSize.LARGE_TOOLBAR);
+            import_button = new Gtk.Button.from_icon_name ("document-import", Gtk.IconSize.LARGE_TOOLBAR);
             header_bar.pack_start (import_button);
 
             // export button
-            //export_button = new Gtk.Button.from_icon_name ("document-export",
-            //                                        Gtk.IconSize.LARGE_TOOLBAR);
+            //export_button = new Gtk.Button.from_icon_name ("document-export", Gtk.IconSize.LARGE_TOOLBAR);
             //export_button.tooltip_text = _("Backup budget");
             //header_bar.pack_end (export_button);
 
             // add transaction button
             add_transaction_button.tooltip_text = _("Record transaction");
-            add_transaction_button = new Gtk.Button.from_icon_name (
-                    "document-new",
-                    Gtk.IconSize.LARGE_TOOLBAR);
+            add_transaction_button = new Gtk.Button.from_icon_name ("document-new", Gtk.IconSize.LARGE_TOOLBAR);
             header_bar.pack_start (add_transaction_button);
 
             // search entry & completion
@@ -136,11 +131,7 @@ namespace Envelope.Window {
                 }
 
                 string store_value;
-                MerchantStore.get_default ().@get (iter,
-                                                   MerchantStore.COLUMN,
-                                                   out store_value,
-                                                   -1);
-
+                MerchantStore.get_default ().@get (iter, MerchantStore.COLUMN, out store_value, -1);
                 return store_value.up ().index_of (key.up ()) != -1;
             });
 
@@ -228,8 +219,7 @@ namespace Envelope.Window {
             paned.set_position (saved_state.sidebar_width);
         }
 
-        private void on_account_welcome_screen_add_transaction_selected (
-            Account account) {
+        private void on_account_welcome_screen_add_transaction_selected (Account account) {
             var transaction_view = TransactionView.get_default ();
 
             set_content_view (transaction_view);
@@ -238,10 +228,8 @@ namespace Envelope.Window {
             TransactionView.get_default ().btn_add_transactions_clicked ();
         }
 
-        private void on_sidebar_list_account_name_updated (Account account,
-                string new_name) {
+        private void on_sidebar_list_account_name_updated (Account account, string new_name) {
             if (account.number != new_name) {
-
                 try {
                     AccountManager.get_default ().rename_account (account, new_name);
                 } catch (Error err) {
@@ -254,8 +242,7 @@ namespace Envelope.Window {
             }
         }
 
-        private void on_sidebar_list_category_name_updated (Category category,
-                string new_name) {
+        private void on_sidebar_list_category_name_updated (Category category, string new_name) {
             string old_name = category.name;
 
             if (category.name != new_name) {
@@ -280,13 +267,12 @@ namespace Envelope.Window {
             }
         }
 
-        private void on_sidebar_category_selected (Category ? category) {
+        private void on_sidebar_category_selected (Category? category) {
             var transaction_view = TransactionView.get_default ();
 
             try {
                 double inflow, outflow;
-                var transactions = budget_manager.compute_current_category_operations (category,
-                                   out inflow, out outflow);
+                var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
 
                 transaction_view.transactions = transactions;
                 transaction_view.with_filter_view = false;
@@ -310,8 +296,7 @@ namespace Envelope.Window {
                 saved_state.selected_category_id = category != null ? category.@id : -1;
                 saved_state.selected_account_id = -1;
             } catch (ServiceError err) {
-                error ("could not load transactions for category %s (%s)", category.name,
-                       err.message);
+                error ("could not load transactions for category %s (%s)", category.name, err.message);
             }
         }
 
@@ -321,16 +306,13 @@ namespace Envelope.Window {
             sidebar.list_account_selected.connect (on_sidebar_account_selected);
 
             // connect signals
-            AccountWelcomeScreen.get_default ().add_transaction_selected.connect (
-                on_account_welcome_screen_add_transaction_selected);
+            AccountWelcomeScreen.get_default ().add_transaction_selected.connect (on_account_welcome_screen_add_transaction_selected);
 
             // handle account renames
-            sidebar.list_account_name_updated.connect (
-                on_sidebar_list_account_name_updated);
+            sidebar.list_account_name_updated.connect (on_sidebar_list_account_name_updated);
 
             // handle category renames
-            sidebar.list_category_name_updated.connect (
-                on_sidebar_list_category_name_updated);
+            sidebar.list_category_name_updated.connect (on_sidebar_list_category_name_updated);
 
             sidebar.overview_selected.connect (on_sidebar_overview_selected);
 
@@ -400,8 +382,7 @@ namespace Envelope.Window {
             });
         }
 
-        private void determine_initial_content_view (Gee.Collection<Account> accounts,
-                out Gtk.Widget widget) {
+        private void determine_initial_content_view (Gee.Collection<Account> accounts, out Gtk.Widget widget) {
             if (accounts.size > 0) {
                 widget = BudgetOverview.get_default ();
             } else {
@@ -419,11 +400,9 @@ namespace Envelope.Window {
             }
         }
 
-        private void determine_account_content_view (Account account,
-                out Gtk.Widget widget, out string window_title) {
+        private void determine_account_content_view (Account account, out Gtk.Widget widget, out string window_title) {
             try {
-                var transactions = AccountManager.get_default ().load_account_transactions (
-                                       account);
+                var transactions = AccountManager.get_default ().load_account_transactions (account);
                 account.transactions = transactions;
 
                 if (transactions.size == 0) {
@@ -476,9 +455,7 @@ namespace Envelope.Window {
             }
 
             paned.pack2 (widget, true, false);
-
             widget.show ();
-
             main_view_changed (widget);
         }
     }

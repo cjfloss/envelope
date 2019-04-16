@@ -25,10 +25,8 @@ using Gee;
 namespace Envelope.View {
     private static BudgetOverview budget_overview_instance = null;
 
-    private const string STYLE_CLASS_INFLOW =
-        ".inflow { font-weight: 900; font-size: 18px; color: #4e9a06; }";
-    private const string STYLE_CLASS_OUTFLOW =
-        ".outflow { font-weight: 900; font-size: 18px; color: #A62626; }";
+    private const string STYLE_CLASS_INFLOW = ".inflow { font-weight: 900; font-size: 18px; color: #4e9a06; }";
+    private const string STYLE_CLASS_OUTFLOW = ".outflow { font-weight: 900; font-size: 18px; color: #A62626; }";
 
     public class BudgetOverview : Gtk.Box {
         private const string STYLESHEET_BUDGET_OVERVIEW = """
@@ -74,8 +72,7 @@ namespace Envelope.View {
         private void build_ui () {
             homogeneous = false;
 
-            Granite.Widgets.Utils.set_theming (this, STYLESHEET_BUDGET_OVERVIEW, null,
-                                               Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            Granite.Widgets.Utils.set_theming (this, STYLESHEET_BUDGET_OVERVIEW, null, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
             build_summary_ui ();
             build_charts_ui ();
@@ -112,10 +109,8 @@ namespace Envelope.View {
             //                                   "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             inflow_box.pack_start (inflow_label, false);
 
-            inflow_value_label = new Gtk.Label (Envelope.Util.String.format_currency (
-                                                    budget_state.inflow));
-            Granite.Widgets.Utils.set_theming (inflow_value_label, STYLE_CLASS_INFLOW,
-                                               "inflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            inflow_value_label = new Gtk.Label (Envelope.Util.String.format_currency (budget_state.inflow));
+            Granite.Widgets.Utils.set_theming (inflow_value_label, STYLE_CLASS_INFLOW, "inflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             inflow_box.pack_start (inflow_value_label, false);
 
             var outflow_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
@@ -123,14 +118,11 @@ namespace Envelope.View {
 
             var outflow_label = new Gtk.Label (_("Outflow:"));
             set_class (outflow_label, Granite.STYLE_CLASS_H2_LABEL);
-            //Granite.Widgets.Utils.set_theming (outflow_label, STYLE_CLASS_OVERVIEW,
-            //                                   "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            //Granite.Widgets.Utils.set_theming (outflow_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             outflow_box.pack_start (outflow_label, false);
 
-            outflow_value_label = new Gtk.Label (Envelope.Util.String.format_currency (
-                    budget_state.outflow));
-            Granite.Widgets.Utils.set_theming (outflow_value_label, STYLE_CLASS_OUTFLOW,
-                                               "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            outflow_value_label = new Gtk.Label (Envelope.Util.String.format_currency (budget_state.outflow));
+            Granite.Widgets.Utils.set_theming (outflow_value_label, STYLE_CLASS_OUTFLOW, "outflow", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             outflow_box.pack_start (outflow_value_label, false);
 
             var remaining_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
@@ -138,8 +130,7 @@ namespace Envelope.View {
 
             var remaining_label = new Gtk.Label (_("Remaining this month:"));
             set_class (remaining_label, Granite.STYLE_CLASS_H2_LABEL);
-            //Granite.Widgets.Utils.set_theming (remaining_label, STYLE_CLASS_OVERVIEW,
-            //                                   "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            //Granite.Widgets.Utils.set_theming (remaining_label, STYLE_CLASS_OVERVIEW, "overview", Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             remaining_box.pack_start (remaining_label, false);
 
             remaining_value_label = new Gtk.Label (Envelope.Util.String.format_currency (
@@ -183,8 +174,7 @@ namespace Envelope.View {
                 foreach (Category category in categories) {
                     double inflow;
                     double outflow;
-                    var transactions = budget_manager.compute_current_category_operations (category,
-                                       out inflow, out outflow);
+                    var transactions = budget_manager.compute_current_category_operations (category, out inflow, out outflow);
 
                     if (!transactions.is_empty) {
                         var category_label = new Gtk.Label (category.name);
@@ -197,34 +187,28 @@ namespace Envelope.View {
                         bool outflow_set = false;
 
                         if (inflow != 0) {
-                            category_summary_str += "%s earned".printf (
-                                                        Envelope.Util.String.format_currency (inflow));
+                            category_summary_str += "%s earned".printf (Envelope.Util.String.format_currency (inflow));
                             inflow_set = true;
                         }
 
                         if (outflow != 0) {
                             if (inflow_set) {
-                                category_summary_str += ", %s spent".printf (
-                                                            Envelope.Util.String.format_currency (outflow));
+                                category_summary_str += ", %s spent".printf (Envelope.Util.String.format_currency (outflow));
                             } else {
-                                category_summary_str += "%s spent".printf (
-                                                            Envelope.Util.String.format_currency (outflow));
+                                category_summary_str += "%s spent".printf (Envelope.Util.String.format_currency (outflow));
                             }
 
                             outflow_set = true;
                         }
 
-                        category_summary_str += " in %d operation%s".printf (transactions.size,
-                                                transactions.size > 1 ? "s" : "");
+                        category_summary_str += " in %d operation%s".printf (transactions.size, transactions.size > 1 ? "s" : "");
 
                         var category_summary = new Gtk.Label (category_summary_str);
                         set_class (category_summary, Granite.STYLE_CLASS_H3_LABEL);
                         category_summary.xalign = 0.0f;
 
-                        charts_container.attach_next_to (category_label, null,
-                                                         Gtk.PositionType.BOTTOM, 1, 1);
-                        charts_container.attach_next_to (category_summary, category_label,
-                                                         Gtk.PositionType.RIGHT, 1, 1);
+                        charts_container.attach_next_to (category_label, null, Gtk.PositionType.BOTTOM, 1, 1);
+                        charts_container.attach_next_to (category_summary, category_label, Gtk.PositionType.RIGHT, 1, 1);
                     }
                 }
 

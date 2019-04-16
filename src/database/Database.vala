@@ -54,8 +54,7 @@ namespace Envelope.Database {
          *
          * @param name Name of the database which is used to create the file-name
          */
-        public Database (string name)
-                         throws DatabaseError, Error {
+        public Database (string name) throws DatabaseError, Error {
             Object (name : name);
             init ();
         }
@@ -104,9 +103,7 @@ namespace Envelope.Database {
          * @param arguments Values to bind in the SQL query or null.
          * @throws DatabaseError if the underlying SQLite operation fails.
          */
-        public Cursor exec_cursor (string sql,
-                                   GLib.Value[]? arguments = null)
-                                   throws DatabaseError {
+        public Cursor exec_cursor (string sql, GLib.Value[]? arguments = null) throws DatabaseError {
             return new Cursor (this.db, sql, arguments);
         }
 
@@ -119,9 +116,7 @@ namespace Envelope.Database {
          * @param arguments Values to bind in the SQL query or null.
          * @throws DatabaseError if the underlying SQLite operation fails.
          */
-        public void exec (string sql,
-                          GLib.Value[]? arguments = null)
-                          throws DatabaseError {
+        public void exec (string sql, GLib.Value[]? arguments = null) throws DatabaseError {
             if (arguments == null) {
                 debug (sql);
                 this.db.exec (sql);
@@ -155,9 +150,7 @@ namespace Envelope.Database {
          * @return The contents of the first row's column as an int.
          * @throws DatabaseError if the underlying SQLite operation fails.
          */
-        public int query_value (string sql,
-                                 GLib.Value[]? args = null)
-                                 throws DatabaseError {
+        public int query_value (string sql, GLib.Value[]? args = null) throws DatabaseError {
             var cursor = this.exec_cursor (sql, args);
             var statement = cursor.next ();
             return statement->column_int (0);
@@ -191,8 +184,7 @@ namespace Envelope.Database {
             try {
                 this.exec ("ROLLBACK;");
             } catch (DatabaseError error) {
-                critical (_("Failed to roll back transaction: %s"),
-                          error.message);
+                critical (_("Failed to roll back transaction: %s"), error.message);
             }
         }
 
@@ -203,8 +195,7 @@ namespace Envelope.Database {
          * usually indicates that the file is not a databsae
          */
         public bool is_empty () throws DatabaseError {
-            return this.query_value ("SELECT count(type) FROM " +
-                                     "sqlite_master WHERE rowid = 1;") == 0;
+            return this.query_value ("SELECT count(type) FROM " + "sqlite_master WHERE rowid = 1;") == 0;
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Envelope.Widget {
 
         public signal void dismissed ();
 
-        protected string ? current_path;
+        protected string? current_path;
 
         protected abstract void build_ui ();
         protected abstract void connect_signals ();
@@ -40,15 +40,8 @@ namespace Envelope.Widget {
             connect_real_signals ();
         }
 
-        public override unowned Gtk.CellEditable ? start_editing ( Gdk.Event ? event,
-                Gtk.Widget widget,
-                string path,
-                Gdk.Rectangle background_area,
-                Gdk.Rectangle cell_area,
-                Gtk.CellRendererState flags) {
-            unowned Gtk.CellEditable ? return_value = base.start_editing (event, widget,
-                    path, background_area, cell_area, flags);
-
+        public override unowned Gtk.CellEditable? start_editing ( Gdk.Event? event, Gtk.Widget widget, string path, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
+            unowned Gtk.CellEditable? return_value = base.start_editing (event, widget, path, background_area, cell_area, flags);
             current_path = path;
 
             popover.pointing_to = cell_area;
