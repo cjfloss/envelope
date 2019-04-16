@@ -1,3 +1,17 @@
+com.github.cjfloss.envelope (0.0.4) bionic; urgency=high
+
+  * Polish Translation (By @DanyGee)
+  * French Translation (By @kameha)
+  * German Translation (By Nicolas @Mondei1)
+  * Fix crash while importing
+  * Updated HoustonCI
+  * Updated markdown license file
+  * Drop SqlHeavy, use Sqlite3
+  * Use the right color on Budget overview
+  * Use better wording. Payee instead of Merchant
+
+ -- Cleiton Floss <cleitonfloss@gmail.com>  Tue, 16 Apr 2019 09:00:00 -0400
+
 com.github.cjfloss.envelope (0.0.3) trusty; urgency=high
 
   * Fix crash while removing category
@@ -10,3 +24,23 @@ com.github.cjfloss.envelope (0.0.3) trusty; urgency=high
   * Add current version to the binary
 
  -- Cleiton Floss <cleitonfloss@gmail.com>  Tue, 13 Feb 2018 00:00:00 -0300
+
+com.github.cjfloss.envelope (0.0.2) trusty; urgency=high
+
+  * Fixed some glitches
+  * Fix crash while removing category
+  * Fix information loss on editing
+  * Add AppData changelog
+  * Update app branding
+
+ -- Cleiton Floss <cleitonfloss@gmail.com>  Sat, 03 Feb 2018 00:00:00 -0300
+
+com.github.cjfloss.envelope (0.0.1) trusty; urgency=high
+
+  * First release: Testing.
+  * Basic functionalities
+  * Add account
+  * Add transactions
+  * Import QIF files
+
+ -- Cleiton Floss <cleitonfloss@gmail.com>  Mon, 22 Jan 2018 00:00:00 -0300
