@@ -44,7 +44,7 @@ namespace Envelope.Service {
             try {
                 load_payees ();
             } catch (DatabaseError err) {
-                warning ("could not load merchants; transaction search autocompletion won't work (%s)".printf (err.message));
+                warning ("could not load payees; transaction search autocompletion won't work (%s)".printf (err.message));
             }
         }
 

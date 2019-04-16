@@ -35,7 +35,7 @@ namespace Envelope.View {
 
         private enum Column {
             DATE,
-            MERCHANT,
+            PAYEE,
             OUTFLOW,
             INFLOW,
             MEMO,
@@ -142,7 +142,7 @@ namespace Envelope.View {
             var color = get_foreground_from_date (transaction.date);
 
             transactions_store.append (out iter, parent_iter);
-            transactions_store.@set (iter, Column.DATE, transaction.date.format (CELL_DATE_FORMAT), Column.MERCHANT, transaction.label, Column.OUTFLOW, out_amount, Column.INFLOW, in_amount, Column.MEMO, transaction.description, Column.ID, transaction.@id, Column.TRANSACTION, transaction, Column.CATEGORY, category_name, Column.COLOR, color, -1);
+            transactions_store.@set (iter, Column.DATE, transaction.date.format (CELL_DATE_FORMAT), Column.PAYEE, transaction.label, Column.OUTFLOW, out_amount, Column.INFLOW, in_amount, Column.MEMO, transaction.description, Column.ID, transaction.@id, Column.TRANSACTION, transaction, Column.CATEGORY, category_name, Column.COLOR, color, -1);
 
             update_view ();
         }
@@ -385,9 +385,9 @@ namespace Envelope.View {
                     get_transaction_iter_from_sort_iter (out store_iter, iter);
 
                     string payee;
-                    transactions_store.@get (store_iter, Column.MERCHANT, out payee, -1);
+                    transactions_store.@get (store_iter, Column.PAYEE, out payee, -1);
 
-                    transactions_store.@set (store_iter, Column.MERCHANT, text == "" ? merchant : text, -1);
+                    transactions_store.@set (store_iter, Column.PAYEE, text == "" ? payee : text, -1);
                 }
             });
 
@@ -420,11 +420,11 @@ namespace Envelope.View {
                     get_transaction_iter_from_sort_iter (out store_iter, iter);
 
                     string payee;
-                    transactions_store.@get (store_iter, Column.MERCHANT, out payee, -1);
+                    transactions_store.@get (store_iter, Column.PAYEE, out payee, -1);
 
                     if (renderer_category.apply_to_all) {
                         try {
-                            BudgetManager.get_default ().categorize_all_for_merchant (merchant, category);
+                            BudgetManager.get_default ().categorize_all_for_payee (payee, category);
                             transactions = AccountManager.get_default ().load_account_transactions (Sidebar.get_default ().selected_account);
                             add_transactions ();
                         } catch (ServiceError err) {
@@ -536,8 +536,8 @@ namespace Envelope.View {
             payee_column.pack_start (renderer_label, true);
             payee_column.resizable = true;
             payee_column.reorderable = true;
-            payee_column.sort_column_id = Column.MERCHANT;
-            payee_column.set_attributes (renderer_label, "text", Column.MERCHANT);
+            payee_column.sort_column_id = Column.PAYEE;
+            payee_column.set_attributes (renderer_label, "text", Column.PAYEE);
             payee_column.set_cell_data_func (renderer_label, cell_renderer_color_function);
             payee_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
             treeview.append_column (payee_column);
@@ -614,7 +614,7 @@ namespace Envelope.View {
 
             string payee;
             string category_name;
-            model.@get (iter, Column.MERCHANT, out payee, Column.CATEGORY, out category_name, -1);
+            model.@get (iter, Column.PAYEE, out payee, Column.CATEGORY, out category_name, -1);
 
             cp.payee_name = payee;
             cp.category_name = category_name;
@@ -754,7 +754,7 @@ namespace Envelope.View {
             Gtk.TreeIter insert_iter;
             transactions_store.append (out insert_iter, parent);
 
-            transactions_store.@set (insert_iter, Column.DATE, "", Column.MERCHANT, "", Column.MEMO, "", Column.OUTFLOW, "", Column.INFLOW, "", Column.ID, null, Column.TRANSACTION, transaction, Column.CATEGORY, "", -1);
+            transactions_store.@set (insert_iter, Column.DATE, "", Column.PAYEE, "", Column.MEMO, "", Column.OUTFLOW, "", Column.INFLOW, "", Column.ID, null, Column.TRANSACTION, transaction, Column.CATEGORY, "", -1);
 
             return insert_iter;
         }
@@ -944,7 +944,7 @@ namespace Envelope.View {
 
             Gtk.TreeIter view_iter;
             if (view_store.convert_child_iter_to_iter (out view_iter, current_editing_iter)) {
-                view_store.@get (view_iter, Column.DATE, out t_date, Column.MERCHANT, out t_label, Column.MEMO, out t_description, Column.INFLOW, out t_in_amount, Column.OUTFLOW, out t_out_amount, Column.CATEGORY, out t_category, -1);
+                view_store.@get (view_iter, Column.DATE, out t_date, Column.PAYEE, out t_label, Column.MEMO, out t_description, Column.INFLOW, out t_in_amount, Column.OUTFLOW, out t_out_amount, Column.CATEGORY, out t_category, -1);
 
                 // amount
                 double amount = 0d;
@@ -988,7 +988,7 @@ namespace Envelope.View {
                 string out_amount;
                 string category_name;
 
-                transactions_store.@get (iter, Column.DATE, out date, Column.MERCHANT, out label, Column.OUTFLOW, out out_amount, Column.INFLOW, out in_amount, Column.MEMO, out description, Column.TRANSACTION, out transaction, Column.CATEGORY, out category_name, -1);
+                transactions_store.@get (iter, Column.DATE, out date, Column.PAYEE, out label, Column.OUTFLOW, out out_amount, Column.INFLOW, out in_amount, Column.MEMO, out description, Column.TRANSACTION, out transaction, Column.CATEGORY, out category_name, -1);
 
                 if (transaction != null && transaction.@id != null) {
                     transaction.label = label;

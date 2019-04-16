@@ -116,7 +116,7 @@ namespace Envelope.Database {
                 return payee_cache.values;
             }
 
-            var cursor = this.database.exec_cursor (SQL_GET_UNIQUE_MERCHANTS);
+            var cursor = this.database.exec_cursor (SQL_GET_UNIQUE_PAYEES);
             foreach (var stmt in cursor) {
                 Payee payee;
                 var label = stmt.column_text (0);
@@ -271,7 +271,7 @@ namespace Envelope.Database {
          */
         public void categorize_for_payee (string payee, Category category) throws DatabaseError {
             GLib.Value[] args = {(int) category.@id, payee};
-            this.database.exec (SQL_CATEGORIZE_ALL_FOR_MERCHANT, args);
+            this.database.exec (SQL_CATEGORIZE_ALL_FOR_PAYEE, args);
         }
 
         /**
