@@ -1,31 +1,20 @@
 {
     "app-id" : "com.github.cjfloss.envelope",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "3.28",
+    "runtime-version" : "3.32",
     "sdk" : "org.gnome.Sdk",
+    "base":"io.elementary.BaseApp",
+    "base-version": "juno",
     "command" : "com.github.cjfloss.envelope",
     "finish-args" : [
-        "--share=network",
-        "--share=ipc",
-        "--socket=x11",
+        "--share=ipc", "--socket=x11",
+
         "--socket=wayland",
-        "--filesystem=xdg-run/dconf",
-        "--filesystem=~/.config/dconf:ro",
-        "--talk-name=ca.desrt.dconf",
-        "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
+
+        "--filesystem=xdg-run/dconf", "--filesystem=~/.config/dconf:ro",
+        "--talk-name=ca.desrt.dconf", "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
-    "build-options" : {
-        "cflags" : "-O2 -g",
-        "cxxflags" : "-O2 -g",
-        "env" : {
-            "PKG_CONFIG_GOBJECT_INTROSPECTION_1_0_GIRDIR" : "/app/share/gir-1.0",
-            "PKG_CONFIG_GOBJECT_INTROSPECTION_1_0_TYPELIBDIR" : "/app/lib/girepository-1.0",
-            "V" : "1"
-        }
-    },
     "cleanup" : [
-        "/bin/granite-demo",
-        "/share/applications/granite-demo.desktop",
         "/include",
         "/lib/pkgconfig",
         "/man",
@@ -39,57 +28,13 @@
     ],
     "modules" : [
         {
-            "name" : "libgee",
-            "buildsystem" : "meson",
-            "config-opts" : [
-                "--libdir=lib"
-            ],
-            "builddir" : true,
-            "sources" : [
-                {
-                    "type" : "git",
-                    "tag" : "meson",
-                    "url" : "https://github.com/GNOME/libgee.git"
-                }
-            ]
-        },
-        {
-            "name" : "libsqlheavy",
-            "buildsystem" : "autotools",
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://github.com/nemequ/sqlheavy.git"
-                }
-            ]
-        },
-        {
-            "name" : "granite",
-            "buildsystem" : "cmake-ninja",
-            "config-opts" : [
-                "-DCMAKE_BUILD_TYPE=Release"
-            ],
-            "sources" : [
-                {
-                    "type" : "archive",
-                    "url" : "https://github.com/elementary/granite/archive/0.5.tar.gz",
-                    "sha256" : "cc4905ae70fddeba3d2ded44bb642be77d419aa090251a7ab24c155b8616be06"
-                }
-            ]
-        },
-        {
             "name" : "envelope",
             "buildsystem" : "meson",
-            "config-opts" : [
-                "--libdir=lib"
-            ],
-            "builddir" : true,
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "file:///home/cleiton/Projects/envelope"
-                }
-            ]
+            "config-opts" : ["--buildtype=release"],
+            "sources" : [{
+                "type" : "git",
+                "url" : "https://github.com/cjfloss/envelope.git"
+            }]
         }
     ]
 }
