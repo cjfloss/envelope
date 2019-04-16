@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Cleiton Floss <cleitonfloss@gmail.com>
 Build-Depends:  debhelper (>= 8.0.0),
                 meson,
-                ninja,
+                ninja-build,
                 valac (>= 0.26.1),
                 libgtk-3-dev (>= 3.14.0),
                 libgee-0.8-dev,
