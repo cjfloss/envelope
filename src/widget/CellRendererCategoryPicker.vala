@@ -75,7 +75,6 @@ namespace Envelope.Widget {
 
             // apply to all
             check_button = new Gtk.CheckButton.with_label (_("Apply to all %s").printf (payee_name));
-
             grid.attach_next_to (check_button, null, Gtk.PositionType.BOTTOM, 2, 1);
 
             // Cancel button
