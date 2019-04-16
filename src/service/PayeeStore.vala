@@ -20,20 +20,20 @@ using Envelope.Database;
 using Gee;
 
 namespace Envelope.Service {
-    public class MerchantStore : Gtk.ListStore {
-        private static MerchantStore merchant_store_instance = null;
+    public class PayeeStore : Gtk.ListStore {
+        private static PayeeStore payee_store_instance = null;
 
-        public static new unowned MerchantStore get_default () {
-            if (merchant_store_instance == null) {
-                merchant_store_instance = new MerchantStore ();
+        public static new unowned PayeeStore get_default () {
+            if (payee_store_instance == null) {
+                payee_store_instance = new PayeeStore ();
             }
 
-            return merchant_store_instance;
+            return payee_store_instance;
         }
 
         public const int COLUMN = 0;
 
-        private MerchantStore () {
+        private PayeeStore () {
             Object ();
             set_column_types ({typeof (string), typeof (int)});
             reload ();
@@ -42,17 +42,17 @@ namespace Envelope.Service {
         public void reload () {
             clear ();
             try {
-                load_merchants ();
+                load_payees ();
             } catch (DatabaseError err) {
                 warning ("could not load merchants; transaction search autocompletion won't work (%s)".printf (err.message));
             }
         }
 
-        private void load_merchants () throws DatabaseError {
-            Collection<Merchant> merchants = DatabaseManager.get_default ().get_merchants ();
+        private void load_payees () throws DatabaseError {
+            Collection<Payee> payees = DatabaseManager.get_default ().get_payees ();
 
-            if (!merchants.is_empty) {
-                foreach (Merchant m in merchants) {
+            if (!payees.is_empty) {
+                foreach (Payee m in payees) {
                     Gtk.TreeIter iter;
                     append (out iter);
 
