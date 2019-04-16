@@ -373,7 +373,7 @@ namespace Envelope.View {
 
             // label cell renderer
             var renderer_label = new CellRendererTextCompletion ();
-            renderer_label.store = MerchantStore.get_default ();
+            renderer_label.store = PayeeStore.get_default ();
             renderer_label.text_column = 0;
             renderer_label.editable = true;
             renderer_label.ellipsize = Pango.EllipsizeMode.END;
@@ -384,8 +384,8 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     get_transaction_iter_from_sort_iter (out store_iter, iter);
 
-                    string merchant;
-                    transactions_store.@get (store_iter, Column.MERCHANT, out merchant, -1);
+                    string payee;
+                    transactions_store.@get (store_iter, Column.MERCHANT, out payee, -1);
 
                     transactions_store.@set (store_iter, Column.MERCHANT, text == "" ? merchant : text, -1);
                 }
@@ -419,8 +419,8 @@ namespace Envelope.View {
                     Gtk.TreeIter store_iter;
                     get_transaction_iter_from_sort_iter (out store_iter, iter);
 
-                    string merchant;
-                    transactions_store.@get (store_iter, Column.MERCHANT, out merchant, -1);
+                    string payee;
+                    transactions_store.@get (store_iter, Column.MERCHANT, out payee, -1);
 
                     if (renderer_category.apply_to_all) {
                         try {
@@ -529,18 +529,18 @@ namespace Envelope.View {
             date_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
             treeview.append_column (date_column);
 
-            var merchant_column = new Gtk.TreeViewColumn ();
-            merchant_column.set_title (_("Merchant"));
-            merchant_column.max_width = -1;
-            merchant_column.min_width = 165;
-            merchant_column.pack_start (renderer_label, true);
-            merchant_column.resizable = true;
-            merchant_column.reorderable = true;
-            merchant_column.sort_column_id = Column.MERCHANT;
-            merchant_column.set_attributes (renderer_label, "text", Column.MERCHANT);
-            merchant_column.set_cell_data_func (renderer_label, cell_renderer_color_function);
-            merchant_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
-            treeview.append_column (merchant_column);
+            var payee_column = new Gtk.TreeViewColumn ();
+            payee_column.set_title (_("Payee"));
+            payee_column.max_width = -1;
+            payee_column.min_width = 165;
+            payee_column.pack_start (renderer_label, true);
+            payee_column.resizable = true;
+            payee_column.reorderable = true;
+            payee_column.sort_column_id = Column.MERCHANT;
+            payee_column.set_attributes (renderer_label, "text", Column.MERCHANT);
+            payee_column.set_cell_data_func (renderer_label, cell_renderer_color_function);
+            payee_column.set_sizing (Gtk.TreeViewColumnSizing.FIXED);
+            treeview.append_column (payee_column);
 
             var category_column = new Gtk.TreeViewColumn ();
             category_column.set_title (_("Category"));
@@ -612,11 +612,11 @@ namespace Envelope.View {
 
             CellRendererCategoryPicker cp = renderer as CellRendererCategoryPicker;
 
-            string merchant;
+            string payee;
             string category_name;
-            model.@get (iter, Column.MERCHANT, out merchant, Column.CATEGORY, out category_name, -1);
+            model.@get (iter, Column.MERCHANT, out payee, Column.CATEGORY, out category_name, -1);
 
-            cp.merchant_name = merchant;
+            cp.payee_name = payee;
             cp.category_name = category_name;
         }
 

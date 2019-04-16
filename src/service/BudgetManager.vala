@@ -167,13 +167,13 @@ namespace Envelope.Service {
             }
         }
 
-        public void categorize_all_for_merchant (string merchant_name,
+        public void categorize_all_for_payee (string payee_name,
                 Category category) throws ServiceError {
             return_if_fail (category.@id != null);
 
             try {
-                // set category for all transactions having the same merchant
-                dbm.categorize_for_merchant (merchant_name, category);
+                // set category for all transactions having the same payee
+                dbm.categorize_for_payee (payee_name, category);
                 // re-compute budget state and fire state_changed
                 compute_state_and_fire_changed_event ();
             } catch (DatabaseError err) {

@@ -46,7 +46,7 @@ executable (
   'model/Transaction.vala',
   'model/Category.vala',
   'model/MonthlyCategory.vala',
-  'model/Merchant.vala',
+  'model/Payee.vala',
 
   'database/SQLQueries.vala',
   'database/DatabaseError.vala',
@@ -59,7 +59,7 @@ executable (
   'service/BudgetManager.vala',
   'service/Importer.vala',
   'service/QIFImporter.vala',
-  'service/MerchantStore.vala',
+  'service/PayeeStore.vala',
   'service/CategoryStore.vala',
   'service/settings/SavedState.vala',
 

@@ -70,7 +70,7 @@ namespace Envelope.Database {
         // in-memory caches for often-used objects
         //private SortedMap<int, Account> account_cache = new TreeMap<int, Account> ();
         private SortedMap<string, Category> category_cache = new TreeMap<string, Category> ();
-        private SortedMap<string, Merchant> merchant_cache = new TreeMap<string, Merchant> ();
+        private SortedMap<string, Payee> payee_cache = new TreeMap<string, Payee> ();
 
         /**
          * Obtain a reference to the singleton instance of the DatabaseManager
@@ -107,28 +107,28 @@ namespace Envelope.Database {
         }
 
         /**
-         * Get the list of all merchants
+         * Get the list of all payees
          *
-         * @return list of unique merchants
+         * @return list of unique payees
          */
-        public Collection<Merchant> get_merchants () throws DatabaseError {
-            if (!merchant_cache.is_empty) {
-                return merchant_cache.values;
+        public Collection<Payee> get_payees () throws DatabaseError {
+            if (!payee_cache.is_empty) {
+                return payee_cache.values;
             }
 
             var cursor = this.database.exec_cursor (SQL_GET_UNIQUE_MERCHANTS);
             foreach (var stmt in cursor) {
-                Merchant merchant;
+                Payee payee;
                 var label = stmt.column_text (0);
                 var count = stmt.column_int (1);
 
-                merchant = new Merchant (label, count);
-                merchant_cache.@set (merchant.label, merchant);
+                payee = new Payee (label, count);
+                payee_cache.@set (payee.label, payee);
             }
 
-            debug ("%d unique merchants", merchant_cache.size);
+            debug ("%d unique payees", payee_cache.size);
 
-            return merchant_cache.values;
+            return payee_cache.values;
         }
 
         /**
@@ -263,14 +263,14 @@ namespace Envelope.Database {
         }
 
         /**
-         * Assign all transactions having the specified merchant to a category
+         * Assign all transactions having the specified payee to a category
          *
-         * @param merchant the name of the merchant to match
+         * @param payee the name of the payee to match
          * @param category the category to assign to each transaction
          * @throws SQLHeavy.Error
          */
-        public void categorize_for_merchant (string merchant, Category category) throws DatabaseError {
-            GLib.Value[] args = {(int) category.@id, merchant};
+        public void categorize_for_payee (string payee, Category category) throws DatabaseError {
+            GLib.Value[] args = {(int) category.@id, payee};
             this.database.exec (SQL_CATEGORIZE_ALL_FOR_MERCHANT, args);
         }
 
@@ -704,9 +704,9 @@ namespace Envelope.Database {
         }
 
         private void connect_signals () {
-            // invalidate merchant cache when a transaction is recorded
+            // invalidate payee cache when a transaction is recorded
             transaction_created.connect ((transaction) => {
-                merchant_cache.clear ();
+                payee_cache.clear ();
             });
         }
 
