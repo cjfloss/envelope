@@ -1,12 +1,8 @@
 [Desktop Entry]
 Name=Envelope
 Comment=Manage your budget
-Comment[lt]=Tvarkyti savo biudžetą
-Comment[pl]=Zarządzaj swoim budżetem
 Keywords=Budget;Money;
-Keywords[lt]=Biudžetas;Pinigai;
 GenericName=Personal budget manager
-GenericName[lt]=Asmeninio biudžeto tvarkytuvė
 Exec=com.github.cjfloss.envelope
 Icon=com.github.cjfloss.envelope
 Terminal=false
