@@ -12,7 +12,7 @@
   <img src="data/screenshots/05.png" alt="screenshot" />
 </p>
 
-[![Build Status](https://travis-ci.org/cjfloss/envelope.svg)](https://travis-ci.org/cjfloss/envelope)
+[![Build Status](https://travis-ci.com/cjfloss/envelope.svg?branch=master)](https://travis-ci.com/cjfloss/envelope)
 
 ## Introduction
 
@@ -25,7 +25,7 @@ Configure accounts where you record all your transactions, then assign each of t
 ## Features
 
 * Envelope system budget workflow
-* Import transactions from QIF/OFX files
+* Import transactions from QIF files
 
 ## Installation
 
@@ -33,34 +33,27 @@ Configure accounts where you record all your transactions, then assign each of t
 * meson
 * ninja
 * Vala >=0.23.2
-* glib >=2.29.0
+* glib >=2.30
 * gio-2.0
-* Gtk+ >=3.10
+* Gtk+ >=3.14
 * libgee-0.8
 * granite-0.3
-* sqlheavy-0.1
+* sqlite3
 
 #### Building from sources
 ```sh
 $ git clone https://github.com/cjfloss/envelope.git
-$ cd envelope
-$ meson build --prefix=/usr && cd build
-$ ninja
+$ meson envelope build
+$ ninja -C build
 ```
-From there you can either use the binary in `src/com.github.cjfloss.envelope` or install it:
+From there you can either use the binary in `build/src/com.github.cjfloss.envelope` or install it:
 ```sh
-$ sudo ninja install
+$ sudo ninja -C build install
 ```
 
 ## Contributing
 
 Want to help? Just fork this repository, pick an issue and start hacking. Just follow the coding style and document your changes.
-
-### Donate
-* `Bitcoin: 15zE9cUoe7m2zHjQFCYpHPG7moFB51ncTN`
-* `Dash: XhhutrX3rzQDcFY6cFDUdDo9ZDPngrv9Tk`
-* `Ethereum: 0xE77D57EA81E1c8Ad394366FfB32A2F556073A147`
-* `Monero: 48PJP6rEXdKfAUTHqiBa367taCAuphZiTjgbme99kDvEbkKoPKuN3WMWb2dhraFs3S11oChRasDba2Xth7VbaFke5ZPxbzK`
 
 ### Commit messages
 
