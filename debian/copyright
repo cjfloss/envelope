@@ -7,13 +7,13 @@ Files: debian/* data/* po/* src/* tests/*
 Upstream Author(s):
 
     Nicolas Laplante <nicolas.laplante@gmail.com>
-    2018 Cleiton Floss <cleitonfloss@gmail.com>
+    2018-2019 Cleiton Floss <cleitonfloss@gmail.com>
 
 
 Copyright:
 
     Copyright (C) 2014-2015 Nicolas Laplante
-    Copyright (C) 2018 Cleiton Floss
+    Copyright (C) 2018-2019 Cleiton Floss
 
 License:
 
