@@ -42,7 +42,7 @@
     <p>Maintain your personal budget by using the tried-and-true envelope system.
        Designate spending categories (envelopes) and distribute your monthly income into them.
        Configure accounts where you record all your transactions, then assign each of them to a category.</p>
-    <p>Originaly made by Nicolas Laplante.</p>
+    <p>Originally made by Nicolas Laplante.</p>
     <p>Features:</p>
     <ul>
       <li>Envelope system budget workflow</li>
@@ -58,35 +58,64 @@
 
   <screenshots>
     <screenshot type="default">
-      <caption>Editing a category</caption>
-      <image>https://github.com/cjfloss/envelope/raw/master/data/screenshots/05.png</image>
+      <caption>Budget Overview</caption>
+      <image type="thumbnail" width="1421" height="818">https://github.com/cjfloss/envelope/raw/master/data/screenshots/03.png</image>
+      <image type="source" width="3000" height="1794">https://github.com/cjfloss/envelope/raw/master/data/screenshots/03@2.png</image>
     </screenshot>
     <screenshot>
-      <caption>When you lauch envelope for the first time</caption>
-      <image>https://github.com/cjfloss/envelope/raw/master/data/screenshots/01.png</image>
+      <caption>Editing a category</caption>
+      <image type="thumbnail" width="1342" height="831">https://github.com/cjfloss/envelope/raw/master/data/screenshots/05.png</image>
+      <image type="source" width="2198" height="1292">https://github.com/cjfloss/envelope/raw/master/data/screenshots/05@2.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>When you launch envelope for the first time</caption>
+      <image type="thumbnail" width="1499" height="846">https://github.com/cjfloss/envelope/raw/master/data/screenshots/01.png</image>
+      <image type="source" width="2198" height="1292">https://github.com/cjfloss/envelope/raw/master/data/screenshots/01@2.png</image>
     </screenshot>
     <screenshot>
       <caption>Dialog to add an account</caption>
-      <image>https://github.com/cjfloss/envelope/raw/master/data/screenshots/02.png</image>
+      <image type="thumbnail" width="430" height="400">https://github.com/cjfloss/envelope/raw/master/data/screenshots/02.png</image>
+      <image type="source" width="860" height="800">https://github.com/cjfloss/envelope/raw/master/data/screenshots/02@2.png</image>
     </screenshot>
     <screenshot>
-      <caption>When you just added an account</caption>
-      <image>https://github.com/cjfloss/envelope/raw/master/data/screenshots/03.png</image>
+      <caption>Transactions View</caption>
+      <image type="thumbnail" width="1500" height="897">https://github.com/cjfloss/envelope/raw/master/data/screenshots/04.png</image>
+      <image type="source" width="3158" height="1952">https://github.com/cjfloss/envelope/raw/master/data/screenshots/04@2.png</image>
     </screenshot>
     <screenshot>
-      <caption>Adding a transaction</caption>
-      <image>https://github.com/cjfloss/envelope/raw/master/data/screenshots/04.png</image>
+      <caption>After creating a Account</caption>
+      <image type="thumbnail" width="1434" height="827">https://github.com/cjfloss/envelope/raw/master/data/screenshots/06.png</image>
+      <image type="source" width="2198" height="1292">https://github.com/cjfloss/envelope/raw/master/data/screenshots/06@2.png</image>
     </screenshot>
   </screenshots>
 
   <developer_name>Cleiton Floss</developer_name>
 
-  <url type="homepage">https://github.com/cjfloss/envelope</url>
+  <url type="homepage">https://cjfloss.github.io/</url>
   <url type="bugtracker">https://github.com/cjfloss/envelope/issues</url>
   <url type="help">https://github.com/cjfloss/envelope/issues</url>
   <update_contact>cleitonfloss_AT_gmail.com</update_contact>
 
   <releases>
+    <release version="0.0.4" date="2019-04-16" urgency="high">
+      <description>
+        <p>New:</p>
+        <ul>
+          <li>Polish Translation (By @DanyGee)</li>
+          <li>French Translation (By @kameha)</li>
+          <li>German Translation (By Nicolas @Mondei1)</li>
+          <li>Drop SqlHeavy, use Sqlite3</li>
+        </ul>
+        <p>Fix:</p>
+        <ul>
+          <li>Use the right color on Budget overview</li>
+          <li>Fix crash while importing</li>
+          <li>Use better wording. Payee instead of Merchant</li>
+          <li>Updated markdown license file</li>
+          <li>Updated HoustonCI</li>
+        </ul>
+      ​</description>
+    </release>
     <release version="0.0.3" date="2018-02-13" urgency="high">
       <description>
         <p>New:</p>
@@ -136,6 +165,6 @@
   <custom>
     <value key="x-appcenter-color-primary">#226324</value>
     <value key="x-appcenter-color-primary-text">rgb(255, 255, 255)</value>
-    <value key="x-appcenter-suggested-price">0</value>
+    <value key="x-appcenter-suggested-price">5</value>
   </custom>
 </component>
