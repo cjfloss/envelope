@@ -81,9 +81,9 @@ executable(
     'window/MainWindow.vala',
     'Envelope.vala',
     build_config,
-    
+
     dependencies : [
-        dependency('glib-2.0', version :'>=2.29.0'),
+        dependency('glib-2.0', version :'>=2.30'),
         dependency('gtk+-3.0', version :'>=3.14'),
         dependency('gobject-2.0'),
         dependency('gee-0.8'),
