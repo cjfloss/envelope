@@ -132,7 +132,6 @@ namespace Envelope.Window {
 
                 string store_value;
                 PayeeStore.get_default ().@get (iter, PayeeStore.COLUMN, out store_value, -1);
-
                 return store_value.up ().index_of (key.up ()) != -1;
             });
 
