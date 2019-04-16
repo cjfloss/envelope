@@ -74,14 +74,8 @@ namespace Envelope.Widget {
             grid.attach_next_to (category_entry, null, Gtk.PositionType.BOTTOM, 2, 1);
 
             // apply to all
-<<<<<<< HEAD
-            check_button = new Gtk.CheckButton.with_label (_("Apply to all %s").printf (merchant_name));
-=======
-            check_button = new Gtk.CheckButton.with_label (
-                                                _("Apply to all %s")
-                                                .printf (payee_name));
+            check_button = new Gtk.CheckButton.with_label (_("Apply to all %s").printf (payee_name));
 
->>>>>>> refactor: Replace 'Merchant' with 'Payee'
             grid.attach_next_to (check_button, null, Gtk.PositionType.BOTTOM, 2, 1);
 
             // Cancel button

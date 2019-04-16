@@ -131,15 +131,8 @@ namespace Envelope.Window {
                 }
 
                 string store_value;
-<<<<<<< HEAD
-                MerchantStore.get_default ().@get (iter, MerchantStore.COLUMN, out store_value, -1);
-=======
-                PayeeStore.get_default ().@get (iter,
-                                                   PayeeStore.COLUMN,
-                                                   out store_value,
-                                                   -1);
+                PayeeStore.get_default ().@get (iter, PayeeStore.COLUMN, out store_value, -1);
 
->>>>>>> refactor: Replace 'Merchant' with 'Payee'
                 return store_value.up ().index_of (key.up ()) != -1;
             });
 
