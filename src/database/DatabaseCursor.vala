@@ -96,7 +96,7 @@ public class Envelope.Database.Cursor : Object {
                 }
             } else {
                 var type = current_value.type ();
-                warning (_("Unsupported type %s"), type.name ());
+                warning ("Unsupported type %s", type.name ());
                 assert_not_reached ();
             }
 

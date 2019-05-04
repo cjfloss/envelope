@@ -14,5 +14,3 @@ src/dialog/ImportTransactionsDialog.vala
 src/widget/CellRendererCategoryPicker.vala
 src/window/MainWindow.vala
 src/Envelope.vala
-data/com.github.cjfloss.envelope.desktop.in
-data/com.github.cjfloss.envelope.appdata.xml.in

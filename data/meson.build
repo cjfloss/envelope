@@ -17,7 +17,7 @@ i18n.merge_file (
   output: meson.project_name () + '.desktop',
   install: true,
   install_dir: join_paths (get_option ('datadir'), 'applications'),
-  po_dir: join_paths (meson.source_root (), 'po'),
+  po_dir: join_paths (meson.source_root (), 'po', 'extra'),
   type: 'desktop'
 )
 
@@ -27,7 +27,7 @@ i18n.merge_file (
   output: meson.project_name () + '.appdata.xml',
   install: true,
   install_dir: join_paths (get_option ('datadir'), 'metainfo'),
-  po_dir: join_paths (meson.source_root (), 'po')
+  po_dir: join_paths (meson.source_root (), 'po', 'extra')
 )
 
 dfv = find_program ('desktop-file-validate', required: false)

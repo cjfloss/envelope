@@ -23,7 +23,7 @@ namespace Envelope.View {
 
     public class Welcome : Gtk.Grid {
         construct {
-            var welcome = new Granite.Widgets.Welcome ("Get your budget going", "You have not configured any account yet");
+            var welcome = new Granite.Widgets.Welcome (_("Get your budget going"), _("You have not configured any account yet"));
             welcome.append ("list-add-symbolic", _("Add an account"), _("You have not configured any account yet"));
 
             add (welcome);
