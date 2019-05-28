@@ -1,0 +1,11 @@
+[default]
+name=Default
+runtime=host
+toolchain=gcc:/usr/bin/x86_64-redhat-linux-gcc
+config-opts=
+run-opts=
+prefix=/home/ivan/.cache/gnome-builder/install/envelope/host
+app-id=
+postbuild=
+prebuild=
+default=true
