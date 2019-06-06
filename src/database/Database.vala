@@ -81,7 +81,7 @@ namespace Envelope.Database {
 
                 Sqlite.Database.open_v2 (db_file.get_path (), out db, flags);
                 if (db.errcode () != Sqlite.OK) {
-                    var msg = _("Error while opening SQLite database %s: %s");
+                    var msg = "Error while opening SQLite database %s: %s";
                     throw new DatabaseError.OPEN (msg, db_file.get_path (), this.db.errmsg ());
                 }
 
@@ -184,7 +184,7 @@ namespace Envelope.Database {
             try {
                 this.exec ("ROLLBACK;");
             } catch (DatabaseError error) {
-                critical (_("Failed to roll back transaction: %s"), error.message);
+                critical ("Failed to roll back transaction: %s", error.message);
             }
         }
 
