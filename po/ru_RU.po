@@ -1,0 +1,589 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the com.github.cjfloss.envelope package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: com.github.cjfloss.envelope\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-04-16 07:30-0400\n"
+"PO-Revision-Date: 2019-05-28 01:36+0300\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.3\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Language: ru_RU\n"
+
+#: src/database/Database.vala:84
+#, c-format
+msgid "Error while opening SQLite database %s: %s"
+msgstr "Ошибка при открытии базы данных SQLite %s:%s"
+
+#: src/database/Database.vala:187
+#, c-format
+msgid "Failed to roll back transaction: %s"
+msgstr "Провал отката транзакции: %s"
+
+#: src/database/DatabaseCursor.vala:99
+#, c-format
+msgid "Unsupported type %s"
+msgstr "Не поддерживаемый тип %s"
+
+#: src/database/DatabaseManager.vala:581
+msgid "Groceries"
+msgstr "Продукты"
+
+#: src/database/DatabaseManager.vala:582
+msgid "Fuel"
+msgstr "Топливо"
+
+#: src/database/DatabaseManager.vala:583
+msgid "Public transit"
+msgstr "Общественный транспорт"
+
+#: src/database/DatabaseManager.vala:584
+msgid "Restaurants"
+msgstr "Рестораны"
+
+#: src/database/DatabaseManager.vala:585
+msgid "Entertainment"
+msgstr "Развлечения"
+
+#: src/database/DatabaseManager.vala:586 src/dialog/AddAccountDialog.vala:80
+msgid "Savings"
+msgstr "Сбережения"
+
+#: src/database/DatabaseManager.vala:587
+msgid "Personal care"
+msgstr "Личная гигена"
+
+#: src/database/DatabaseManager.vala:588
+msgid "Alcohol & Bars"
+msgstr "Алкоголь и бары"
+
+#: src/database/DatabaseManager.vala:589
+msgid "Emergency fund"
+msgstr "Чрезвычайный запас"
+
+#. OK button
+#: src/view/TransactionView.vala:166 src/view/TransactionView.vala:864
+#: src/view/CategoryProperties.vala:143
+msgid "Apply"
+msgstr "Применить"
+
+#: src/view/TransactionView.vala:177 src/view/TransactionView.vala:323
+#: src/view/TransactionView.vala:880 src/view/TransactionView.vala:898
+msgid "Add transaction"
+msgstr "Добавить проводку"
+
+#: src/view/TransactionView.vala:300
+msgid "No results."
+msgstr "Нет результатов."
+
+#. Cancel button
+#: src/view/TransactionView.vala:327 src/view/CategoryProperties.vala:139
+#: src/dialog/AddAccountDialog.vala:121 src/dialog/AddCategoryDialog.vala:89
+#: src/widget/CellRendererCategoryPicker.vala:81
+msgid "Cancel"
+msgstr "Отмена"
+
+#. columns
+#: src/view/TransactionView.vala:520
+msgid "Date"
+msgstr "Дата"
+
+#: src/view/TransactionView.vala:533
+msgid "Payee"
+msgstr ""
+
+#: src/view/TransactionView.vala:546
+msgid "Category"
+msgstr "Категория"
+
+#: src/view/TransactionView.vala:559
+#, c-format
+msgid "Outflow (%s)"
+msgstr "Расход (%s)"
+
+#: src/view/TransactionView.vala:572
+#, c-format
+msgid "Inflow (%s)"
+msgstr "Приход (%s)"
+
+#: src/view/TransactionView.vala:585
+msgid "Memo"
+msgstr "Заметка"
+
+#. right-click menu
+#: src/view/TransactionView.vala:600
+msgid "Split"
+msgstr "Разделить"
+
+#. right-click menu
+#: src/view/TransactionView.vala:602 src/view/Sidebar.vala:220
+msgid "Remove"
+msgstr "Удалить"
+
+#: src/view/TransactionView.vala:926
+msgid "Transaction removed"
+msgstr "Проводка удалена"
+
+#: src/view/Sidebar.vala:252
+#, c-format
+msgid "Budget overview for %s"
+msgstr "Обзор бюджета за %s"
+
+#: src/view/Sidebar.vala:254
+msgid "Spending this month"
+msgstr "Расходы в этом месяце"
+
+#: src/view/Sidebar.vala:254
+#, c-format
+msgid "Money spent in %s"
+msgstr "Денег потрачено %s"
+
+#: src/view/Sidebar.vala:256
+msgid "Income this month"
+msgstr "Пришло в этом месяце"
+
+#: src/view/Sidebar.vala:256
+#, c-format
+msgid "Money earned in %s"
+msgstr "Денег получено %s"
+
+#. remaining
+#: src/view/Sidebar.vala:258 src/view/CategoryProperties.vala:124
+msgid "Remaining"
+msgstr "Остаток"
+
+#: src/view/Sidebar.vala:258
+#, c-format
+msgid "Remaining balance for %s"
+msgstr "Остаток баланса за %s"
+
+#. Add "Accounts" category header
+#: src/view/Sidebar.vala:261
+msgid "Accounts"
+msgstr "Аккаунты"
+
+#. Add "Add account..."
+#: src/view/Sidebar.vala:268
+msgid "Add account…"
+msgstr "Добавить аккаунт…"
+
+#: src/view/Sidebar.vala:268
+msgid "Add a new account"
+msgstr "Добавить новый аккаунт"
+
+#. Add "Categories" category header
+#: src/view/Sidebar.vala:271
+msgid "Spending categories"
+msgstr "Категории расходов"
+
+#. Add "Uncategorized"
+#: src/view/Sidebar.vala:371 src/window/MainWindow.vala:285
+msgid "Uncategorized"
+msgstr "Без категории"
+
+#. Add category...
+#: src/view/Sidebar.vala:385
+msgid "Add category…"
+msgstr "Добавить категорию…"
+
+#: src/view/Sidebar.vala:385
+msgid "Add a new spending category"
+msgstr "Добавить новую категорию расходов"
+
+#: src/view/Sidebar.vala:652
+msgid "None yet"
+msgstr "Нет еще"
+
+#: src/view/Sidebar.vala:1033
+#, c-format
+msgid "Category %s removed"
+msgstr "Категория %s удалена"
+
+#: src/view/Sidebar.vala:1044
+#, c-format
+msgid "Account %s removed"
+msgstr "Аккаунт %s удален"
+
+#: src/view/WelcomeScreen.vala:27
+msgid "Add an account"
+msgstr "Добавить аккаунт"
+
+#: src/view/WelcomeScreen.vala:27
+msgid "You have not configured any account yet"
+msgstr "У вас еще нет настроенных аккаунтов"
+
+#: src/view/AccountWelcomeScreen.vala:41
+msgid "Spend! Get paid!"
+msgstr "Трать! Получай!"
+
+#: src/view/AccountWelcomeScreen.vala:41
+msgid "There are currently no transactions in this account"
+msgstr ""
+
+#: src/view/AccountWelcomeScreen.vala:47
+msgid "Record a transaction"
+msgstr "Записать проводку"
+
+#: src/view/AccountWelcomeScreen.vala:47
+msgid "Record a fresh new transaction for this account. Or, plan a future one!"
+msgstr ""
+
+#. import button
+#: src/view/AccountWelcomeScreen.vala:48 src/window/MainWindow.vala:105
+msgid "Import transactions"
+msgstr "Импортировать проводки"
+
+#: src/view/AccountWelcomeScreen.vala:48
+msgid "Import from a QIF file obtained from another application"
+msgstr "Импорт из QIF файла полученного из другого приложения"
+
+#. set_class (summary_container, Granite.StyleClass.CONTENT_VIEW);
+#: src/view/BudgetOverview.vala:93
+msgid "Your budget right now:"
+msgstr "Ваш бюджет прямо сейчас:"
+
+#: src/view/BudgetOverview.vala:106
+msgid "Inflow:"
+msgstr "Доход:"
+
+#: src/view/BudgetOverview.vala:119
+msgid "Outflow:"
+msgstr "Расход:"
+
+#: src/view/BudgetOverview.vala:131
+msgid "Remaining this month:"
+msgstr "Потрачено в этом месяце:"
+
+#. this month
+#: src/view/FilterView.vala:82
+msgid "This month"
+msgstr "Этот месяц"
+
+#. last month
+#: src/view/FilterView.vala:86
+msgid "Last month"
+msgstr "Прошлый месяц"
+
+#. future
+#: src/view/FilterView.vala:90
+msgid "Future"
+msgstr "Будущие"
+
+#. manual dates
+#: src/view/FilterView.vala:94
+msgid "Pick dates:"
+msgstr "Выбранные даты:"
+
+#. column_homogeneous = true;
+#. title
+#: src/view/CategoryProperties.vala:76
+msgid "Edit category"
+msgstr "Редактировать категорию"
+
+#. category name text entry
+#: src/view/CategoryProperties.vala:81
+msgid "Name"
+msgstr "Имя"
+
+#. budgeted amount
+#: src/view/CategoryProperties.vala:91
+msgid "Budget"
+msgstr "Бюджет"
+
+#: src/view/CategoryProperties.vala:98
+msgid "Monthly budget"
+msgstr "Месячный бюджет"
+
+#. outflow
+#: src/view/CategoryProperties.vala:106
+msgid "Outflow"
+msgstr "Расход"
+
+#. inflow
+#: src/view/CategoryProperties.vala:115
+msgid "Inflow"
+msgstr "Доход"
+
+#: src/dialog/AddAccountDialog.vala:35
+msgid "Add an Account"
+msgstr "Добавить аккаунт"
+
+#: src/dialog/AddAccountDialog.vala:58
+msgid "Label:"
+msgstr "Метка:"
+
+#: src/dialog/AddAccountDialog.vala:63
+msgid "Eg.: account number"
+msgstr "Нм.: номер счета"
+
+#: src/dialog/AddAccountDialog.vala:70
+msgid "Type:"
+msgstr "Тип:"
+
+#: src/dialog/AddAccountDialog.vala:78
+msgid "Checking"
+msgstr "Контроль"
+
+#: src/dialog/AddAccountDialog.vala:101
+msgid "Balance:"
+msgstr "Баланс:"
+
+#: src/dialog/AddAccountDialog.vala:110
+msgid "Description:"
+msgstr "Описание:"
+
+#: src/dialog/AddAccountDialog.vala:116
+msgid "Optional"
+msgstr "Опционально"
+
+#: src/dialog/AddAccountDialog.vala:120
+msgid "Create Account"
+msgstr "Создать аккаунт"
+
+#. show notification
+#: src/dialog/AddAccountDialog.vala:151
+#, c-format
+msgid "Account %s has been created"
+msgstr "Аккаунт %s был создан"
+
+#: src/dialog/AddCategoryDialog.vala:31
+msgid "Add a Category"
+msgstr "Добавить категорию"
+
+#: src/dialog/AddCategoryDialog.vala:55
+msgid "Name:"
+msgstr "Имя:"
+
+#: src/dialog/AddCategoryDialog.vala:60
+#: src/widget/CellRendererCategoryPicker.vala:72
+msgid "Category name"
+msgstr "Название категории"
+
+#: src/dialog/AddCategoryDialog.vala:67
+#, c-format
+msgid "Monthly Budget for %s"
+msgstr "Месячный бюджет для %s"
+
+#: src/dialog/AddCategoryDialog.vala:73
+msgid "Budget:"
+msgstr "Бюджет:"
+
+#: src/dialog/AddCategoryDialog.vala:78
+msgid "Monthly budget for category"
+msgstr "Месячный бюджет для категории"
+
+#: src/dialog/AddCategoryDialog.vala:81
+msgid "Create Category"
+msgstr "Создать категорию"
+
+#: src/dialog/ImportTransactionsDialog.vala:26
+msgid "Import transactions from file"
+msgstr "Импортировать проводки из файла"
+
+#: src/dialog/ImportTransactionsDialog.vala:67
+#, c-format
+msgid "%d transactions imported in account %s"
+msgstr "%d проводки добавлены в аккаунт%s"
+
+#. apply to all
+#: src/widget/CellRendererCategoryPicker.vala:39
+#: src/widget/CellRendererCategoryPicker.vala:77
+#, c-format
+msgid "Apply to all %s"
+msgstr "Применить ко всем %s"
+
+#. OK button
+#: src/widget/CellRendererCategoryPicker.vala:85
+msgid "Set category"
+msgstr "Установить категорию"
+
+#: src/window/MainWindow.vala:89
+msgid "Export…"
+msgstr "Экспорт…"
+
+#. export button
+#. export_button = new Gtk.Button.from_icon_name ("document-export", Gtk.IconSize.LARGE_TOOLBAR);
+#. export_button.tooltip_text = _("Backup budget");
+#. header_bar.pack_end (export_button);
+#. add transaction button
+#: src/window/MainWindow.vala:115
+msgid "Record transaction"
+msgstr "Записать проводку"
+
+#: src/window/MainWindow.vala:122
+msgid "Search transactions…"
+msgstr "Найти проводку…"
+
+#: src/window/MainWindow.vala:290
+#, c-format
+msgid "Search in %s"
+msgstr "Искать в %s"
+
+#. uncategorized
+#: src/window/MainWindow.vala:292
+msgid "Search uncategorized"
+msgstr "Искать без категорий"
+
+#: src/window/MainWindow.vala:369
+msgid "Transaction recorded"
+msgstr "Проводка записана"
+
+#: src/window/MainWindow.vala:415
+#, c-format
+msgid "Transactions in %s"
+msgstr "Проводки из %s"
+
+#: data/com.github.cjfloss.envelope.desktop.in:3
+#: data/com.github.cjfloss.envelope.appdata.xml.in:7
+msgid "Envelope"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.desktop.in:4
+msgid "Manage your budget"
+msgstr "Управляй своим бюджетом"
+
+#: data/com.github.cjfloss.envelope.desktop.in:5
+msgid "Budget;Money;"
+msgstr "Бюджет;Деньги;"
+
+#: data/com.github.cjfloss.envelope.desktop.in:6
+#: data/com.github.cjfloss.envelope.appdata.xml.in:8
+msgid "Personal budget manager"
+msgstr "Персональный менеджер финансов"
+
+#: data/com.github.cjfloss.envelope.desktop.in:8
+msgid "com.github.cjfloss.envelope"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:42
+msgid ""
+"Maintain your personal budget by using the tried-and-true envelope system. "
+"Designate spending categories (envelopes) and distribute your monthly income "
+"into them. Configure accounts where you record all your transactions, then "
+"assign each of them to a category."
+msgstr ""
+"Сохраняйте свой личный бюджет, используя проверенную систему envelope. "
+"Укажите категории расходов (Envelope) и распределите в них свой ежемесячный "
+"доход. Настройте учетные записи, в которые вы записываете все свои "
+"транзакции, затем назначьте каждой из них категорию."
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:45
+msgid "Originaly made by Nicolas Laplante."
+msgstr "Автор оригинала Nicolas Laplante."
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:46
+msgid "Features:"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:48
+msgid "Envelope system budget workflow"
+msgstr "Рабочий процесс системы бюджета envelope"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:49
+msgid "Import transactions from QIF files"
+msgstr "Импортировать проводки из файла"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:61
+msgid "Editing a category"
+msgstr "Редактировать категорию"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:65
+msgid "When you lauch envelope for the first time"
+msgstr "Когда вы загружаете envelope в первый раз"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:69
+msgid "Dialog to add an account"
+msgstr "Диалог добавления аккаунта"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:73
+msgid "When you just added an account"
+msgstr "Когда вы только добавили аккаунт"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:77
+msgid "Adding a transaction"
+msgstr "Добавьте проводки"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:82
+msgid "Cleiton Floss"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:92
+msgid "New:"
+msgstr "Новое:"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:94
+msgid "Improved add account Dialog"
+msgstr "Улучшение диалога добавления аккаунта"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:95
+msgid "Improved add category Dialog"
+msgstr "Улучшение диалога добавления категории"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:97
+msgid "Fix:"
+msgstr "Исправления:"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:99
+msgid "Fix crash while adding second account"
+msgstr "Исправлено падение при добавлении второго аккаунта"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:100
+msgid "Allow resizing window"
+msgstr "Разрешено изменение размеров окна"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:101
+msgid "Add unit tests"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:102
+msgid "Add current version to the binary"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:108
+msgid "Fixed some glitches:"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:110
+msgid "Fix crash while removing category"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:111
+msgid "Fix information loss on editing"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:112
+msgid "Add AppData changelog"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:113
+msgid "Update app branding"
+msgstr ""
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:119
+msgid "First release: Testing."
+msgstr "Первый релиз: тестовый."
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:120
+msgid "Basic functionalities:"
+msgstr "Базовый функционал:"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:122
+msgid "Add account"
+msgstr "Добавить аккаунт"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:123
+msgid "Add transactions"
+msgstr "Импортировать проводки"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:124
+msgid "Import QIF files"
+msgstr "Импортировать QIF файлы"
