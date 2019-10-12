@@ -21,7 +21,7 @@ i18n.merge_file (
   type: 'desktop'
 )
 
-i18n.merge_file (
+appdata_file = i18n.merge_file (
   'appdata',
   input: meson.project_name () + '.appdata.xml.in',
   output: meson.project_name () + '.appdata.xml',
@@ -44,7 +44,7 @@ if asc.found ()
 test (
  'Validate appdata file',
   asc,
-  args: ['validate-strict', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
+  args: ['validate-relax', '--nonet', appdata_file.full_path()]
 )
 endif
 
