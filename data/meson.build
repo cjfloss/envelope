@@ -11,7 +11,7 @@ install_data (
   install_dir: join_paths (get_option ('datadir'), 'glib-2.0', 'schemas')
 )
 
-i18n.merge_file (
+desktop_file = i18n.merge_file (
   'desktop',
   input: meson.project_name () + '.desktop.in',
   output: meson.project_name () + '.desktop',
@@ -35,7 +35,7 @@ if dfv.found ()
 test (
   'Validate desktop file',
   dfv,
-  args: join_paths (meson.current_build_dir (), meson.project_name () + '.desktop')
+  args: desktop_file.full_path()
 )
 endif
 
