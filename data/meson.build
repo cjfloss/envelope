@@ -11,7 +11,7 @@ install_data (
   install_dir: join_paths (get_option ('datadir'), 'glib-2.0', 'schemas')
 )
 
-i18n.merge_file (
+desktop_file = i18n.merge_file (
   'desktop',
   input: meson.project_name () + '.desktop.in',
   output: meson.project_name () + '.desktop',
@@ -21,7 +21,7 @@ i18n.merge_file (
   type: 'desktop'
 )
 
-i18n.merge_file (
+appdata_file = i18n.merge_file (
   'appdata',
   input: meson.project_name () + '.appdata.xml.in',
   output: meson.project_name () + '.appdata.xml',
@@ -35,7 +35,7 @@ if dfv.found ()
 test (
   'Validate desktop file',
   dfv,
-  args: join_paths (meson.current_build_dir (), meson.project_name () + '.desktop')
+  args: desktop_file.full_path()
 )
 endif
 
@@ -44,7 +44,7 @@ if asc.found ()
 test (
  'Validate appdata file',
   asc,
-  args: ['validate-strict', join_paths (meson.current_build_dir (), meson.project_name () + '.appdata.xml')]
+  args: ['validate-relax', '--nonet', appdata_file.full_path()]
 )
 endif
 
