@@ -1,0 +1,208 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the extra package.
+# André Barata <andretiagob@protonmail.com>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: extra\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-04 18:17+0200\n"
+"PO-Revision-Date: 2020-08-19 14:27+0100\n"
+"Language-Team: Portuguese (Portugal)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.1\n"
+"Last-Translator: André Barata <andretiagob@protonmail.com\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: pt\n"
+
+#: data/com.github.cjfloss.envelope.desktop.in:3
+#: data/com.github.cjfloss.envelope.appdata.xml.in:7
+msgid "Envelope"
+msgstr "Envelope"
+
+#: data/com.github.cjfloss.envelope.desktop.in:4
+msgid "Manage your budget"
+msgstr "Administre o seu orçamento"
+
+#: data/com.github.cjfloss.envelope.desktop.in:5
+msgid "Budget;Money;"
+msgstr "Orçamento;Dinheiro;"
+
+#: data/com.github.cjfloss.envelope.desktop.in:6
+#: data/com.github.cjfloss.envelope.appdata.xml.in:8
+msgid "Personal budget manager"
+msgstr "Administrador pessoal de orçamentos"
+
+#: data/com.github.cjfloss.envelope.desktop.in:8
+msgid "com.github.cjfloss.envelope"
+msgstr "com.github.cjfloss.envelope"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:42
+msgid ""
+"Maintain your personal budget by using the tried-and-true envelope system. "
+"Designate spending categories (envelopes) and distribute your monthly income "
+"into them. Configure accounts where you record all your transactions, then "
+"assign each of them to a category."
+msgstr ""
+"Mantenha o seu orçamento pessoal usando o sistema envelope que é "
+"experimentado e verdadeiro. Designe categorias de despesa (envelopes) e "
+"distribua o seu fluxo mensal nelas. Configure contas onde irá registar todas "
+"as suas transações, depois atribua uma categoria a cada uma delas."
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:45
+msgid "Originally made by Nicolas Laplante."
+msgstr "Feito originalmente por  Nicolas Laplante."
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:46
+msgid "Features:"
+msgstr "Funcionalidades:"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:48
+msgid "Envelope system budget workflow"
+msgstr "Sistema envelope fluxo de trabalho de orçamentos"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:49
+msgid "Import transactions from QIF files"
+msgstr "Importe transações de ficheiros QIF"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:61
+msgid "Budget Overview"
+msgstr "Visão Geral do Orçamento"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:66
+msgid "Editing a category"
+msgstr "Editar uma categoria"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:71
+msgid "When you launch envelope for the first time"
+msgstr "Quando inicia o Envelope pela primeira vez"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:76
+msgid "Dialog to add an account"
+msgstr "Dialogo para adicionar uma conta"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:81
+msgid "Transactions View"
+msgstr "Vista de Transações"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:86
+msgid "After creating a Account"
+msgstr "Depois de criar uma Conta"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:92
+msgid "Cleiton Floss"
+msgstr "Cleiton Floss"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:102
+#: data/com.github.cjfloss.envelope.appdata.xml.in:121
+msgid "New:"
+msgstr "Novo:"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:104
+msgid "Polish Translation (By @DanyGee)"
+msgstr "Tradução Polaca (Por @DanyGee)"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:105
+msgid "French Translation (By @kameha)"
+msgstr "Tradução Francesa (Por @kameha)"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:106
+msgid "German Translation (By Nicolas @Mondei1)"
+msgstr "Tradução Alemã (Por Nicolas @Mondei1)"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:107
+msgid "Drop SqlHeavy, use Sqlite3"
+msgstr "Largar SqlHeavy, usar Sqlite3"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:109
+#: data/com.github.cjfloss.envelope.appdata.xml.in:126
+msgid "Fix:"
+msgstr "Correções:"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:111
+msgid "Use the right color on Budget overview"
+msgstr "Uso da cor correta na visão geral do Orçamento"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:112
+msgid "Fix crash while importing"
+msgstr "Correção de uma falha ao importar"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:113
+msgid "Use better wording. Payee instead of Merchant"
+msgstr "Redação melhorada. Beneficiário em vez de Comerciante"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:114
+msgid "Updated markdown license file"
+msgstr "Atualização do ficheiro da licença markdown"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:115
+msgid "Updated HoustonCI"
+msgstr "Atualização HoustonCI"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:123
+msgid "Improved add account Dialog"
+msgstr "Melhorias do dialogo adicionar conta"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:124
+msgid "Improved add category Dialog"
+msgstr "Melhorias do dialogo adicionar categoria"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:128
+msgid "Fix crash while adding second account"
+msgstr "Correção de uma falha ao adicionar uma segunda conta"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:129
+msgid "Allow resizing window"
+msgstr "Permitir ajustes da janela"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:130
+msgid "Add unit tests"
+msgstr "Adicionado testes de unidades"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:131
+msgid "Add current version to the binary"
+msgstr "Adicionada a versão atual ao binário"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:137
+msgid "Fixed some glitches:"
+msgstr "Correções de alguns erros:"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:139
+msgid "Fix crash while removing category"
+msgstr "Correção de uma falha ao remover uma categoria"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:140
+msgid "Fix information loss on editing"
+msgstr "Correção de perca de informação ao editar"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:141
+msgid "Add AppData changelog"
+msgstr "Adicionada lista de mudanças à AppData"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:142
+msgid "Update app branding"
+msgstr "Atualização de marca da aplicação"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:148
+msgid "First release: Testing."
+msgstr "Lançamento inicial: A testar."
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:149
+msgid "Basic functionalities:"
+msgstr "Funcionalidades básicas:"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:151
+msgid "Add account"
+msgstr "Adicionar conta"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:152
+msgid "Add transactions"
+msgstr "Adicionar transação"
+
+#: data/com.github.cjfloss.envelope.appdata.xml.in:153
+msgid "Import QIF files"
+msgstr "Importar ficheiros QIF"
